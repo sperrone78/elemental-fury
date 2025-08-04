@@ -764,7 +764,6 @@ class Game {
     enterShop() {
         this.previousGameState = this.gameState; // Remember where we came from
         this.gameState = 'shop';
-        document.getElementById('startWidget').style.display = 'none';
         document.getElementById('shopMenu').style.display = 'block';
         this.updateShopDisplay();
     }
@@ -773,7 +772,6 @@ class Game {
     exitShop() {
         this.gameState = this.previousGameState || 'waiting'; // Return to previous state
         document.getElementById('shopMenu').style.display = 'none';
-        document.getElementById('startWidget').style.display = 'block';
     }
     
     // Update shop display with current prices and levels
