@@ -17,7 +17,7 @@ class Game {
         this.score = 0;
         this.isPaused = false;
         this.gameOver = false;
-        this.gameState = 'waiting'; // 'waiting', 'playing', 'gameOver'
+        this.gameState = 'waiting'; // 'waiting', 'playing', 'gameOver', 'shop'
         
         this.keys = {};
         this.mousePos = { x: 0, y: 0 };
@@ -143,9 +143,11 @@ class Game {
         document.addEventListener('keydown', (e) => {
             this.keys[e.key.toLowerCase()] = true;
             
-            if ((this.gameState === 'waiting' || this.gameState === 'gameOver') && (e.key === ' ' || e.key === 'Enter')) {
-                console.log('Space/Enter pressed, game state:', this.gameState);
+            // Handle keyboard shortcuts for game over and shop states
+            if (this.gameState === 'waiting' && (e.key === ' ' || e.key === 'Enter')) {
                 this.startGame();
+            } else if (this.gameState === 'shop' && e.key === 'Escape') {
+                this.exitShop();
             }
         });
         
@@ -158,6 +160,44 @@ class Game {
             this.mousePos.x = e.clientX - rect.left;
             this.mousePos.y = e.clientY - rect.top;
         });
+        
+        // Shop button event listeners
+        const newGameBtn = document.getElementById('newGameBtn');
+        const shopBtn = document.getElementById('shopBtn');
+        const backToGameBtn = document.getElementById('backToGameBtn');
+        const buyXpVortex = document.getElementById('buyXpVortex');
+        
+        if (newGameBtn) {
+            newGameBtn.addEventListener('click', () => {
+                if (this.gameState === 'gameOver') {
+                    this.startGame();
+                }
+            });
+        }
+        
+        if (shopBtn) {
+            shopBtn.addEventListener('click', () => {
+                if (this.gameState === 'gameOver') {
+                    this.enterShop();
+                }
+            });
+        }
+        
+        if (backToGameBtn) {
+            backToGameBtn.addEventListener('click', () => {
+                if (this.gameState === 'shop') {
+                    this.exitShop();
+                }
+            });
+        }
+        
+        if (buyXpVortex) {
+            buyXpVortex.addEventListener('click', () => {
+                if (this.gameState === 'shop') {
+                    this.purchaseXpVortex();
+                }
+            });
+        }
     }
     
     gameLoop(currentTime = 0) {
@@ -255,7 +295,7 @@ class Game {
         this.pickups.forEach((pickup, index) => {
             if (pickup.update) pickup.update(this.deltaTime); // For animated pickups like EliteXPPickup
             
-            if (this.checkCollision(this.player, pickup)) {
+            if (this.checkXPPickupCollision(this.player, pickup)) {
                 if (pickup.type === 'xp') {
                     this.player.gainXP(pickup.value);
                 }
@@ -455,6 +495,22 @@ class Game {
         const dy = obj1.y - obj2.y;
         const distance = Math.sqrt(dx * dx + dy * dy);
         return distance < (obj1.radius + obj2.radius);
+    }
+    
+    checkXPPickupCollision(player, pickup) {
+        const dx = player.x - pickup.x;
+        const dy = player.y - pickup.y;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        
+        // Base pickup range
+        let pickupRange = player.radius + pickup.radius;
+        
+        // Apply XP Vortex upgrade bonus
+        const xpVortexLevel = this.playerProfile.shopUpgrades.xpVortex;
+        const rangeMultiplier = 1 + (xpVortexLevel * 0.5); // 50% increase per level
+        pickupRange *= rangeMultiplier;
+        
+        return distance < pickupRange;
     }
     
     createXPPickup(x, y) {
@@ -702,6 +758,55 @@ class Game {
     updateDiamondDisplay() {
         const stats = this.playerProfile.statistics;
         document.getElementById('totalDiamonds').textContent = stats.totalDiamondsEarned || 0;
+    }
+    
+    // Enter shop mode
+    enterShop() {
+        this.gameState = 'shop';
+        document.getElementById('startWidget').style.display = 'none';
+        document.getElementById('shopMenu').style.display = 'block';
+        this.updateShopDisplay();
+    }
+    
+    // Exit shop mode
+    exitShop() {
+        this.gameState = 'gameOver';
+        document.getElementById('shopMenu').style.display = 'none';
+        document.getElementById('startWidget').style.display = 'block';
+    }
+    
+    // Update shop display with current prices and levels
+    updateShopDisplay() {
+        const availableDiamonds = this.playerProfile.getAvailableDiamonds();
+        const xpVortexLevel = this.playerProfile.shopUpgrades.xpVortex;
+        const xpVortexPrice = this.playerProfile.getUpgradePrice('xpVortex');
+        
+        // Update diamond balance
+        document.getElementById('shopDiamonds').textContent = availableDiamonds;
+        
+        // Update XP Vortex item
+        document.getElementById('xpVortexLevel').textContent = xpVortexLevel;
+        document.getElementById('xpVortexPrice').textContent = xpVortexPrice;
+        
+        const buyButton = document.getElementById('buyXpVortex');
+        if (xpVortexLevel >= 5) {
+            buyButton.textContent = 'MAX';
+            buyButton.disabled = true;
+        } else if (availableDiamonds < xpVortexPrice) {
+            buyButton.textContent = 'Buy';
+            buyButton.disabled = true;
+        } else {
+            buyButton.textContent = 'Buy';
+            buyButton.disabled = false;
+        }
+    }
+    
+    // Purchase XP Vortex upgrade
+    purchaseXpVortex() {
+        if (this.playerProfile.purchaseUpgrade('xpVortex')) {
+            this.updateShopDisplay();
+            this.updateDiamondDisplay(); // Update header display
+        }
     }
 }
 
@@ -2974,6 +3079,11 @@ class PlayerProfile {
             preferredPlayStyle: null // 'aggressive', 'defensive', 'balanced'
         };
         
+        // Shop upgrades
+        this.shopUpgrades = {
+            xpVortex: 0 // Level 0-5, increases XP pickup range
+        };
+        
         this.load();
     }
     
@@ -2987,6 +3097,7 @@ class PlayerProfile {
                     // Merge saved data, keeping structure but updating with saved values
                     this.mergeDeep(this.statistics, data.statistics || {});
                     this.mergeDeep(this.preferences, data.preferences || {});
+                    this.mergeDeep(this.shopUpgrades, data.shopUpgrades || {});
                 } else {
                     // Handle version migration in the future
                     console.log('Profile version mismatch, keeping defaults');
@@ -3004,6 +3115,7 @@ class PlayerProfile {
                 version: this.version,
                 statistics: this.statistics,
                 preferences: this.preferences,
+                shopUpgrades: this.shopUpgrades,
                 lastSaved: new Date().toISOString()
             };
             localStorage.setItem('elemental-fury-profile', JSON.stringify(data));
@@ -3084,6 +3196,48 @@ class PlayerProfile {
         diamonds += sessionStats.enemiesKilled.boss * 2;
         
         return diamonds;
+    }
+    
+    // Purchase shop upgrade
+    purchaseUpgrade(upgradeType) {
+        const prices = {
+            xpVortex: [10, 15, 25, 40, 60] // Prices for levels 1-5
+        };
+        
+        if (!prices[upgradeType]) return false;
+        
+        const currentLevel = this.shopUpgrades[upgradeType];
+        if (currentLevel >= 5) return false; // Max level reached
+        
+        const price = prices[upgradeType][currentLevel];
+        if (this.statistics.totalDiamondsEarned - this.statistics.totalDiamondsSpent < price) {
+            return false; // Not enough diamonds
+        }
+        
+        // Purchase successful
+        this.statistics.totalDiamondsSpent += price;
+        this.shopUpgrades[upgradeType]++;
+        this.save();
+        return true;
+    }
+    
+    // Get available diamonds for spending
+    getAvailableDiamonds() {
+        return (this.statistics.totalDiamondsEarned || 0) - (this.statistics.totalDiamondsSpent || 0);
+    }
+    
+    // Get upgrade price
+    getUpgradePrice(upgradeType) {
+        const prices = {
+            xpVortex: [10, 15, 25, 40, 60] // Prices for levels 1-5
+        };
+        
+        if (!prices[upgradeType]) return 0;
+        
+        const currentLevel = this.shopUpgrades[upgradeType];
+        if (currentLevel >= 5) return 0; // Max level reached
+        
+        return prices[upgradeType][currentLevel];
     }
 }
 
