@@ -56,23 +56,27 @@ Elemental Fury is a top-down survival game where players master 5 elemental powe
 
 ### Basic Enemy
 - **Health**: 30 HP
+- **Damage**: 30 (3-4 hits to kill player)
 - **Speed**: Normal
 - **Reward**: 5 XP, 10 points
 
 ### Veteran Enemy (Level 10+)
-- **Health**: 60 HP
+- **Health**: 120 HP (+100% from basic)
+- **Damage**: 35 (3 hits to kill player)
 - **Speed**: 20% faster
 - **Features**: Spiked appearance
 - **Reward**: 15 XP, 25 points
 
 ### Elite Enemy (Level 20+)
-- **Health**: 120 HP
+- **Health**: 250 HP (+108% from veteran)
+- **Damage**: 40 (2-3 hits to kill player)
 - **Speed**: 40% faster
 - **Features**: Armor (reduces damage by 5), crown effect
 - **Reward**: 30 XP, 50 points
 
 ### Boss Enemy (Every 5 levels)
 - **Health**: 200 HP
+- **Damage**: 50 (2 hits to kill player)
 - **Features**: Shoots projectiles, health bar
 - **Reward**: 25 XP (5 pickups), 100 points
 
@@ -120,10 +124,12 @@ Elemental Fury is a top-down survival game where players master 5 elemental powe
 - **Deployment**: Automated via Firebase CLI
 
 ### Performance Features
+- **Frame Rate Independence**: DeltaTime system ensures consistent gameplay at any FPS (30, 60, 120, 144+)
 - **Efficient Collision Detection**: Distance-based calculations
 - **Particle Management**: Automatic cleanup of expired effects
-- **Smooth Animation**: 60 FPS game loop with requestAnimationFrame
+- **Smooth Animation**: Variable frame rate game loop with requestAnimationFrame
 - **Responsive Design**: Scales to different screen sizes
+- **Performance Optimization**: Frame time capping prevents lag spikes when tab loses focus
 
 ### Code Architecture
 - **Class-based Design**: Modular entity system

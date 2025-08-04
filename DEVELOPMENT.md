@@ -4,6 +4,18 @@ This document outlines the technical implementation details and recent changes m
 
 ## 📋 Recent Updates
 
+### Frame Rate Independence System (v2.2.0)
+- **DeltaTime Implementation**: Added consistent frame rate normalization across all devices
+- **Variable Timestep**: Game loop now uses proper deltaTime calculations instead of fixed 1/60 timesteps
+- **Cross-Device Performance**: Game runs identically on 30fps, 60fps, 120fps, and 144fps+ displays
+- **Performance Optimization**: Frame time capping prevents lag spikes when browser tab loses focus
+
+### Game Balance Rebalancing (v2.2.0)
+- **Enemy Damage Scaling**: Increased all enemy damage by 3x (10→30, 15→35, 18→40, 20→50)
+- **Enemy Health Buffs**: Veteran enemies 60→120 HP (+100%), Elite enemies 120→250 HP (+108%)
+- **Player Survivability**: Removed starting invincibility for more challenging early game
+- **Combat Pacing**: Maintains same time-to-kill while increasing individual hit impact
+
 ### Game State Management
 - **Added Start Screen**: Informative welcome screen with game controls and objective
 - **Improved Game Over**: Clean screen showing only final stats (time, score, level)
@@ -46,7 +58,32 @@ This document outlines the technical implementation details and recent changes m
 class Game {
     constructor() {
         this.gameState = 'waiting'; // 'waiting', 'playing', 'gameOver'
+        
+        // Delta time system for consistent frame rate
+        this.lastFrameTime = 0;
+        this.deltaTime = 0;
+        this.targetFPS = 60;
+        this.fixedTimeStep = 1 / this.targetFPS;
         // ... other properties
+    }
+    
+    gameLoop(currentTime = 0) {
+        // Calculate delta time in seconds
+        if (this.lastFrameTime === 0) {
+            this.lastFrameTime = currentTime;
+        }
+        
+        this.deltaTime = (currentTime - this.lastFrameTime) / 1000;
+        this.lastFrameTime = currentTime;
+        
+        // Cap delta time to prevent huge jumps
+        this.deltaTime = Math.min(this.deltaTime, this.fixedTimeStep * 2);
+        
+        if (this.gameState === 'playing') {
+            this.update(this.deltaTime);
+        }
+        this.render();
+        requestAnimationFrame((time) => this.gameLoop(time));
     }
     
     startGame() { /* Initialize new game */ }
@@ -139,8 +176,9 @@ User presses SPACE/ENTER → startGame() → 'playing' state (restart)
 - **Early Returns**: Skip processing for distant objects
 
 ### Animation System
-- **60 FPS Target**: `requestAnimationFrame` loop
-- **Delta Time**: Frame-independent updates (`1/60` assumption)
+- **Variable Frame Rate**: `requestAnimationFrame` loop with deltaTime normalization
+- **Frame Rate Independence**: All movement/timing calculations use deltaTime multipliers
+- **Performance Consistency**: Multiplier approach (deltaTime * 60) maintains existing game feel
 - **Smooth Transitions**: CSS transitions for UI elements
 
 ## 🚀 Deployment Pipeline
@@ -205,9 +243,15 @@ firebase deploy
 
 ### Enemy Health Progression
 - **Basic**: 30 HP
-- **Veteran**: 60 HP (2x)
-- **Elite**: 120 HP (4x) + 5 armor
+- **Veteran**: 120 HP (4x) 
+- **Elite**: 250 HP (8.3x) + 5 armor
 - **Boss**: 200 HP + projectiles
+
+### Enemy Damage Progression
+- **Basic**: 30 damage (3-4 hits to kill)
+- **Veteran**: 35 damage (3 hits to kill)
+- **Elite**: 40 damage (2-3 hits to kill)
+- **Boss**: 50 damage (2 hits to kill)
 
 ## 🔄 State Management
 
@@ -276,4 +320,4 @@ firebase deploy
 ---
 
 *Last Updated: August 2025*
-*Version: 2.1 - Thunder Storm Release*
+*Version: 2.2 - Frame Rate Independence & Balance Update*

@@ -2,6 +2,28 @@
 
 All notable changes to Elemental Fury are documented here.
 
+## [2.2.0] - 2025-08-04 - Frame Rate Independence & Balance Update
+
+### 🚀 Added - Frame Rate Independence
+- **DeltaTime System**: Game now runs at consistent speed regardless of device frame rate (30fps, 60fps, 120fps, 144fps+)
+- **Variable Timestep**: Game loop now uses requestAnimationFrame with proper deltaTime calculations
+- **Performance Optimization**: Frame time capping prevents lag spikes when tab loses focus
+
+### ⚖️ Enhanced - Game Balance
+- **Enemy Damage Rebalance**: Starting enemies now deal 30 damage (was 10)
+  - Veteran enemies: 35 damage (was 15)
+  - Elite enemies: 40 damage (was 18)  
+  - Boss enemies: 50 damage (was 20)
+- **Enemy Health Buffs**: 
+  - Veteran enemies: 120 HP (was 60, +100% increase)
+  - Elite enemies: 250 HP (was 120, +108% increase)
+- **Player Survivability**: Starting invincibility removed for more challenging gameplay
+
+### 🛠️ Technical Improvements
+- **Cross-Device Compatibility**: Game now plays identically on all devices regardless of refresh rate
+- **Smooth Animation**: Variable frame rate ensures fluid motion at any FPS
+- **Performance Consistency**: DeltaTime system normalizes all movement and timing calculations
+
 ## [2.1.0] - 2025-08-04 - Thunder Storm Release
 
 ### ⚡ Added - Lightning Ultimate
