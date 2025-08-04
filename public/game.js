@@ -22,6 +22,12 @@ class Game {
         this.keys = {};
         this.mousePos = { x: 0, y: 0 };
         
+        // Delta time system for consistent frame rate
+        this.lastFrameTime = 0;
+        this.deltaTime = 0;
+        this.targetFPS = 60;
+        this.fixedTimeStep = 1 / this.targetFPS;
+        
         this.waveManager = new WaveManager();
         this.upgradeSystem = new UpgradeSystem();
         this.upgradeSystem.game = this;
@@ -92,23 +98,34 @@ class Game {
         });
     }
     
-    gameLoop() {
+    gameLoop(currentTime = 0) {
+        // Calculate delta time in seconds
+        if (this.lastFrameTime === 0) {
+            this.lastFrameTime = currentTime;
+        }
+        
+        this.deltaTime = (currentTime - this.lastFrameTime) / 1000;
+        this.lastFrameTime = currentTime;
+        
+        // Cap delta time to prevent huge jumps (e.g., when tab loses focus)
+        this.deltaTime = Math.min(this.deltaTime, this.fixedTimeStep * 2);
+        
         this.update();
         this.render();
-        requestAnimationFrame(() => this.gameLoop());
+        requestAnimationFrame((time) => this.gameLoop(time));
     }
     
     update() {
         if (this.isPaused || this.gameState !== 'playing') return;
         
-        this.gameTime += 1/60;
+        this.gameTime += this.deltaTime;
         
-        this.player.update(this.keys, this.mousePos);
+        this.player.update(this.keys, this.mousePos, this.deltaTime);
         
-        this.waveManager.update(this.gameTime, this, this.player.level);
+        this.waveManager.update(this.gameTime, this, this.player.level, this.deltaTime);
         
         this.enemies.forEach((enemy, index) => {
-            enemy.update(this.player);
+            enemy.update(this.player, this.deltaTime);
             if (enemy.health <= 0) {
                 if (enemy.isBoss) {
                     let xpCount = 5; // Basic boss
@@ -141,35 +158,35 @@ class Game {
         });
         
         this.projectiles.forEach((projectile, index) => {
-            projectile.update();
+            projectile.update(this.deltaTime);
             if (projectile.shouldRemove) {
                 this.projectiles.splice(index, 1);
             }
         });
         
         this.enemyProjectiles.forEach((projectile, index) => {
-            projectile.update();
+            projectile.update(this.deltaTime);
             if (projectile.shouldRemove) {
                 this.enemyProjectiles.splice(index, 1);
             }
         });
         
         this.particles.forEach((particle, index) => {
-            particle.update();
+            particle.update(this.deltaTime);
             if (particle.shouldRemove) {
                 this.particles.splice(index, 1);
             }
         });
         
         this.dotEffects.forEach((dot, index) => {
-            dot.update(this.gameTime);
+            dot.update(this.gameTime, this.deltaTime);
             if (dot.shouldRemove) {
                 this.dotEffects.splice(index, 1);
             }
         });
         
         this.pickups.forEach((pickup, index) => {
-            if (pickup.update) pickup.update(); // For animated pickups like EliteXPPickup
+            if (pickup.update) pickup.update(this.deltaTime); // For animated pickups like EliteXPPickup
             
             if (this.checkCollision(this.player, pickup)) {
                 if (pickup.type === 'xp') {
@@ -278,10 +295,10 @@ class Game {
         
         this.enemies.forEach(enemy => {
             if (this.checkCollision(this.player, enemy)) {
-                let damage = 10;
-                if (enemy.isBoss) damage = 20;
-                else if (enemy.isElite) damage = 18;
-                else if (enemy.isVeteran) damage = 15;
+                let damage = 30;
+                if (enemy.isBoss) damage = 50;
+                else if (enemy.isElite) damage = 40;
+                else if (enemy.isVeteran) damage = 35;
                 
                 this.player.takeDamage(damage);
                 
@@ -496,9 +513,24 @@ class Player {
         this.maxShieldHealth = 50;
         this.healthRegen = 0;
         this.armor = 0;
+        
+        // Invincibility frames system
+        this.invulnerable = false; // No starting invincibility
+        this.invulnerabilityTime = 0;
+        this.maxInvulnerabilityTime = 3.0;
+        this.lastDamageTime = 0;
+        this.damageCooldown = 0.5; // 0.5 seconds between damage instances
     }
     
-    update(keys, mousePos) {
+    update(keys, mousePos, deltaTime) {
+        // Handle invincibility frames
+        if (this.invulnerable) {
+            this.invulnerabilityTime -= deltaTime;
+            if (this.invulnerabilityTime <= 0) {
+                this.invulnerable = false;
+            }
+        }
+        
         let dx = 0, dy = 0;
         
         if (keys['w'] || keys['arrowup']) dy -= 1;
@@ -511,13 +543,13 @@ class Player {
             dy *= 0.707;
         }
         
-        this.x += dx * this.speed;
-        this.y += dy * this.speed;
+        this.x += dx * this.speed * deltaTime * 60; // Multiply by 60 to maintain same speed as before
+        this.y += dy * this.speed * deltaTime * 60;
         
         this.x = Math.max(this.radius, Math.min(800 - this.radius, this.x));
         this.y = Math.max(this.radius, Math.min(600 - this.radius, this.y));
         
-        this.weapons.forEach(weapon => weapon.update(mousePos));
+        this.weapons.forEach(weapon => weapon.update(mousePos, deltaTime));
         
         if (this.specialAbilities.radiusAttack) {
             this.updateRadiusAttack();
@@ -583,7 +615,22 @@ class Player {
             ctx.stroke();
         }
         
-        ctx.fillStyle = '#4a9eff';
+        // Show invincibility visual feedback
+        if (this.invulnerable) {
+            const flashSpeed = 8; // Flash speed
+            const flashAlpha = Math.sin(this.game.gameTime * flashSpeed) * 0.3 + 0.7;
+            ctx.fillStyle = `rgba(74, 158, 255, ${flashAlpha})`;
+            
+            // Draw protective glow
+            ctx.strokeStyle = `rgba(255, 255, 255, ${flashAlpha * 0.8})`;
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.radius + 5, 0, Math.PI * 2);
+            ctx.stroke();
+        } else {
+            ctx.fillStyle = '#4a9eff';
+        }
+        
         ctx.beginPath();
         ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
         ctx.fill();
@@ -700,6 +747,18 @@ class Player {
     }
     
     takeDamage(damage) {
+        // Check invincibility frames
+        if (this.invulnerable) {
+            return; // No damage during invincibility
+        }
+        
+        // Check damage cooldown to prevent multiple hits in rapid succession
+        if (this.game.gameTime - this.lastDamageTime < this.damageCooldown) {
+            return;
+        }
+        
+        this.lastDamageTime = this.game.gameTime;
+        
         // Apply armor reduction
         const actualDamage = Math.max(1, damage - this.armor);
         
@@ -712,6 +771,10 @@ class Player {
         } else {
             this.health -= actualDamage;
         }
+        
+        // Add brief invincibility after taking damage (0.5 seconds)
+        this.invulnerable = true;
+        this.invulnerabilityTime = 0.5;
         
         // Freezing Touch activation
         if (this.specialAbilities.freezingTouch) {
@@ -905,10 +968,10 @@ class Enemy {
         this.stunnedTime = 0;
     }
     
-    update(player) {
+    update(player, deltaTime) {
         // Handle frozen state
         if (this.frozen) {
-            this.frozenTime -= 1/60;
+            this.frozenTime -= deltaTime;
             if (this.frozenTime <= 0) {
                 this.frozen = false;
             }
@@ -917,7 +980,7 @@ class Enemy {
         
         // Handle stunned state
         if (this.stunned) {
-            this.stunnedTime -= 1/60;
+            this.stunnedTime -= deltaTime;
             if (this.stunnedTime <= 0) {
                 this.stunned = false;
             }
@@ -929,8 +992,8 @@ class Enemy {
         const distance = Math.sqrt(dx * dx + dy * dy);
         
         if (distance > 0) {
-            this.x += (dx / distance) * this.speed;
-            this.y += (dy / distance) * this.speed;
+            this.x += (dx / distance) * this.speed * deltaTime * 60;
+            this.y += (dy / distance) * this.speed * deltaTime * 60;
         }
     }
     
@@ -980,8 +1043,8 @@ class BossEnemy extends Enemy {
         this.game = null;
     }
     
-    update(player) {
-        super.update(player);
+    update(player, deltaTime) {
+        super.update(player, deltaTime);
         
         if (this.game && this.game.gameTime - this.lastShot >= this.shootCooldown) {
             this.shootAtPlayer(player);
@@ -1288,8 +1351,8 @@ class VeteranEnemy extends Enemy {
         super(x, y);
         this.radius = 14;
         this.speed = 1.2;
-        this.health = 60;
-        this.maxHealth = 60;
+        this.health = 120;
+        this.maxHealth = 120;
         this.isVeteran = true;
         this.xpReward = 15;
     }
@@ -1339,8 +1402,8 @@ class EliteEnemy extends Enemy {
         super(x, y);
         this.radius = 16;
         this.speed = 1.4;
-        this.health = 120;
-        this.maxHealth = 120;
+        this.health = 250;
+        this.maxHealth = 250;
         this.isElite = true;
         this.xpReward = 30;
         this.armor = 5;
@@ -1402,7 +1465,7 @@ class BasicWeapon {
         this.range = 200;
     }
     
-    update(mousePos) {
+    update(mousePos, deltaTime) {
         if (this.owner.game.gameTime - this.lastFire >= this.cooldown) {
             this.fire(mousePos);
             this.lastFire = this.owner.game.gameTime;
@@ -1466,10 +1529,11 @@ class Projectile {
         this.shouldRemove = false;
     }
     
-    update() {
-        this.x += this.dirX * this.speed;
-        this.y += this.dirY * this.speed;
-        this.traveled += this.speed;
+    update(deltaTime) {
+        const movement = this.speed * deltaTime * 60;
+        this.x += this.dirX * movement;
+        this.y += this.dirY * movement;
+        this.traveled += movement;
         
         if (this.traveled >= this.range || 
             this.x < 0 || this.x > 800 || 
@@ -1499,10 +1563,11 @@ class EnemyProjectile {
         this.traveled = 0;
     }
     
-    update() {
-        this.x += this.dirX * this.speed;
-        this.y += this.dirY * this.speed;
-        this.traveled += this.speed;
+    update(deltaTime) {
+        const movement = this.speed * deltaTime * 60;
+        this.x += this.dirX * movement;
+        this.y += this.dirY * movement;
+        this.traveled += movement;
         
         if (this.traveled >= this.maxDistance || 
             this.x < 0 || this.x > 800 || 
@@ -1539,10 +1604,11 @@ class SpikeProjectile {
         this.rotation = Math.atan2(dirY, dirX);
     }
     
-    update() {
-        this.x += this.dirX * this.speed;
-        this.y += this.dirY * this.speed;
-        this.traveled += this.speed;
+    update(deltaTime) {
+        const movement = this.speed * deltaTime * 60;
+        this.x += this.dirX * movement;
+        this.y += this.dirY * movement;
+        this.traveled += movement;
         
         if (this.traveled >= this.maxDistance || 
             this.x < 0 || this.x > 800 || 
@@ -1742,8 +1808,8 @@ class EliteXPPickup extends XPPickup {
         this.pulseTime = 0;
     }
     
-    update() {
-        this.pulseTime += 1/60;
+    update(deltaTime) {
+        this.pulseTime += deltaTime;
     }
     
     render(ctx) {
@@ -1785,7 +1851,7 @@ class DOTEffect {
         this.shouldRemove = false;
     }
     
-    update(gameTime) {
+    update(gameTime, deltaTime) {
         if (this.startTime === 0) this.startTime = gameTime;
         
         if (gameTime - this.startTime >= this.duration) {
@@ -1813,10 +1879,10 @@ class ExplosionParticle {
         this.shouldRemove = false;
     }
     
-    update() {
-        this.x += this.vx;
-        this.y += this.vy;
-        this.life -= 1/60;
+    update(deltaTime) {
+        this.x += this.vx * deltaTime * 60;
+        this.y += this.vy * deltaTime * 60;
+        this.life -= deltaTime;
         
         if (this.life <= 0) {
             this.shouldRemove = true;
@@ -1865,8 +1931,8 @@ class LightningBolt {
         return segments;
     }
     
-    update() {
-        this.life -= 1/60;
+    update(deltaTime) {
+        this.life -= deltaTime;
         
         if (this.life <= 0) {
             this.shouldRemove = true;
@@ -1906,8 +1972,8 @@ class DelayedLightningChain {
         this.shouldRemove = false;
     }
     
-    update() {
-        this.timer += 1/60;
+    update(deltaTime) {
+        this.timer += deltaTime;
         
         if (this.timer >= this.delay) {
             if (this.target && this.target.health > 0) {
@@ -1932,8 +1998,8 @@ class IceRing {
         this.shouldRemove = false;
     }
     
-    update() {
-        this.life -= 1/60;
+    update(deltaTime) {
+        this.life -= deltaTime;
         
         if (this.life <= 0) {
             this.shouldRemove = true;
@@ -1967,8 +2033,8 @@ class InfernoWave {
         this.shouldRemove = false;
     }
     
-    update() {
-        this.life -= 1/60;
+    update(deltaTime) {
+        this.life -= deltaTime;
         this.currentRadius = this.maxRadius * (1 - this.life / this.maxLife);
         
         if (this.life <= 0) {
@@ -2024,9 +2090,9 @@ class Tornado {
         this.directionChangeInterval = 2; // Change direction every 2 seconds
     }
     
-    update() {
-        this.life -= 1/60;
-        this.rotation += 0.3; // Spin the tornado
+    update(deltaTime) {
+        this.life -= deltaTime;
+        this.rotation += 0.3 * deltaTime * 60; // Spin the tornado
         
         if (this.life <= 0) {
             this.shouldRemove = true;
@@ -2034,7 +2100,7 @@ class Tornado {
         }
         
         // Random movement direction changes
-        this.changeDirectionTimer += 1/60;
+        this.changeDirectionTimer += deltaTime;
         if (this.changeDirectionTimer >= this.directionChangeInterval) {
             this.vx = (Math.random() - 0.5) * 3;
             this.vy = (Math.random() - 0.5) * 3;
@@ -2042,8 +2108,8 @@ class Tornado {
         }
         
         // Move the tornado
-        this.x += this.vx;
-        this.y += this.vy;
+        this.x += this.vx * deltaTime * 60;
+        this.y += this.vy * deltaTime * 60;
         
         // Bounce off walls
         if (this.x < this.radius || this.x > 800 - this.radius) {
@@ -2137,12 +2203,12 @@ class WindParticle {
         this.shouldRemove = false;
     }
     
-    update() {
-        this.x += this.vx;
-        this.y += this.vy;
-        this.vx *= 0.95; // Air resistance
-        this.vy *= 0.95;
-        this.life -= 1/60;
+    update(deltaTime) {
+        this.x += this.vx * deltaTime * 60;
+        this.y += this.vy * deltaTime * 60;
+        this.vx *= Math.pow(0.95, deltaTime * 60); // Air resistance
+        this.vy *= Math.pow(0.95, deltaTime * 60);
+        this.life -= deltaTime;
         
         if (this.life <= 0) {
             this.shouldRemove = true;
@@ -2169,8 +2235,8 @@ class EarthquakeWave {
         this.shouldRemove = false;
     }
     
-    update() {
-        this.life -= 1/60;
+    update(deltaTime) {
+        this.life -= deltaTime;
         this.currentRadius = this.maxRadius * (1 - this.life / this.maxLife);
         
         if (this.life <= 0) {
@@ -2218,7 +2284,7 @@ class ShockwaveRing {
         this.active = false;
     }
     
-    update() {
+    update(deltaTime) {
         if (!this.active) {
             this.delayTimer += 1/60;
             if (this.delayTimer >= this.delay) {
@@ -2227,7 +2293,7 @@ class ShockwaveRing {
             return;
         }
         
-        this.life -= 1/60;
+        this.life -= deltaTime;
         
         if (this.life <= 0) {
             this.shouldRemove = true;
@@ -2261,13 +2327,13 @@ class DebrisParticle {
         this.gravity = 0.15;
     }
     
-    update() {
-        this.x += this.vx;
-        this.y += this.vy;
+    update(deltaTime) {
+        this.x += this.vx * deltaTime * 60;
+        this.y += this.vy * deltaTime * 60;
         this.vy += this.gravity; // Apply gravity
         this.vx *= 0.98; // Air resistance
         this.rotation += this.rotationSpeed;
-        this.life -= 1/60;
+        this.life -= deltaTime;
         
         if (this.life <= 0) {
             this.shouldRemove = true;
@@ -2312,8 +2378,8 @@ class StormClouds {
         }
     }
     
-    update() {
-        this.life -= 1/60;
+    update(deltaTime) {
+        this.life -= deltaTime;
         
         // Drift clouds slightly
         this.cloudParticles.forEach(cloud => {
@@ -2371,8 +2437,8 @@ class ThunderBolt {
         return segments;
     }
     
-    update() {
-        this.life -= 1/60;
+    update(deltaTime) {
+        this.life -= deltaTime;
         
         if (this.life <= 0) {
             this.shouldRemove = true;
@@ -2419,8 +2485,8 @@ class LightningImpact {
         this.shouldRemove = false;
     }
     
-    update() {
-        this.life -= 1/60;
+    update(deltaTime) {
+        this.life -= deltaTime;
         
         if (this.life <= 0) {
             this.shouldRemove = true;
@@ -2465,12 +2531,12 @@ class ElectricSpark {
         this.size = 2 + Math.random() * 3;
     }
     
-    update() {
-        this.x += this.vx;
-        this.y += this.vy;
-        this.vx *= 0.95; // Slow down over time
-        this.vy *= 0.95;
-        this.life -= 1/60;
+    update(deltaTime) {
+        this.x += this.vx * deltaTime * 60;
+        this.y += this.vy * deltaTime * 60;
+        this.vx *= Math.pow(0.95, deltaTime * 60); // Slow down over time
+        this.vy *= Math.pow(0.95, deltaTime * 60);
+        this.life -= deltaTime;
         
         if (this.life <= 0) {
             this.shouldRemove = true;
@@ -2506,8 +2572,8 @@ class SummonRing {
         this.pulseTime = 0;
     }
     
-    update() {
-        this.life -= 1/60;
+    update(deltaTime) {
+        this.life -= deltaTime;
         this.pulseTime += 1/60;
         this.currentRadius = this.maxRadius * (1 - this.life / this.maxLife);
         
@@ -2562,7 +2628,7 @@ class WaveManager {
         this.currentSpawnInterval = 2;
     }
     
-    update(gameTime, game, playerLevel) {
+    update(gameTime, game, playerLevel, deltaTime) {
         this.currentSpawnInterval = this.baseSpawnInterval / (1 + (playerLevel - 1) * 0.15);
         
         this.currentSpawnInterval = Math.max(0.3, this.currentSpawnInterval);
