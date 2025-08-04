@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Elemental Fury</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #000;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            font-family: Arial, sans-serif;
+            color: white;
+        }
+        
+        #topHeader {
+            height: 60px;
+            background: #222;
+            border-bottom: 2px solid #333;
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            justify-content: space-between;
+        }
+        
+        #gameContainer {
+            display: flex;
+            width: 100%;
+            height: calc(100vh - 60px);
+        }
+        
+        #leftPanel {
+            width: 250px;
+            background: #111;
+            border-right: 2px solid #333;
+            padding: 20px;
+            overflow-y: auto;
+        }
+        
+        #gameArea {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        #gameCanvas {
+            border: 2px solid #333;
+            background: #111;
+        }
+        
+        .powerup-section {
+            margin-bottom: 25px;
+        }
+        
+        .powerup-title {
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .element-icon {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            margin-right: 8px;
+            display: inline-block;
+        }
+        
+        .fire { background: linear-gradient(45deg, #ff4400, #ff8800); }
+        .water { background: linear-gradient(45deg, #0066ff, #00aaff); }
+        .earth { background: linear-gradient(45deg, #8B4513, #D2691E); }
+        .air { background: linear-gradient(45deg, #87CEEB, #E0E0E0); }
+        .lightning { background: linear-gradient(45deg, #FFD700, #FFFF00); }
+        
+        .powerup-level {
+            font-size: 14px;
+            color: #aaa;
+            margin-bottom: 5px;
+        }
+        
+        .powerup-bar {
+            width: 100%;
+            height: 8px;
+            background: #333;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 5px;
+        }
+        
+        .powerup-progress {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+        
+        #gameOverWidget {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        
+        .game-over-content {
+            background: #222;
+            border: 2px solid #333;
+            border-radius: 10px;
+            padding: 40px;
+            text-align: center;
+            box-shadow: 0 0 20px rgba(255, 0, 0, 0.3);
+        }
+        
+        .game-over-content h2 {
+            color: #ff4444;
+            font-size: 32px;
+            margin-bottom: 20px;
+            text-shadow: 0 0 10px rgba(255, 0, 0, 0.5);
+        }
+        
+        .game-over-stats {
+            margin: 20px 0;
+        }
+        
+        .stat {
+            font-size: 18px;
+            margin: 10px 0;
+            color: #ccc;
+        }
+        
+        .restart-btn {
+            background: linear-gradient(45deg, #ff4400, #ff8800);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 18px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 20px;
+        }
+        
+        .restart-btn:hover {
+            background: linear-gradient(45deg, #ff6600, #ffaa00);
+            transform: scale(1.05);
+            box-shadow: 0 0 15px rgba(255, 100, 0, 0.5);
+        }
+        
+        .special-ability {
+            font-size: 12px;
+            color: #ffff00;
+            font-weight: bold;
+            margin-top: 5px;
+        }
+        
+        .special-ability.unlocked {
+            color: #00ff00;
+        }
+        
+        .header-left, .header-center, .header-right {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .stat-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .stat-bar {
+            width: 120px;
+            height: 10px;
+            background: #333;
+            border-radius: 5px;
+            overflow: hidden;
+            border: 1px solid #555;
+        }
+        
+        .health-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #ff0000, #00ff00);
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+        
+        .xp-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #0066ff, #00ffff);
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+        
+        .stat-text {
+            font-size: 14px;
+            color: #ccc;
+            min-width: 60px;
+        }
+        
+        .level-display {
+            font-size: 18px;
+            font-weight: bold;
+            color: #ffff00;
+        }
+        
+        .timer-display {
+            font-size: 16px;
+            color: #ff8800;
+        }
+        
+        .score-display {
+            font-size: 16px;
+            color: #00ff88;
+        }
+        
+        #upgradeMenu {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.9);
+            border: 2px solid #333;
+            padding: 20px;
+            color: white;
+            display: none;
+            z-index: 20;
+        }
+        
+        .upgrade-option {
+            margin: 10px 0;
+            padding: 10px;
+            border: 1px solid #666;
+            cursor: pointer;
+            background: #222;
+        }
+        
+        .upgrade-option:hover {
+            background: #444;
+        }
+    </style>
+</head>
+<body>
+    <div id="topHeader">
+        <div class="header-left">
+            <div class="stat-group">
+                <span class="stat-text">Health:</span>
+                <div class="stat-bar">
+                    <div class="health-bar" id="health-bar" style="width: 100%"></div>
+                </div>
+                <span class="stat-text"><span id="health">100</span>/<span id="maxHealth">100</span></span>
+            </div>
+            <div class="stat-group">
+                <span class="stat-text">XP:</span>
+                <div class="stat-bar">
+                    <div class="xp-bar" id="xp-bar" style="width: 0%"></div>
+                </div>
+                <span class="stat-text"><span id="xp">0</span>/<span id="xpNext">10</span></span>
+            </div>
+        </div>
+        
+        <div class="header-center">
+            <div class="level-display">Level <span id="level">1</span></div>
+        </div>
+        
+        <div class="header-right">
+            <div class="timer-display">⏱️ <span id="timer">0:00</span></div>
+            <div class="score-display">💎 <span id="score">0</span></div>
+        </div>
+    </div>
+    
+    <div id="gameContainer">
+        <div id="leftPanel">
+            <h2>Elemental Powers</h2>
+            
+            <div class="powerup-section">
+                <div class="powerup-title">
+                    <div class="element-icon fire"></div>
+                    Fire Mastery
+                </div>
+                <div class="powerup-level">Level: <span id="fire-level">0</span>/6</div>
+                <div class="powerup-bar">
+                    <div class="powerup-progress fire" id="fire-progress" style="width: 0%"></div>
+                </div>
+                <div class="special-ability" id="fire-ability">🔥 Fireball Unleashed</div>
+                <div class="special-ability" id="fire-ultimate">🌋 Inferno Wave (Lvl 6)</div>
+            </div>
+            
+            <div class="powerup-section">
+                <div class="powerup-title">
+                    <div class="element-icon water"></div>
+                    Water Mastery
+                </div>
+                <div class="powerup-level">Level: <span id="water-level">0</span>/6</div>
+                <div class="powerup-bar">
+                    <div class="powerup-progress water" id="water-progress" style="width: 0%"></div>
+                </div>
+                <div class="special-ability" id="water-ability">🛡️ Protective Shield</div>
+                <div class="special-ability" id="water-ultimate">❄️ Freezing Touch (Lvl 6)</div>
+            </div>
+            
+            <div class="powerup-section">
+                <div class="powerup-title">
+                    <div class="element-icon air"></div>
+                    Air Mastery
+                </div>
+                <div class="powerup-level">Level: <span id="air-level">0</span>/6</div>
+                <div class="powerup-bar">
+                    <div class="powerup-progress air" id="air-progress" style="width: 0%"></div>
+                </div>
+                <div class="special-ability" id="air-ability">🚀 Twin Missiles</div>
+                <div class="special-ability" id="air-ultimate">🌪️ Tornado Vortex (Lvl 6)</div>
+            </div>
+            
+            <div class="powerup-section">
+                <div class="powerup-title">
+                    <div class="element-icon earth"></div>
+                    Earth Mastery
+                </div>
+                <div class="powerup-level">Level: <span id="earth-level">0</span>/6</div>
+                <div class="powerup-bar">
+                    <div class="powerup-progress earth" id="earth-progress" style="width: 0%"></div>
+                </div>
+                <div class="special-ability" id="earth-ability">💥 Radius Blast</div>
+                <div class="special-ability" id="earth-ultimate">🌍 Earthquake Stomp (Lvl 6)</div>
+            </div>
+            
+            <div class="powerup-section">
+                <div class="powerup-title">
+                    <div class="element-icon lightning"></div>
+                    Lightning Mastery
+                </div>
+                <div class="powerup-level">Level: <span id="lightning-level">0</span>/6</div>
+                <div class="powerup-bar">
+                    <div class="powerup-progress lightning" id="lightning-progress" style="width: 0%"></div>
+                </div>
+                <div class="special-ability" id="lightning-ability">⚡ Swift Strike</div>
+                <div class="special-ability" id="lightning-ultimate">⛈️ Thunder Storm (Lvl 6)</div>
+            </div>
+        </div>
+        
+        <div id="gameArea">
+            <canvas id="gameCanvas" width="800" height="600"></canvas>
+            
+            <div id="upgradeMenu">
+                <h3>Level Up! Choose an upgrade:</h3>
+                <div id="upgradeOptions"></div>
+            </div>
+            
+            <div id="gameOverWidget" style="display: none;">
+                <div class="game-over-content">
+                    <h2>💀 Game Over</h2>
+                    <div class="game-over-stats">
+                        <div class="stat">Level: <span id="finalLevel">1</span></div>
+                        <div class="stat">Score: <span id="finalScore">0</span></div>
+                        <div class="stat">Time: <span id="finalTime">0:00</span></div>
+                    </div>
+                    <button id="restartButton" class="restart-btn">🔄 Restart Game</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="game.js"></script>
+</body>
+</html>
