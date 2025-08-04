@@ -718,8 +718,8 @@ class Game {
     
     // Update diamond display only after game completion
     updateDiamondDisplay() {
-        const stats = this.playerProfile.statistics;
-        document.getElementById('totalDiamonds').textContent = stats.totalDiamondsEarned || 0;
+        const availableDiamonds = this.playerProfile.getAvailableDiamonds();
+        document.getElementById('totalDiamonds').textContent = availableDiamonds;
     }
     
     // Enter shop mode
