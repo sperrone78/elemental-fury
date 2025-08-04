@@ -316,7 +316,7 @@ class Game {
         }
         
         this.updateUI();
-        // Profile UI updates removed from main loop - only update after game completion
+        this.updateCurrentSessionDisplay(); // Update current session stats during gameplay
     }
     
     render() {
@@ -713,45 +713,7 @@ class Game {
             document.getElementById(`${element}Mastery`).textContent = maxLevel;
         });
         
-        // Update current session stats (if in game)
-        if (this.gameState === 'playing' && this.sessionStats) {
-            document.getElementById('sessionTime').textContent = formatTime(this.sessionStats.survivalTime);
-            document.getElementById('sessionScore').textContent = formatNumber(this.sessionStats.score);
-            document.getElementById('sessionLevel').textContent = this.sessionStats.level;
-            document.getElementById('sessionKills').textContent = this.sessionStats.enemiesKilled.total;
-            document.getElementById('sessionXP').textContent = this.sessionStats.xpGained;
-            
-            // Update detailed damage breakdown for current session
-            document.getElementById('sessionBasicDamage').textContent = formatNumber(this.sessionStats.damageDealt.basicWeapon);
-            document.getElementById('sessionFireballDamage').textContent = formatNumber(this.sessionStats.damageDealt.fireball);
-            document.getElementById('sessionMissilesDamage').textContent = formatNumber(this.sessionStats.damageDealt.missiles);
-            document.getElementById('sessionTremorsDamage').textContent = formatNumber(this.sessionStats.damageDealt.tremors);
-            document.getElementById('sessionChainLightningDamage').textContent = formatNumber(this.sessionStats.damageDealt.chainLightning);
-            document.getElementById('sessionEarthquakeDamage').textContent = formatNumber(this.sessionStats.damageDealt.earthquakeStormp);
-            document.getElementById('sessionThunderStormDamage').textContent = formatNumber(this.sessionStats.damageDealt.thunderStorm);
-            document.getElementById('sessionTornadoDamage').textContent = formatNumber(this.sessionStats.damageDealt.tornadoVortex);
-            document.getElementById('sessionInfernoDamage').textContent = formatNumber(this.sessionStats.damageDealt.infernoWave);
-            document.getElementById('sessionTotalDamage').textContent = formatNumber(this.sessionStats.damageDealt.total);
-        } else {
-            // Reset session display when not playing
-            document.getElementById('sessionTime').textContent = '0:00';
-            document.getElementById('sessionScore').textContent = '0';
-            document.getElementById('sessionLevel').textContent = '1';
-            document.getElementById('sessionKills').textContent = '0';
-            document.getElementById('sessionXP').textContent = '0';
-            
-            // Reset detailed damage breakdown
-            document.getElementById('sessionBasicDamage').textContent = '0';
-            document.getElementById('sessionFireballDamage').textContent = '0';
-            document.getElementById('sessionMissilesDamage').textContent = '0';
-            document.getElementById('sessionTremorsDamage').textContent = '0';
-            document.getElementById('sessionChainLightningDamage').textContent = '0';
-            document.getElementById('sessionEarthquakeDamage').textContent = '0';
-            document.getElementById('sessionThunderStormDamage').textContent = '0';
-            document.getElementById('sessionTornadoDamage').textContent = '0';
-            document.getElementById('sessionInfernoDamage').textContent = '0';
-            document.getElementById('sessionTotalDamage').textContent = '0';
-        }
+        // Current session stats are now updated via updateCurrentSessionDisplay() during gameplay
     }
     
     // Update diamond display only after game completion
@@ -806,6 +768,44 @@ class Game {
             this.updateShopDisplay();
             this.updateDiamondDisplay(); // Update header display
         }
+    }
+    
+    // Update current session display during gameplay
+    updateCurrentSessionDisplay() {
+        if (this.gameState !== 'playing' || !this.sessionStats) return;
+        
+        // Helper function to format time
+        const formatTime = (timeInSeconds) => {
+            const minutes = Math.floor(timeInSeconds / 60);
+            const seconds = Math.floor(timeInSeconds % 60);
+            return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+        };
+        
+        // Helper function to format large numbers
+        const formatNumber = (num) => {
+            if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
+            if (num >= 1000) return (num / 1000).toFixed(1) + 'K';
+            return num.toString();
+        };
+        
+        // Update current session stats
+        document.getElementById('sessionTime').textContent = formatTime(this.sessionStats.survivalTime);
+        document.getElementById('sessionScore').textContent = formatNumber(this.sessionStats.score);
+        document.getElementById('sessionLevel').textContent = this.sessionStats.level;
+        document.getElementById('sessionKills').textContent = this.sessionStats.enemiesKilled.total;
+        document.getElementById('sessionXP').textContent = this.sessionStats.xpGained;
+        
+        // Update detailed damage breakdown for current session
+        document.getElementById('sessionBasicDamage').textContent = formatNumber(this.sessionStats.damageDealt.basicWeapon);
+        document.getElementById('sessionFireballDamage').textContent = formatNumber(this.sessionStats.damageDealt.fireball);
+        document.getElementById('sessionMissilesDamage').textContent = formatNumber(this.sessionStats.damageDealt.missiles);
+        document.getElementById('sessionTremorsDamage').textContent = formatNumber(this.sessionStats.damageDealt.tremors);
+        document.getElementById('sessionChainLightningDamage').textContent = formatNumber(this.sessionStats.damageDealt.chainLightning);
+        document.getElementById('sessionEarthquakeDamage').textContent = formatNumber(this.sessionStats.damageDealt.earthquakeStormp);
+        document.getElementById('sessionThunderStormDamage').textContent = formatNumber(this.sessionStats.damageDealt.thunderStorm);
+        document.getElementById('sessionTornadoDamage').textContent = formatNumber(this.sessionStats.damageDealt.tornadoVortex);
+        document.getElementById('sessionInfernoDamage').textContent = formatNumber(this.sessionStats.damageDealt.infernoWave);
+        document.getElementById('sessionTotalDamage').textContent = formatNumber(this.sessionStats.damageDealt.total);
     }
 }
 
