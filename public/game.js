@@ -82,6 +82,7 @@ class Game {
         
         // Initialize UI with starting values
         this.updateUI();
+        this.updateDiamondDisplay(); // Initialize diamond display with current total
         this.updateProfileUI();
     }
     
@@ -275,7 +276,7 @@ class Game {
         }
         
         this.updateUI();
-        this.updateProfileUI();
+        // Profile UI updates removed from main loop - only update after game completion
     }
     
     render() {
@@ -621,8 +622,7 @@ class Game {
             return num.toString();
         };
         
-        // Update diamond display (future implementation)
-        document.getElementById('totalDiamonds').textContent = stats.totalDiamondsEarned || 0;
+        // Diamond display is updated separately after game completion
         
         // Update game statistics
         document.getElementById('totalGames').textContent = stats.totalGamesPlayed;
@@ -696,6 +696,12 @@ class Game {
             document.getElementById('sessionInfernoDamage').textContent = '0';
             document.getElementById('sessionTotalDamage').textContent = '0';
         }
+    }
+    
+    // Update diamond display only after game completion
+    updateDiamondDisplay() {
+        const stats = this.playerProfile.statistics;
+        document.getElementById('totalDiamonds').textContent = stats.totalDiamondsEarned || 0;
     }
 }
 
@@ -1071,8 +1077,9 @@ class Player {
             this.game.gameOver = true;
             this.game.gameState = 'gameOver';
             
-            // Update player profile with session stats
+            // Update player profile with session stats and diamond display
             this.game.playerProfile.updateGameStats(this.game.sessionStats);
+            this.game.updateDiamondDisplay();
             this.game.updateProfileUI();
         }
     }
@@ -3055,6 +3062,10 @@ class PlayerProfile {
                 }
             }
         }
+        
+        // Calculate and add diamond rewards
+        const diamondsEarned = this.calculateDiamondReward(sessionStats);
+        this.statistics.totalDiamondsEarned += diamondsEarned;
         
         this.save();
     }
