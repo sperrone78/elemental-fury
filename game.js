@@ -295,6 +295,11 @@ class Game {
         this.pickups.forEach((pickup, index) => {
             if (pickup.update) pickup.update(this.deltaTime); // For animated pickups like EliteXPPickup
             
+            // Handle XP Vortex attraction
+            if (pickup.type === 'xp') {
+                this.updateXPPickupVortex(pickup);
+            }
+            
             if (this.checkXPPickupCollision(this.player, pickup)) {
                 if (pickup.type === 'xp') {
                     this.player.gainXP(pickup.value);
@@ -502,15 +507,45 @@ class Game {
         const dy = player.y - pickup.y;
         const distance = Math.sqrt(dx * dx + dy * dy);
         
-        // Base pickup range
-        let pickupRange = player.radius + pickup.radius;
+        // Base collection range (smaller, for actual pickup)
+        const collectionRange = player.radius + pickup.radius + 5;
         
-        // Apply XP Vortex upgrade bonus
+        return distance < collectionRange;
+    }
+    
+    updateXPPickupVortex(pickup) {
         const xpVortexLevel = this.playerProfile.shopUpgrades.xpVortex;
-        const rangeMultiplier = 1 + (xpVortexLevel * 0.5); // 50% increase per level
-        pickupRange *= rangeMultiplier;
+        if (xpVortexLevel === 0) return; // No vortex effect
         
-        return distance < pickupRange;
+        const dx = this.player.x - pickup.x;
+        const dy = this.player.y - pickup.y;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        
+        // Vortex attraction range (larger than collection range)
+        const baseRange = this.player.radius + pickup.radius + 20;
+        const vortexRange = baseRange * (1 + (xpVortexLevel * 0.5)); // 50% increase per level
+        
+        if (distance < vortexRange && distance > 5) { // Don't attract if too close
+            // Calculate attraction force based on distance and vortex level
+            const attraction = (xpVortexLevel * 0.3 + 0.5) * (vortexRange - distance) / vortexRange;
+            const speed = Math.min(attraction * 200 * this.deltaTime, distance * 0.8); // Max speed to prevent overshooting
+            
+            // Normalize direction vector
+            const dirX = dx / distance;
+            const dirY = dy / distance;
+            
+            // Move pickup towards player
+            pickup.x += dirX * speed;
+            pickup.y += dirY * speed;
+            
+            // Add some visual effects
+            if (!pickup.isBeingAttracted) {
+                pickup.isBeingAttracted = true;
+                pickup.attractionStartTime = this.gameTime;
+            }
+        } else {
+            pickup.isBeingAttracted = false;
+        }
     }
     
     createXPPickup(x, y) {
@@ -2173,9 +2208,47 @@ class XPPickup {
     }
     
     render(ctx) {
-        ctx.fillStyle = '#00ff88';
+        // Add visual effects when being attracted by vortex
+        if (this.isBeingAttracted) {
+            // Pulsing glow effect
+            const pulseIntensity = Math.sin(Date.now() * 0.01) * 0.3 + 0.7;
+            const glowRadius = this.radius + 3;
+            
+            // Outer glow
+            const gradient = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, glowRadius);
+            gradient.addColorStop(0, `rgba(0, 255, 136, ${pulseIntensity * 0.8})`);
+            gradient.addColorStop(0.7, `rgba(0, 255, 136, ${pulseIntensity * 0.3})`);
+            gradient.addColorStop(1, 'rgba(0, 255, 136, 0)');
+            
+            ctx.fillStyle = gradient;
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, glowRadius, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Add trailing particles effect
+            for (let i = 0; i < 3; i++) {
+                const angle = Math.random() * Math.PI * 2;
+                const distance = 2 + Math.random() * 4;
+                const trailX = this.x - Math.cos(angle) * distance;
+                const trailY = this.y - Math.sin(angle) * distance;
+                
+                ctx.fillStyle = `rgba(0, 255, 136, ${0.3 * pulseIntensity})`;
+                ctx.beginPath();
+                ctx.arc(trailX, trailY, 1, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+        
+        // Main XP pellet
+        ctx.fillStyle = this.isBeingAttracted ? '#00ffaa' : '#00ff88';
         ctx.beginPath();
         ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // Inner highlight
+        ctx.fillStyle = this.isBeingAttracted ? '#88ffcc' : '#66ffaa';
+        ctx.beginPath();
+        ctx.arc(this.x - 1, this.y - 1, this.radius * 0.4, 0, Math.PI * 2);
         ctx.fill();
     }
 }
