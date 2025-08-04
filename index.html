@@ -191,6 +191,101 @@
         .upgrade-option:hover {
             background: #444;
         }
+        
+        #startWidget {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.95);
+            border: 3px solid #333;
+            border-radius: 10px;
+            padding: 30px;
+            color: white;
+            text-align: center;
+            z-index: 30;
+            max-width: 500px;
+            width: 90%;
+        }
+        
+        .start-title {
+            font-size: 32px;
+            font-weight: bold;
+            color: #ffff00;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+        }
+        
+        .start-subtitle {
+            font-size: 18px;
+            color: #ff8800;
+            margin-bottom: 25px;
+        }
+        
+        .controls-section {
+            margin: 20px 0;
+            text-align: left;
+        }
+        
+        .controls-title {
+            font-size: 20px;
+            color: #00ff88;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        
+        .control-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 8px 0;
+            padding: 5px 0;
+        }
+        
+        .control-key {
+            background: #333;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-family: monospace;
+            color: #ffff00;
+            border: 1px solid #555;
+        }
+        
+        .control-action {
+            color: #ccc;
+        }
+        
+        .game-info {
+            margin: 20px 0;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            border: 1px solid #444;
+        }
+        
+        .info-title {
+            font-size: 16px;
+            color: #00aaff;
+            margin-bottom: 10px;
+        }
+        
+        .info-text {
+            font-size: 14px;
+            color: #aaa;
+            line-height: 1.4;
+        }
+        
+        .start-prompt {
+            font-size: 20px;
+            color: #00ff00;
+            margin-top: 25px;
+            animation: blink 1.5s infinite;
+        }
+        
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0.3; }
+        }
     </style>
 </head>
 <body>
@@ -294,6 +389,49 @@
         
         <div id="gameArea">
             <canvas id="gameCanvas" width="800" height="600"></canvas>
+            
+            <div id="startWidget">
+                <div class="start-title">⚡ ELEMENTAL FURY ⚡</div>
+                <div class="start-subtitle">Vampire Survivor-like Elemental Combat</div>
+                
+                <div class="controls-section">
+                    <div class="controls-title">🎮 Controls</div>
+                    <div class="control-item">
+                        <span class="control-key">WASD</span>
+                        <span class="control-action">Move</span>
+                    </div>
+                    <div class="control-item">
+                        <span class="control-key">Mouse</span>
+                        <span class="control-action">Aim attacks</span>
+                    </div>
+                </div>
+                
+                <div class="game-info">
+                    <div class="info-title">🔥 Game Objective</div>
+                    <div class="info-text">
+                        Survive waves of enemies and master 5 elemental powers: Fire, Water, Air, Earth, and Lightning. 
+                        Level up to unlock devastating abilities and ultimate powers!
+                    </div>
+                </div>
+                
+                <div class="game-info">
+                    <div class="info-title">⚡ Elemental Powers</div>
+                    <div class="info-text">
+                        Each element has unique abilities. Reach level 6 in any element to unlock its ultimate power!
+                    </div>
+                </div>
+                
+                <div class="game-info" id="finalStats" style="display: none;">
+                    <div class="info-title">📊 Final Stats</div>
+                    <div class="info-text">
+                        <div>Time Survived: <span id="finalTime">0:00</span></div>
+                        <div>Final Score: <span id="finalScore">0</span></div>
+                        <div>Final Level: <span id="finalLevel">1</span></div>
+                    </div>
+                </div>
+                
+                <div class="start-prompt">Press SPACE or ENTER to Start!</div>
+            </div>
             
             <div id="upgradeMenu">
                 <h3>Level Up! Choose an upgrade:</h3>

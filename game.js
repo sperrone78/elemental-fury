@@ -17,6 +17,7 @@ class Game {
         this.score = 0;
         this.isPaused = false;
         this.gameOver = false;
+        this.gameState = 'waiting'; // 'waiting', 'playing', 'gameOver'
         
         this.keys = {};
         this.mousePos = { x: 0, y: 0 };
@@ -30,15 +31,52 @@ class Game {
     
     init() {
         this.setupEventListeners();
+        this.gameLoop();
+    }
+    
+    startGame() {
+        this.gameState = 'playing';
+        this.gameOver = false;
         this.player = new Player(this.width / 2, this.height / 2);
         this.player.game = this;
         this.player.weapons = [new BasicWeapon(this.player)];
-        this.gameLoop();
+        this.gameTime = 0;
+        this.score = 0;
+        this.enemies = [];
+        this.projectiles = [];
+        this.enemyProjectiles = [];
+        this.particles = [];
+        this.pickups = [];
+        this.dotEffects = [];
+        document.getElementById('startWidget').style.display = 'none';
+        document.getElementById('upgradeMenu').style.display = 'none';
+        
+        // Reset upgrade system
+        this.upgradeSystem = new UpgradeSystem();
+        this.upgradeSystem.game = this;
+        
+        // Reset wave manager
+        this.waveManager = new WaveManager();
+        
+        // Reset all power levels in UI
+        ['fire', 'water', 'air', 'earth', 'lightning'].forEach(element => {
+            document.getElementById(`${element}-level`).textContent = '0';
+            document.getElementById(`${element}-progress`).style.width = '0%';
+            document.getElementById(`${element}-ability`).classList.remove('unlocked');
+            document.getElementById(`${element}-ultimate`).classList.remove('unlocked');
+        });
+        
+        // Initialize UI with starting values
+        this.updateUI();
     }
     
     setupEventListeners() {
         document.addEventListener('keydown', (e) => {
             this.keys[e.key.toLowerCase()] = true;
+            
+            if ((this.gameState === 'waiting' || this.gameState === 'gameOver') && (e.key === ' ' || e.key === 'Enter')) {
+                this.startGame();
+            }
         });
         
         document.addEventListener('keyup', (e) => {
@@ -53,15 +91,13 @@ class Game {
     }
     
     gameLoop() {
-        if (!this.gameOver) {
-            this.update();
-            this.render();
-            requestAnimationFrame(() => this.gameLoop());
-        }
+        this.update();
+        this.render();
+        requestAnimationFrame(() => this.gameLoop());
     }
     
     update() {
-        if (this.isPaused) return;
+        if (this.isPaused || this.gameState !== 'playing') return;
         
         this.gameTime += 1/60;
         
@@ -138,13 +174,78 @@ class Game {
         this.ctx.fillStyle = '#111';
         this.ctx.fillRect(0, 0, this.width, this.height);
         
-        this.player.render(this.ctx);
-        
-        this.enemies.forEach(enemy => enemy.render(this.ctx));
-        this.projectiles.forEach(projectile => projectile.render(this.ctx));
-        this.enemyProjectiles.forEach(projectile => projectile.render(this.ctx));
-        this.particles.forEach(particle => particle.render(this.ctx));
-        this.pickups.forEach(pickup => pickup.render(this.ctx));
+        if (this.gameState === 'playing' && this.player) {
+            this.player.render(this.ctx);
+            this.enemies.forEach(enemy => enemy.render(this.ctx));
+            this.projectiles.forEach(projectile => projectile.render(this.ctx));
+            this.enemyProjectiles.forEach(projectile => projectile.render(this.ctx));
+            this.particles.forEach(particle => particle.render(this.ctx));
+            this.pickups.forEach(pickup => pickup.render(this.ctx));
+        } else if (this.gameState === 'waiting' || this.gameState === 'gameOver') {
+            // Show start widget
+            document.getElementById('startWidget').style.display = 'block';
+            
+            if (this.gameState === 'gameOver') {
+                // Update start widget text for game over
+                const startPrompt = document.querySelector('.start-prompt');
+                const startTitle = document.querySelector('.start-title');
+                const startSubtitle = document.querySelector('.start-subtitle');
+                const controlsSection = document.querySelector('.controls-section');
+                const gameInfoSections = document.querySelectorAll('.game-info:not(#finalStats)');
+                const finalStats = document.getElementById('finalStats');
+                
+                if (startPrompt) {
+                    startPrompt.textContent = 'Game Over! Press SPACE or ENTER to Restart!';
+                }
+                if (startTitle) {
+                    startTitle.innerHTML = '💀 GAME OVER 💀';
+                }
+                if (startSubtitle) {
+                    startSubtitle.style.display = 'none';
+                }
+                if (controlsSection) {
+                    controlsSection.style.display = 'none';
+                }
+                gameInfoSections.forEach(section => {
+                    section.style.display = 'none';
+                });
+                if (finalStats) {
+                    finalStats.style.display = 'block';
+                    const minutes = Math.floor(this.gameTime / 60);
+                    const seconds = Math.floor(this.gameTime % 60);
+                    document.getElementById('finalTime').textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+                    document.getElementById('finalScore').textContent = this.score;
+                    document.getElementById('finalLevel').textContent = this.player ? this.player.level : 1;
+                }
+            } else {
+                // Reset start widget text for new game
+                const startPrompt = document.querySelector('.start-prompt');
+                const startTitle = document.querySelector('.start-title');
+                const startSubtitle = document.querySelector('.start-subtitle');
+                const controlsSection = document.querySelector('.controls-section');
+                const gameInfoSections = document.querySelectorAll('.game-info:not(#finalStats)');
+                const finalStats = document.getElementById('finalStats');
+                
+                if (startPrompt) {
+                    startPrompt.textContent = 'Press SPACE or ENTER to Start!';
+                }
+                if (startTitle) {
+                    startTitle.innerHTML = '⚡ ELEMENTAL FURY ⚡';
+                }
+                if (startSubtitle) {
+                    startSubtitle.style.display = 'block';
+                }
+                if (controlsSection) {
+                    controlsSection.style.display = 'block';
+                }
+                gameInfoSections.forEach(section => {
+                    section.style.display = 'block';
+                });
+                if (finalStats) {
+                    finalStats.style.display = 'none';
+                }
+            }
+        }
     }
     
     handleCollisions() {
@@ -257,6 +358,8 @@ class Game {
     }
     
     updateUI() {
+        if (this.gameState !== 'playing' || !this.player) return;
+        
         // Update health display and bar
         document.getElementById('health').textContent = this.player.health;
         document.getElementById('maxHealth').textContent = this.player.maxHealth;
@@ -559,6 +662,7 @@ class Player {
         
         if (this.health <= 0) {
             this.game.gameOver = true;
+            this.game.gameState = 'gameOver';
         }
     }
     
