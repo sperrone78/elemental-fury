@@ -169,7 +169,7 @@ class Game {
         
         if (newGameBtn) {
             newGameBtn.addEventListener('click', () => {
-                if (this.gameState === 'gameOver') {
+                if (this.gameState === 'gameOver' || this.gameState === 'waiting') {
                     this.startGame();
                 }
             });
@@ -177,7 +177,7 @@ class Game {
         
         if (shopBtn) {
             shopBtn.addEventListener('click', () => {
-                if (this.gameState === 'gameOver') {
+                if (this.gameState === 'gameOver' || this.gameState === 'waiting') {
                     this.enterShop();
                 }
             });
@@ -762,6 +762,7 @@ class Game {
     
     // Enter shop mode
     enterShop() {
+        this.previousGameState = this.gameState; // Remember where we came from
         this.gameState = 'shop';
         document.getElementById('startWidget').style.display = 'none';
         document.getElementById('shopMenu').style.display = 'block';
@@ -770,7 +771,7 @@ class Game {
     
     // Exit shop mode
     exitShop() {
-        this.gameState = 'gameOver';
+        this.gameState = this.previousGameState || 'waiting'; // Return to previous state
         document.getElementById('shopMenu').style.display = 'none';
         document.getElementById('startWidget').style.display = 'block';
     }
