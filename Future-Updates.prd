@@ -1,0 +1,412 @@
+# 🚀 Elemental Fury - Future Updates PRD
+## Product Requirements Document v1.0
+
+---
+
+## 📋 Executive Summary
+
+This document outlines the strategic roadmap for expanding Elemental Fury from a single-session survival game into a comprehensive progression-based gaming experience. The focus is on adding persistent progression, variety, and competitive elements while maintaining the core elemental combat that players love.
+
+### 🎯 Core Vision
+Transform Elemental Fury into a replayable, progression-driven experience with multiple game modes, persistent upgrades, and social competition features.
+
+---
+
+## 📊 Current State Analysis
+
+### ✅ Strengths
+- **Solid Core Gameplay**: 5 elemental masteries with unique abilities
+- **Progressive Difficulty**: Scaling enemies and boss encounters  
+- **Visual Polish**: Particle effects and smooth animations
+- **Technical Foundation**: Stable Canvas-based architecture
+- **Deployment Pipeline**: Firebase hosting with automated deployment
+
+### 🔄 Areas for Enhancement
+- **No Persistence**: Progress resets completely between games
+- **Limited Variety**: Single game mode and environment
+- **No Social Features**: Isolated single-player experience
+- **Static Progression**: Same upgrade path every game
+- **No Long-term Goals**: Limited replay incentive
+
+---
+
+## 🏗️ Feature Categories Overview
+
+### 1. 💎 Currency & Progression System
+**Priority: High** | **Complexity: Medium**
+
+#### Diamond Currency
+- **Earning**: Diamonds awarded based on survival time, score, and achievements
+  - Base: 1 diamond per 30 seconds survived
+  - Bonus: +1 diamond per 1000 score points
+  - Boss Kills: +2 diamonds (Basic), +4 (Veteran), +6 (Elite)
+- **Display**: Persistent diamond counter in main menu and game over screen
+
+#### Persistent Player Profile
+- **Statistics Tracking**: 
+  - Total games played, best survival time, highest score
+  - Element mastery preferences, favorite combinations
+  - Total diamonds earned, total diamonds spent
+- **Achievement Progress**: Unlock conditions and completion status
+- **Local Storage**: Browser localStorage for persistence
+
+### 2. 🛒 Shop & Permanent Upgrades
+**Priority: High** | **Complexity: Medium**
+
+#### Shop Categories
+
+##### 🧲 Utility Items
+- **Magnet** (Cost: 50 💎)
+  - Effect: +50% XP pickup range
+  - Visual: Blue sparkle effect around XP orbs when in range
+  
+- **Lucky Charm** (Cost: 75 💎)
+  - Effect: 10% chance for double XP from pickups
+  - Visual: Golden shine on double-value XP orbs
+
+- **Time Dilation** (Cost: 100 💎)
+  - Effect: Slow motion for 2 seconds when health drops below 25%
+  - Cooldown: 30 seconds
+  - Visual: Screen tint and particle time distortion
+
+##### ⚡ Power Enhancers
+- **Elemental Affinity** (Cost: 150 💎 each)
+  - Fire: +25% explosion radius for all fire abilities
+  - Water: Shield absorbs 1 additional hit
+  - Earth: Tremors have 25% larger radius
+  - Air: Missiles fire 1 additional projectile
+  - Lightning: Chain lightning gains +1 permanent bounce
+
+- **Ultimate Amplifier** (Cost: 200 💎)
+  - Effect: All Level 6 ultimates deal +50% damage
+  - Visual: Enhanced particle effects for ultimate abilities
+
+##### 🛡️ Survival Tools
+- **Emergency Shield** (Cost: 80 💎)
+  - Effect: Automatic shield activation when health drops to 1 HP
+  - Duration: 3 seconds of invincibility
+  - Cooldown: Once per game
+
+- **Health Boost** (Cost: 60 💎)
+  - Effect: Start each game with +20 max health
+  - Stackable: Up to 3 purchases (+60 total)
+
+#### Shop Interface
+- **Grid Layout**: Categories with item icons and descriptions
+- **Preview System**: Show effects before purchase
+- **Owned Indicators**: Visual confirmation of purchased items
+
+### 3. 🗺️ Game Modes & Environments
+**Priority: Medium** | **Complexity: High**
+
+#### Environment Types
+
+##### 🌋 Volcanic Wasteland
+- **Theme**: Fire-enhanced difficulty
+- **Mechanics**: 
+  - Lava pools deal damage over time
+  - Fire enemies immune to burning effects
+  - Periodic volcanic eruptions create temporary barriers
+- **Rewards**: +25% diamonds earned
+- **Unlock**: Reach level 20 in Classic mode
+
+##### ❄️ Frozen Tundra  
+- **Theme**: Ice and water challenges
+- **Mechanics**:
+  - Slippery ice patches affect movement
+  - Blizzards reduce visibility periodically
+  - Ice enemies move slower but have more health
+- **Rewards**: +25% XP gain
+- **Unlock**: Achieve Water mastery level 6
+
+##### ⚡ Storm Peaks
+- **Theme**: Lightning and air mastery focus
+- **Mechanics**:
+  - Random lightning strikes create temporary hazards
+  - Strong winds affect projectile trajectories
+  - Flying enemies spawn more frequently
+- **Rewards**: Start with 1 random Level 3 ability unlocked
+- **Unlock**: Survive 10 minutes in any mode
+
+##### 🌪️ Chaos Realm
+- **Theme**: All elements, maximum difficulty
+- **Mechanics**:
+  - Random environmental effects every 2 minutes
+  - All elite enemies spawn with random element resistances
+  - Bosses appear every 3 levels instead of 5
+- **Rewards**: Double diamond earning rate
+- **Unlock**: Own 5+ shop items
+
+#### Game Mode Variants
+
+##### 📊 Endless Mode (Current)
+- Standard survival with scaling difficulty
+- All upgrades available
+
+##### ⏱️ Blitz Mode
+- **Duration**: Fixed 5-minute timer
+- **Mechanics**: Extremely fast enemy spawns, rapid XP gain
+- **Goal**: Achieve highest score before time expires
+- **Rewards**: Diamonds based on score milestones
+
+##### 🎯 Element Mastery Challenges
+- **Fire Trial**: Start with Fire level 3, only fire upgrades available
+- **Water Trial**: Constant health drain, must rely on water healing
+- **Earth Trial**: Movement speed halved, earth abilities enhanced
+- **Air Trial**: Double projectile speed, air mastery provides extra benefits
+- **Lightning Trial**: Attack speed doubled, lightning chains always active
+
+### 4. 🏆 Leaderboard System
+**Priority: Medium** | **Complexity: Medium**
+
+#### Leaderboard Categories
+- **Global High Scores**: Top survival times across all players
+- **Weekly Challenges**: Rotating special conditions
+- **Element Mastery**: Best scores using specific element focus
+- **Game Mode Records**: Separate boards for each environment/mode
+
+#### Implementation Options
+##### Option A: Firebase Realtime Database
+- **Pros**: Real-time updates, built-in scaling
+- **Cons**: Requires authentication, ongoing costs
+- **Technical**: REST API integration with game client
+
+##### Option B: GitHub-based Leaderboard
+- **Pros**: Free, version controlled, transparent
+- **Cons**: Not real-time, requires GitHub API knowledge
+- **Technical**: JSON file updates via GitHub API
+
+##### Option C: Local Leaderboard
+- **Pros**: No external dependencies, privacy-friendly
+- **Cons**: Limited to single browser/device
+- **Technical**: localStorage with export/import features
+
+#### Leaderboard Features
+- **Player Names**: Optional username input (default: "Anonymous Player")
+- **Score Details**: Time survived, final level, elements mastered
+- **Replay Value**: "Beat This Score" challenges
+- **Social Sharing**: Generate shareable score images
+
+### 5. 🎖️ Achievement System
+**Priority: Low** | **Complexity: Low**
+
+#### Achievement Categories
+
+##### 🕐 Survival Milestones
+- "First Steps": Survive 1 minute
+- "Getting Started": Survive 5 minutes  
+- "Veteran Survivor": Survive 10 minutes
+- "Master of Time": Survive 15 minutes
+- "Legendary": Survive 20+ minutes
+
+##### 🔥 Element Mastery
+- "Jack of All Trades": Reach level 3 in all elements (single game)
+- "Elemental Master": Reach level 6 in any element
+- "Pure Focus": Complete game using only one element type
+- "Balanced Power": Reach level 6 in 3+ elements (single game)
+
+##### 👾 Combat Achievements  
+- "Boss Hunter": Defeat 10 bosses (across all games)
+- "Elite Slayer": Defeat 5 Elite enemies in one game
+- "Crowd Control": Defeat 50 enemies in 30 seconds
+- "Ultimate Power": Use all 5 Level 6 ultimates in one game
+
+##### 💎 Collection Goals
+- "Diamond Collector": Earn 100 total diamonds
+- "Spender": Purchase first shop item
+- "Investor": Own 5+ shop items
+- "Completionist": Own all available shop items
+
+#### Achievement Rewards
+- **Diamond Bonuses**: 10-50 diamonds per achievement
+- **Visual Unlocks**: Special particle effects or visual themes
+- **Title System**: Display achievement titles in leaderboards
+
+### 6. 🎵 Audio & Polish
+**Priority: Low** | **Complexity: Low**
+
+#### Sound Effects
+- **Combat Sounds**: Weapon firing, explosions, enemy deaths
+- **UI Sounds**: Menu navigation, upgrade selection, achievement notifications
+- **Elemental Audio**: Unique sounds for each element's abilities
+- **Ambient Audio**: Background environment sounds per game mode
+
+#### Music System
+- **Dynamic Soundtrack**: Intensity increases with game progression
+- **Element Themes**: Musical variations based on player's mastery focus
+- **Boss Music**: Special tracks for boss encounters
+- **Menu Music**: Atmospheric background for menus and shop
+
+#### Settings & Options
+- **Audio Controls**: Master volume, SFX volume, music volume
+- **Visual Settings**: Particle density, screen shake, visual effects intensity
+- **Gameplay Options**: Damage numbers, colorblind support
+- **Controls**: Key rebinding for movement (WASD alternatives)
+
+---
+
+## 📅 Implementation Roadmap
+
+### Phase 1: Foundation (Version 3.0) - **4-6 weeks**
+**Focus: Currency & Basic Shop**
+
+#### Week 1-2: Currency System
+- [ ] Diamond earning calculations
+- [ ] Persistent storage (localStorage)
+- [ ] Game over screen diamond display
+- [ ] Basic statistics tracking
+
+#### Week 3-4: Shop Implementation  
+- [ ] Shop UI/UX design and layout
+- [ ] First 5 shop items (Magnet, Lucky Charm, Health Boost, Emergency Shield, Time Dilation)
+- [ ] Purchase confirmation and feedback
+- [ ] Owned items display in game
+
+#### Week 5-6: Integration & Polish
+- [ ] Shop item effects integration into gameplay
+- [ ] Visual effects for active shop items
+- [ ] Bug testing and balance adjustments
+- [ ] Documentation updates
+
+### Phase 2: Variety (Version 3.5) - **6-8 weeks**
+
+#### Week 1-3: New Game Modes
+- [ ] Blitz Mode implementation
+- [ ] Element Mastery Challenge frameworks
+- [ ] Mode selection UI
+- [ ] Balance testing for accelerated gameplay
+
+#### Week 4-6: First New Environment
+- [ ] Volcanic Wasteland environment
+- [ ] Lava hazard mechanics
+- [ ] Fire-themed enemy variants
+- [ ] Environmental visual effects
+
+#### Week 7-8: Achievement System
+- [ ] Achievement tracking backend
+- [ ] Achievement notification system
+- [ ] Achievement gallery/progress UI
+- [ ] Integration with diamond rewards
+
+### Phase 3: Competition (Version 4.0) - **4-6 weeks**
+
+#### Week 1-3: Leaderboard System
+- [ ] Choose implementation approach (Firebase vs GitHub vs Local)
+- [ ] Leaderboard UI design and implementation
+- [ ] Score submission and validation
+- [ ] Username system
+
+#### Week 4-6: Social Features
+- [ ] Score sharing functionality
+- [ ] Weekly challenge system
+- [ ] Leaderboard categories and filtering
+- [ ] Competition balance and fairness measures
+
+### Phase 4: Immersion (Version 4.5) - **4-6 weeks**
+
+#### Week 1-3: Audio Implementation
+- [ ] Sound effect library creation/sourcing
+- [ ] Audio engine integration
+- [ ] Dynamic music system
+- [ ] Audio settings and controls
+
+#### Week 4-6: Remaining Environments
+- [ ] Frozen Tundra implementation
+- [ ] Storm Peaks implementation
+- [ ] Chaos Realm implementation
+- [ ] Environment unlock system
+
+---
+
+## 🎯 Success Metrics
+
+### Player Engagement
+- **Session Length**: Target 15% increase in average play time
+- **Return Rate**: 40% of players return within 7 days
+- **Progression**: 60% of players make at least one shop purchase
+
+### Game Balance
+- **Diamond Economy**: Average 20-30 diamonds earned per 10-minute session
+- **Shop Utilization**: Each shop item purchased by 15%+ of players
+- **Mode Distribution**: At least 25% of games played in non-classic modes
+
+### Technical Performance
+- **Load Time**: Game loads in under 3 seconds
+- **Frame Rate**: Maintain 60 FPS even with shop items active
+- **Data Persistence**: 99.9% reliability for save data
+
+### Community Growth
+- **Leaderboard Participation**: 30% of players submit at least one score
+- **Achievement Completion**: Average 8+ achievements per active player
+- **Social Sharing**: 5% of high scores shared externally
+
+---
+
+## 🔧 Technical Considerations
+
+### Data Management
+- **Local Storage Limits**: Plan for 5-10MB of persistent data
+- **Save Data Structure**: JSON format with versioning for backwards compatibility
+- **Migration System**: Handle updates to save data format gracefully
+
+### Performance Impact
+- **Shop Item Rendering**: Efficient particle systems for visual effects
+- **Leaderboard Caching**: Minimize API calls, cache results locally
+- **Asset Loading**: Progressive loading of new environment assets
+
+### Security & Fairness
+- **Score Validation**: Client-side anti-cheat measures
+- **Save Data Protection**: Basic encryption for local storage
+- **Leaderboard Integrity**: Rate limiting and suspicious score detection
+
+### Mobile Compatibility
+- **Touch Controls**: Future consideration for mobile/tablet support
+- **Performance Scaling**: Adjustable quality settings for lower-end devices
+- **Responsive Design**: Shop and leaderboard UI scales to different screen sizes
+
+---
+
+## 💡 Additional Ideas for Future Consideration
+
+### Community Features
+- **Replay System**: Record and share impressive gameplay moments
+- **Custom Challenges**: Player-created challenge modes
+- **Clan System**: Group progression and competition
+- **Tournament Mode**: Scheduled competitive events
+
+### Advanced Gameplay
+- **Weapon Variants**: Different base weapons with unique properties
+- **Character Classes**: Starting builds that affect upgrade paths
+- **Synergy System**: Bonus effects for specific element combinations
+- **Prestige Mode**: Reset progression for increased diamond earning rates
+
+### Platform Expansion
+- **Mobile App**: Native iOS/Android versions
+- **Desktop Distribution**: Steam or itch.io releases
+- **Multiplayer Modes**: Co-op survival or competitive battles
+- **VR Adaptation**: Virtual reality version of the core gameplay
+
+---
+
+## ✅ Next Steps
+
+1. **Stakeholder Review**: Present this PRD for feedback and prioritization
+2. **Technical Spike**: Prototype diamond currency system (2-3 days)
+3. **Design Mockups**: Create shop UI wireframes and visual concepts
+4. **Architecture Planning**: Design persistent data structures and API contracts
+5. **Development Kickoff**: Begin Phase 1 implementation
+
+---
+
+*Document Version: 1.0*  
+*Last Updated: August 2025*  
+*Status: Draft - Pending Review*
+
+---
+
+## 📞 Contact & Feedback
+
+For questions, suggestions, or implementation discussion:
+- **GitHub Issues**: [elemental-fury/issues](https://github.com/user/elemental-fury/issues)
+- **Development Log**: Track progress in DEVELOPMENT.md
+- **Version History**: See CHANGELOG.md for implementation updates
