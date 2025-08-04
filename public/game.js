@@ -32,6 +32,10 @@ class Game {
         this.upgradeSystem = new UpgradeSystem();
         this.upgradeSystem.game = this;
         
+        // Initialize player profile and statistics tracking
+        this.playerProfile = new PlayerProfile();
+        this.sessionStats = this.initializeSessionStats();
+        
         this.init();
     }
     
@@ -65,6 +69,9 @@ class Game {
         // Reset wave manager
         this.waveManager = new WaveManager();
         
+        // Reset session statistics
+        this.sessionStats = this.initializeSessionStats();
+        
         // Reset all power levels in UI
         ['fire', 'water', 'air', 'earth', 'lightning'].forEach(element => {
             document.getElementById(`${element}-level`).textContent = '0';
@@ -75,6 +82,60 @@ class Game {
         
         // Initialize UI with starting values
         this.updateUI();
+        this.updateProfileUI();
+    }
+    
+    // Initialize session statistics tracking
+    initializeSessionStats() {
+        return {
+            survivalTime: 0,
+            score: 0,
+            level: 1,
+            xpGained: 0,
+            upgradesChosen: 0,
+            enemiesKilled: {
+                basic: 0,
+                veteran: 0,
+                elite: 0,
+                boss: 0,
+                total: 0
+            },
+            damageDealt: {
+                basicWeapon: 0,
+                fireball: 0,
+                tremors: 0,
+                earthquakeStormp: 0,
+                chainLightning: 0,
+                thunderStorm: 0,
+                missiles: 0,
+                tornadoVortex: 0,
+                infernoWave: 0,
+                total: 0
+            },
+            elementLevels: {
+                fire: 0,
+                water: 0,
+                earth: 0,
+                air: 0,
+                lightning: 0
+            }
+        };
+    }
+    
+    // Track damage dealt by attack type
+    recordDamage(attackType, damage) {
+        if (this.sessionStats.damageDealt[attackType] !== undefined) {
+            this.sessionStats.damageDealt[attackType] += damage;
+            this.sessionStats.damageDealt.total += damage;
+        }
+    }
+    
+    // Track enemy kill by type
+    recordEnemyKill(enemyType) {
+        if (this.sessionStats.enemiesKilled[enemyType] !== undefined) {
+            this.sessionStats.enemiesKilled[enemyType]++;
+            this.sessionStats.enemiesKilled.total++;
+        }
     }
     
     setupEventListeners() {
@@ -127,7 +188,9 @@ class Game {
         this.enemies.forEach((enemy, index) => {
             enemy.update(this.player, this.deltaTime);
             if (enemy.health <= 0) {
+                // Track enemy kill by type
                 if (enemy.isBoss) {
+                    this.recordEnemyKill('boss');
                     let xpCount = 5; // Basic boss
                     let scoreReward = 100;
                     
@@ -144,12 +207,15 @@ class Game {
                     }
                     this.score += scoreReward;
                 } else if (enemy.isElite) {
+                    this.recordEnemyKill('elite');
                     this.pickups.push(new EliteXPPickup(enemy.x, enemy.y));
                     this.score += 50;
                 } else if (enemy.isVeteran) {
+                    this.recordEnemyKill('veteran');
                     this.pickups.push(new VeteranXPPickup(enemy.x, enemy.y));
                     this.score += 25;
                 } else {
+                    this.recordEnemyKill('basic');
                     this.createXPPickup(enemy.x, enemy.y);
                     this.score += 10;
                 }
@@ -197,7 +263,19 @@ class Game {
         });
         
         this.handleCollisions();
+        
+        // Update session stats
+        this.sessionStats.survivalTime = this.gameTime;
+        this.sessionStats.score = this.score;
+        this.sessionStats.level = this.player.level;
+        
+        // Update element levels in session stats
+        for (const element in this.player.upgradeCount) {
+            this.sessionStats.elementLevels[element] = this.player.upgradeCount[element];
+        }
+        
         this.updateUI();
+        this.updateProfileUI();
     }
     
     render() {
@@ -241,11 +319,59 @@ class Game {
                 });
                 if (finalStats) {
                     finalStats.style.display = 'block';
-                    const minutes = Math.floor(this.gameTime / 60);
-                    const seconds = Math.floor(this.gameTime % 60);
-                    document.getElementById('finalTime').textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
-                    document.getElementById('finalScore').textContent = this.score;
+                    
+                    // Helper function to format time
+                    const formatTime = (timeInSeconds) => {
+                        const minutes = Math.floor(timeInSeconds / 60);
+                        const seconds = Math.floor(timeInSeconds % 60);
+                        return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+                    };
+                    
+                    // Helper function to format large numbers
+                    const formatNumber = (num) => {
+                        if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
+                        if (num >= 1000) return (num / 1000).toFixed(1) + 'K';
+                        return num.toString();
+                    };
+                    
+                    // Populate basic stats
+                    document.getElementById('finalTime').textContent = formatTime(this.gameTime);
+                    document.getElementById('finalScore').textContent = formatNumber(this.score);
                     document.getElementById('finalLevel').textContent = this.player ? this.player.level : 1;
+                    document.getElementById('finalXP').textContent = this.sessionStats ? this.sessionStats.xpGained : 0;
+                    
+                    // Populate combat stats
+                    document.getElementById('finalKills').textContent = this.sessionStats ? this.sessionStats.enemiesKilled.total : 0;
+                    document.getElementById('finalTotalDamage').textContent = this.sessionStats ? formatNumber(this.sessionStats.damageDealt.total) : 0;
+                    
+                    // Populate detailed damage breakdown
+                    if (this.sessionStats) {
+                        document.getElementById('finalBasicDamage').textContent = formatNumber(this.sessionStats.damageDealt.basicWeapon);
+                        document.getElementById('finalFireballDamage').textContent = formatNumber(this.sessionStats.damageDealt.fireball);
+                        document.getElementById('finalMissilesDamage').textContent = formatNumber(this.sessionStats.damageDealt.missiles);
+                        document.getElementById('finalTremorsDamage').textContent = formatNumber(this.sessionStats.damageDealt.tremors);
+                        document.getElementById('finalChainLightningDamage').textContent = formatNumber(this.sessionStats.damageDealt.chainLightning);
+                        document.getElementById('finalEarthquakeDamage').textContent = formatNumber(this.sessionStats.damageDealt.earthquakeStormp);
+                        document.getElementById('finalThunderStormDamage').textContent = formatNumber(this.sessionStats.damageDealt.thunderStorm);
+                        document.getElementById('finalTornadoDamage').textContent = formatNumber(this.sessionStats.damageDealt.tornadoVortex);
+                        document.getElementById('finalInfernoDamage').textContent = formatNumber(this.sessionStats.damageDealt.infernoWave);
+                        
+                        // Show elements used
+                        const elementsUsed = [];
+                        const elementNames = {fire: 'Fire', water: 'Water', earth: 'Earth', air: 'Air', lightning: 'Lightning'};
+                        for (const element in this.sessionStats.elementLevels) {
+                            const level = this.sessionStats.elementLevels[element];
+                            if (level > 0) {
+                                elementsUsed.push(`${elementNames[element]}: Lvl ${level}`);
+                            }
+                        }
+                        document.getElementById('finalElementsUsed').innerHTML = elementsUsed.length > 0 ? 
+                            elementsUsed.join('<br>') : 'No elements used';
+                        
+                        // Calculate and show diamonds earned
+                        const diamondsEarned = this.playerProfile.calculateDiamondReward(this.sessionStats);
+                        document.getElementById('finalDiamondsEarned').textContent = diamondsEarned;
+                    }
                 }
             } else {
                 // Reset start widget text for new game
@@ -284,8 +410,15 @@ class Game {
                 if (this.checkCollision(projectile, enemy)) {
                     enemy.takeDamage(projectile.damage);
                     
+                    // Track damage by projectile type
                     if (projectile instanceof FireballProjectile) {
+                        this.recordDamage('fireball', projectile.damage);
                         projectile.explode(this);
+                    } else if (projectile instanceof MissileProjectile) {
+                        this.recordDamage('missiles', projectile.damage);
+                    } else {
+                        // Basic weapon projectile
+                        this.recordDamage('basicWeapon', projectile.damage);
                     }
                     
                     projectile.shouldRemove = true;
@@ -469,6 +602,101 @@ class Game {
             }
         });
     }
+    
+    // Update player profile UI display
+    updateProfileUI() {
+        const stats = this.playerProfile.statistics;
+        
+        // Helper function to format time
+        const formatTime = (timeInSeconds) => {
+            const minutes = Math.floor(timeInSeconds / 60);
+            const seconds = Math.floor(timeInSeconds % 60);
+            return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+        };
+        
+        // Helper function to format large numbers
+        const formatNumber = (num) => {
+            if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
+            if (num >= 1000) return (num / 1000).toFixed(1) + 'K';
+            return num.toString();
+        };
+        
+        // Update diamond display (future implementation)
+        document.getElementById('totalDiamonds').textContent = stats.totalDiamondsEarned || 0;
+        
+        // Update game statistics
+        document.getElementById('totalGames').textContent = stats.totalGamesPlayed;
+        document.getElementById('bestTime').textContent = formatTime(stats.bestSurvivalTime);
+        document.getElementById('highScore').textContent = formatNumber(stats.highestScore);
+        document.getElementById('maxLevel').textContent = stats.highestLevel;
+        document.getElementById('totalPlayTime').textContent = formatTime(stats.totalSurvivalTime);
+        
+        // Update enemy kills
+        document.getElementById('basicKills').textContent = formatNumber(stats.enemiesKilled.basic);
+        document.getElementById('veteranKills').textContent = formatNumber(stats.enemiesKilled.veteran);
+        document.getElementById('eliteKills').textContent = formatNumber(stats.enemiesKilled.elite);
+        document.getElementById('bossKills').textContent = formatNumber(stats.enemiesKilled.boss);
+        document.getElementById('totalKills').textContent = formatNumber(stats.enemiesKilled.total);
+        
+        // Update damage statistics
+        document.getElementById('basicWeaponDamage').textContent = formatNumber(stats.damageDealt.basicWeapon);
+        document.getElementById('fireballDamage').textContent = formatNumber(stats.damageDealt.fireball);
+        document.getElementById('missilesDamage').textContent = formatNumber(stats.damageDealt.missiles);
+        document.getElementById('tremorsDamage').textContent = formatNumber(stats.damageDealt.tremors);
+        document.getElementById('chainLightningDamage').textContent = formatNumber(stats.damageDealt.chainLightning);
+        document.getElementById('earthquakeDamage').textContent = formatNumber(stats.damageDealt.earthquakeStormp);
+        document.getElementById('thunderStormDamage').textContent = formatNumber(stats.damageDealt.thunderStorm);
+        document.getElementById('tornadoDamage').textContent = formatNumber(stats.damageDealt.tornadoVortex);
+        document.getElementById('infernoDamage').textContent = formatNumber(stats.damageDealt.infernoWave);
+        document.getElementById('totalDamage').textContent = formatNumber(stats.damageDealt.total);
+        
+        // Update element mastery
+        const elements = ['fire', 'water', 'earth', 'air', 'lightning'];
+        elements.forEach(element => {
+            const maxLevel = stats.elementMastery[element].maxLevelReached;
+            document.getElementById(`${element}Mastery`).textContent = maxLevel;
+        });
+        
+        // Update current session stats (if in game)
+        if (this.gameState === 'playing' && this.sessionStats) {
+            document.getElementById('sessionTime').textContent = formatTime(this.sessionStats.survivalTime);
+            document.getElementById('sessionScore').textContent = formatNumber(this.sessionStats.score);
+            document.getElementById('sessionLevel').textContent = this.sessionStats.level;
+            document.getElementById('sessionKills').textContent = this.sessionStats.enemiesKilled.total;
+            document.getElementById('sessionXP').textContent = this.sessionStats.xpGained;
+            
+            // Update detailed damage breakdown for current session
+            document.getElementById('sessionBasicDamage').textContent = formatNumber(this.sessionStats.damageDealt.basicWeapon);
+            document.getElementById('sessionFireballDamage').textContent = formatNumber(this.sessionStats.damageDealt.fireball);
+            document.getElementById('sessionMissilesDamage').textContent = formatNumber(this.sessionStats.damageDealt.missiles);
+            document.getElementById('sessionTremorsDamage').textContent = formatNumber(this.sessionStats.damageDealt.tremors);
+            document.getElementById('sessionChainLightningDamage').textContent = formatNumber(this.sessionStats.damageDealt.chainLightning);
+            document.getElementById('sessionEarthquakeDamage').textContent = formatNumber(this.sessionStats.damageDealt.earthquakeStormp);
+            document.getElementById('sessionThunderStormDamage').textContent = formatNumber(this.sessionStats.damageDealt.thunderStorm);
+            document.getElementById('sessionTornadoDamage').textContent = formatNumber(this.sessionStats.damageDealt.tornadoVortex);
+            document.getElementById('sessionInfernoDamage').textContent = formatNumber(this.sessionStats.damageDealt.infernoWave);
+            document.getElementById('sessionTotalDamage').textContent = formatNumber(this.sessionStats.damageDealt.total);
+        } else {
+            // Reset session display when not playing
+            document.getElementById('sessionTime').textContent = '0:00';
+            document.getElementById('sessionScore').textContent = '0';
+            document.getElementById('sessionLevel').textContent = '1';
+            document.getElementById('sessionKills').textContent = '0';
+            document.getElementById('sessionXP').textContent = '0';
+            
+            // Reset detailed damage breakdown
+            document.getElementById('sessionBasicDamage').textContent = '0';
+            document.getElementById('sessionFireballDamage').textContent = '0';
+            document.getElementById('sessionMissilesDamage').textContent = '0';
+            document.getElementById('sessionTremorsDamage').textContent = '0';
+            document.getElementById('sessionChainLightningDamage').textContent = '0';
+            document.getElementById('sessionEarthquakeDamage').textContent = '0';
+            document.getElementById('sessionThunderStormDamage').textContent = '0';
+            document.getElementById('sessionTornadoDamage').textContent = '0';
+            document.getElementById('sessionInfernoDamage').textContent = '0';
+            document.getElementById('sessionTotalDamage').textContent = '0';
+        }
+    }
 }
 
 class Player {
@@ -520,6 +748,10 @@ class Player {
         this.maxInvulnerabilityTime = 3.0;
         this.lastDamageTime = 0;
         this.damageCooldown = 0.5; // 0.5 seconds between damage instances
+        
+        // Fireball system
+        this.fireballCooldown = 0;
+        this.lastFireballTime = 0;
     }
     
     update(keys, mousePos, deltaTime) {
@@ -550,6 +782,10 @@ class Player {
         this.y = Math.max(this.radius, Math.min(600 - this.radius, this.y));
         
         this.weapons.forEach(weapon => weapon.update(mousePos, deltaTime));
+        
+        if (this.specialAbilities.fireball) {
+            this.updateFireball();
+        }
         
         if (this.specialAbilities.radiusAttack) {
             this.updateRadiusAttack();
@@ -645,6 +881,7 @@ class Player {
     
     gainXP(amount) {
         this.xp += amount;
+        this.game.sessionStats.xpGained += amount;
         if (this.xp >= this.xpToNext) {
             this.levelUp();
         }
@@ -660,6 +897,53 @@ class Player {
         }
         
         this.game.upgradeSystem.showUpgradeMenu();
+    }
+    
+    updateFireball() {
+        // Calculate fireball cooldown based on fire mastery level
+        const fireLevel = this.upgradeCount.fire || 0;
+        let cooldown = 2.0; // Base 2 second cooldown
+        
+        if (fireLevel >= 4) {
+            // Levels 4-6 reduce cooldown: 2s -> 1.25s -> 1s -> 0.5s
+            const reduction = (fireLevel - 3) * 0.5; // 0.5s reduction per level after 3
+            cooldown = Math.max(0.5, cooldown - reduction);
+        }
+        
+        if (this.game.gameTime - this.lastFireballTime >= cooldown) {
+            // Find closest enemy in range
+            const fireballRange = 200; // Fireball range
+            let closestEnemy = null;
+            let closestDistance = fireballRange;
+            
+            this.game.enemies.forEach(enemy => {
+                const dx = enemy.x - this.x;
+                const dy = enemy.y - this.y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                
+                if (distance < closestDistance) {
+                    closestDistance = distance;
+                    closestEnemy = enemy;
+                }
+            });
+            
+            if (closestEnemy) {
+                // Fire fireball at closest enemy
+                const dx = closestEnemy.x - this.x;
+                const dy = closestEnemy.y - this.y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                const dirX = dx / distance;
+                const dirY = dy / distance;
+                
+                const damage = this.weapons[0] ? this.weapons[0].damage : 20; // Use base weapon damage
+                const range = 200; // Fireball range
+                
+                const fireball = new FireballProjectile(this.x, this.y, dirX, dirY, damage, range);
+                this.game.projectiles.push(fireball);
+                
+                this.lastFireballTime = this.game.gameTime;
+            }
+        }
     }
     
     updateRadiusAttack() {
@@ -681,6 +965,7 @@ class Player {
                 if (distance <= 80) {
                     const damage = 40 + (earthLevel >= 4 ? (earthLevel - 3) * 10 : 0); // Bonus damage at higher levels
                     enemy.takeDamage(damage);
+                    this.game.recordDamage('tremors', damage);
                     this.game.particles.push(new ExplosionParticle(enemy.x, enemy.y));
                 }
             });
@@ -714,6 +999,7 @@ class Player {
         if (bouncesLeft <= 0 || !startEnemy) return;
         
         startEnemy.takeDamage(damage);
+        this.game.recordDamage('chainLightning', damage);
         
         let fromX = this.x;
         let fromY = this.y;
@@ -784,6 +1070,10 @@ class Player {
         if (this.health <= 0) {
             this.game.gameOver = true;
             this.game.gameState = 'gameOver';
+            
+            // Update player profile with session stats
+            this.game.playerProfile.updateGameStats(this.game.sessionStats);
+            this.game.updateProfileUI();
         }
     }
     
@@ -843,7 +1133,9 @@ class Player {
             if (distance <= maxRadius) {
                 // Scale damage based on distance (more damage closer to epicenter)
                 const scaledDamage = damage * (1 - distance / maxRadius * 0.5);
-                enemy.takeDamage(Math.floor(scaledDamage));
+                const finalDamage = Math.floor(scaledDamage);
+                enemy.takeDamage(finalDamage);
+                this.game.recordDamage('earthquakeStormp', finalDamage);
                 
                 // Stun enemies briefly
                 enemy.stunned = true;
@@ -930,7 +1222,9 @@ class Player {
             if (distance <= strikeRadius) {
                 // Scale damage based on distance from strike center
                 const scaledDamage = damage * (1 - distance / strikeRadius * 0.3);
-                enemy.takeDamage(Math.floor(scaledDamage));
+                const finalDamage = Math.floor(scaledDamage);
+                enemy.takeDamage(finalDamage);
+                this.game.recordDamage('thunderStorm', finalDamage);
                 
                 // Brief paralysis effect
                 enemy.stunned = true;
@@ -1481,19 +1775,12 @@ class BasicWeapon {
             const dirX = dx / distance;
             const dirY = dy / distance;
             
-            if (this.owner.specialAbilities.fireball) {
-                this.owner.game.projectiles.push(new FireballProjectile(
-                    this.owner.x, this.owner.y,
-                    dirX, dirY,
-                    this.damage, this.range
-                ));
-            } else {
-                this.owner.game.projectiles.push(new Projectile(
-                    this.owner.x, this.owner.y,
-                    dirX, dirY,
-                    this.damage, this.range
-                ));
-            }
+            // Basic weapon always fires regular projectiles now (fireball is separate)
+            this.owner.game.projectiles.push(new Projectile(
+                this.owner.x, this.owner.y,
+                dirX, dirY,
+                this.damage, this.range
+            ));
             
             if (this.owner.specialAbilities.missiles) {
                 const angle1 = Math.atan2(dirY, dirX) + 0.3;
@@ -1710,7 +1997,7 @@ class FireballProjectile extends Projectile {
     }
     
     createInfernoWave(game, centerX, centerY, damage) {
-        const infernoRadius = 40;
+        const infernoRadius = 200; // 1/4th screen size (800/4)
         
         game.enemies.forEach(enemy => {
             const dx = enemy.x - centerX;
@@ -1719,6 +2006,7 @@ class FireballProjectile extends Projectile {
             
             if (distance <= infernoRadius && distance > 5) { // Avoid hitting the same enemy twice
                 enemy.takeDamage(damage);
+                game.recordDamage('infernoWave', damage);
                 
                 // Add DOT to secondary explosion targets too
                 const fireLevel = game.player.upgradeCount.fire || 0;
@@ -2136,6 +2424,7 @@ class Tornado {
             
             if (distance <= this.radius) {
                 enemy.takeDamage(this.damage);
+                this.game.recordDamage('tornadoVortex', this.damage);
                 // Create small wind particles on hit
                 this.game.particles.push(new WindParticle(enemy.x, enemy.y));
             }
@@ -2620,6 +2909,173 @@ class SummonRing {
     }
 }
 
+// Player Profile and Statistics System
+class PlayerProfile {
+    constructor() {
+        this.version = 1;
+        this.statistics = {
+            // Game Stats
+            totalGamesPlayed: 0,
+            bestSurvivalTime: 0,
+            highestScore: 0,
+            highestLevel: 0,
+            totalSurvivalTime: 0,
+            
+            // Enemy Kill Stats
+            enemiesKilled: {
+                basic: 0,
+                veteran: 0,
+                elite: 0,
+                boss: 0,
+                total: 0
+            },
+            
+            // Damage Stats by Attack Type
+            damageDealt: {
+                basicWeapon: 0,
+                fireball: 0,
+                tremors: 0,
+                earthquakeStormp: 0,
+                chainLightning: 0,
+                thunderStorm: 0,
+                missiles: 0,
+                tornadoVortex: 0,
+                infernoWave: 0,
+                total: 0
+            },
+            
+            // Element Mastery Stats
+            elementMastery: {
+                fire: { timesChosen: 0, maxLevelReached: 0 },
+                water: { timesChosen: 0, maxLevelReached: 0 },
+                earth: { timesChosen: 0, maxLevelReached: 0 },
+                air: { timesChosen: 0, maxLevelReached: 0 },
+                lightning: { timesChosen: 0, maxLevelReached: 0 }
+            },
+            
+            // Progression Stats
+            totalXPGained: 0,
+            totalUpgradesChosen: 0,
+            
+            // Diamond Economy (future)
+            totalDiamondsEarned: 0,
+            totalDiamondsSpent: 0
+        };
+        
+        this.preferences = {
+            favoriteElement: null,
+            preferredPlayStyle: null // 'aggressive', 'defensive', 'balanced'
+        };
+        
+        this.load();
+    }
+    
+    // Load profile from localStorage
+    load() {
+        try {
+            const saved = localStorage.getItem('elemental-fury-profile');
+            if (saved) {
+                const data = JSON.parse(saved);
+                if (data.version === this.version) {
+                    // Merge saved data, keeping structure but updating with saved values
+                    this.mergeDeep(this.statistics, data.statistics || {});
+                    this.mergeDeep(this.preferences, data.preferences || {});
+                } else {
+                    // Handle version migration in the future
+                    console.log('Profile version mismatch, keeping defaults');
+                }
+            }
+        } catch (error) {
+            console.error('Failed to load player profile:', error);
+        }
+    }
+    
+    // Save profile to localStorage
+    save() {
+        try {
+            const data = {
+                version: this.version,
+                statistics: this.statistics,
+                preferences: this.preferences,
+                lastSaved: new Date().toISOString()
+            };
+            localStorage.setItem('elemental-fury-profile', JSON.stringify(data));
+        } catch (error) {
+            console.error('Failed to save player profile:', error);
+        }
+    }
+    
+    // Deep merge utility for loading saved data
+    mergeDeep(target, source) {
+        for (const key in source) {
+            if (source[key] && typeof source[key] === 'object' && !Array.isArray(source[key])) {
+                if (!target[key]) target[key] = {};
+                this.mergeDeep(target[key], source[key]);
+            } else {
+                target[key] = source[key];
+            }
+        }
+    }
+    
+    // Update stats when game ends
+    updateGameStats(sessionStats) {
+        this.statistics.totalGamesPlayed++;
+        this.statistics.totalSurvivalTime += sessionStats.survivalTime;
+        this.statistics.totalXPGained += sessionStats.xpGained;
+        this.statistics.totalUpgradesChosen += sessionStats.upgradesChosen;
+        
+        // Update bests
+        if (sessionStats.survivalTime > this.statistics.bestSurvivalTime) {
+            this.statistics.bestSurvivalTime = sessionStats.survivalTime;
+        }
+        if (sessionStats.score > this.statistics.highestScore) {
+            this.statistics.highestScore = sessionStats.score;
+        }
+        if (sessionStats.level > this.statistics.highestLevel) {
+            this.statistics.highestLevel = sessionStats.level;
+        }
+        
+        // Update enemy kills
+        for (const enemyType in sessionStats.enemiesKilled) {
+            this.statistics.enemiesKilled[enemyType] += sessionStats.enemiesKilled[enemyType];
+        }
+        
+        // Update damage dealt
+        for (const attackType in sessionStats.damageDealt) {
+            this.statistics.damageDealt[attackType] += sessionStats.damageDealt[attackType];
+        }
+        
+        // Update element mastery stats
+        for (const element in sessionStats.elementLevels) {
+            const level = sessionStats.elementLevels[element];
+            if (level > 0) {
+                this.statistics.elementMastery[element].timesChosen++;
+                if (level > this.statistics.elementMastery[element].maxLevelReached) {
+                    this.statistics.elementMastery[element].maxLevelReached = level;
+                }
+            }
+        }
+        
+        this.save();
+    }
+    
+    // Calculate diamond earnings based on performance
+    calculateDiamondReward(sessionStats) {
+        let diamonds = 0;
+        
+        // Base survival time reward (1 diamond per 30 seconds)
+        diamonds += Math.floor(sessionStats.survivalTime / 30);
+        
+        // Score bonus (1 diamond per 1000 points)
+        diamonds += Math.floor(sessionStats.score / 1000);
+        
+        // Boss kill bonuses
+        diamonds += sessionStats.enemiesKilled.boss * 2;
+        
+        return diamonds;
+    }
+}
+
 class WaveManager {
     constructor() {
         this.enemySpawnRate = 1;
@@ -2805,7 +3261,7 @@ class UpgradeSystem {
             } else if (upgrade.type === 'earth' && count >= 3) {
                 desc = 'Tremor Fury: Faster Tremors + Bonus Damage';
             } else if (upgrade.type === 'fire' && count >= 3) {
-                desc = 'Burning Mastery: Enhanced DOT Effects';
+                desc = 'Fireball Mastery: Faster Auto-Fireballs';
             } else if (upgrade.type === 'lightning' && count >= 3) {
                 desc = 'Chain Lightning: +1 Bounce Count';
             } else if (upgrade.type === 'air' && count >= 3) {
@@ -2830,6 +3286,7 @@ class UpgradeSystem {
     
     selectUpgrade(upgrade) {
         upgrade.effect();
+        this.game.sessionStats.upgradesChosen++;
         this.upgradeMenu.style.display = 'none';
         this.game.isPaused = false;
     }

@@ -47,6 +47,14 @@
             align-items: center;
         }
         
+        #rightPanel {
+            width: 280px;
+            background: #111;
+            border-left: 2px solid #333;
+            padding: 20px;
+            overflow-y: auto;
+        }
+        
         #gameCanvas {
             border: 2px solid #333;
             background: #111;
@@ -286,6 +294,132 @@
             0%, 50% { opacity: 1; }
             51%, 100% { opacity: 0.3; }
         }
+        
+        /* Player Profile Styles */
+        .profile-section {
+            margin-bottom: 25px;
+            background: rgba(255, 255, 255, 0.03);
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #333;
+        }
+        
+        .profile-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #ffff00;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .profile-subtitle {
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: #00aaff;
+            border-bottom: 1px solid #333;
+            padding-bottom: 4px;
+        }
+        
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 6px 0;
+            font-size: 13px;
+        }
+        
+        .stat-label {
+            color: #ccc;
+            flex: 1;
+        }
+        
+        .stat-value {
+            color: #fff;
+            font-weight: bold;
+            text-align: right;
+            min-width: 60px;
+        }
+        
+        .best-stat {
+            color: #00ff88;
+        }
+        
+        .damage-stat {
+            color: #ff6644;
+        }
+        
+        .kill-stat {
+            color: #ffaa44;
+        }
+        
+        .element-mastery-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-top: 8px;
+        }
+        
+        .element-mastery-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+        }
+        
+        .element-mastery-icon {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+        
+        .mastery-text {
+            color: #aaa;
+            flex: 1;
+        }
+        
+        .mastery-level {
+            color: #fff;
+            font-weight: bold;
+        }
+        
+        .diamond-display {
+            background: linear-gradient(45deg, #4169E1, #87CEEB);
+            padding: 10px;
+            border-radius: 6px;
+            text-align: center;
+            margin-bottom: 15px;
+            border: 1px solid #555;
+        }
+        
+        .diamond-amount {
+            font-size: 20px;
+            font-weight: bold;
+            color: #fff;
+        }
+        
+        .diamond-label {
+            font-size: 12px;
+            color: #ddd;
+            margin-top: 2px;
+        }
+        
+        .session-highlight {
+            background: rgba(255, 255, 0, 0.1);
+            border: 1px solid rgba(255, 255, 0, 0.3);
+            border-radius: 4px;
+            padding: 8px;
+            margin-top: 10px;
+        }
+        
+        .session-title {
+            font-size: 13px;
+            color: #ffff00;
+            font-weight: bold;
+            margin-bottom: 6px;
+        }
     </style>
 </head>
 <body>
@@ -422,11 +556,47 @@
                 </div>
                 
                 <div class="game-info" id="finalStats" style="display: none;">
-                    <div class="info-title">📊 Final Stats</div>
+                    <div class="info-title">📊 Game Over - Final Stats</div>
                     <div class="info-text">
-                        <div>Time Survived: <span id="finalTime">0:00</span></div>
-                        <div>Final Score: <span id="finalScore">0</span></div>
-                        <div>Final Level: <span id="finalLevel">1</span></div>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 10px;">
+                            <!-- Basic Stats Column -->
+                            <div>
+                                <div style="font-weight: bold; color: #ffff00; margin-bottom: 8px;">⏱️ Performance</div>
+                                <div>Time: <span id="finalTime">0:00</span></div>
+                                <div>Score: <span id="finalScore">0</span></div>
+                                <div>Level: <span id="finalLevel">1</span></div>
+                                <div>XP Gained: <span id="finalXP">0</span></div>
+                                
+                                <div style="font-weight: bold; color: #ffaa44; margin: 12px 0 8px 0;">⚔️ Combat</div>
+                                <div>Enemies Killed: <span id="finalKills">0</span></div>
+                                <div>Total Damage: <span id="finalTotalDamage">0</span></div>
+                            </div>
+                            
+                            <!-- Damage Breakdown Column -->
+                            <div>
+                                <div style="font-weight: bold; color: #ff6644; margin-bottom: 8px;">💥 Damage Sources</div>
+                                <div style="font-size: 13px; line-height: 1.4;">
+                                    <div>Basic Weapon: <span id="finalBasicDamage">0</span></div>
+                                    <div>Fireballs: <span id="finalFireballDamage">0</span></div>
+                                    <div>Missiles: <span id="finalMissilesDamage">0</span></div>
+                                    <div>Tremors: <span id="finalTremorsDamage">0</span></div>
+                                    <div>Chain Lightning: <span id="finalChainLightningDamage">0</span></div>
+                                    <div>Earthquake: <span id="finalEarthquakeDamage">0</span></div>
+                                    <div>Thunder Storm: <span id="finalThunderStormDamage">0</span></div>
+                                    <div>Tornado: <span id="finalTornadoDamage">0</span></div>
+                                    <div>Inferno Wave: <span id="finalInfernoDamage">0</span></div>
+                                </div>
+                                
+                                <div style="font-weight: bold; color: #00aaff; margin: 12px 0 8px 0;">🔥 Elements Used</div>
+                                <div style="font-size: 13px;" id="finalElementsUsed">
+                                    <!-- Dynamically populated with elements used -->
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div style="margin-top: 15px; padding-top: 10px; border-top: 1px solid #333; text-align: center; color: #00ff88;">
+                            <strong>💎 Diamonds Earned: <span id="finalDiamondsEarned">0</span></strong>
+                        </div>
                     </div>
                 </div>
                 
@@ -436,6 +606,218 @@
             <div id="upgradeMenu">
                 <h3>Level Up! Choose an upgrade:</h3>
                 <div id="upgradeOptions"></div>
+            </div>
+        </div>
+        
+        <div id="rightPanel">
+            <h2>Player Profile</h2>
+            
+            <!-- Diamond Display -->
+            <div class="diamond-display">
+                <div class="diamond-amount">💎 <span id="totalDiamonds">0</span></div>
+                <div class="diamond-label">Total Diamonds</div>
+            </div>
+            
+            <!-- Current Session -->
+            <div class="profile-section">
+                <div class="profile-title">🎮 Current Session</div>
+                <div class="session-highlight">
+                    <div class="session-title">This Game</div>
+                    <div class="stat-row">
+                        <span class="stat-label">Time:</span>
+                        <span class="stat-value" id="sessionTime">0:00</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Score:</span>
+                        <span class="stat-value" id="sessionScore">0</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Level:</span>
+                        <span class="stat-value" id="sessionLevel">1</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Kills:</span>
+                        <span class="stat-value kill-stat" id="sessionKills">0</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">XP Gained:</span>
+                        <span class="stat-value" id="sessionXP">0</span>
+                    </div>
+                    
+                    <div class="profile-subtitle" style="margin-top: 10px;">Damage This Game</div>
+                    <div class="stat-row">
+                        <span class="stat-label">Basic Weapon:</span>
+                        <span class="stat-value damage-stat" id="sessionBasicDamage">0</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Fireballs:</span>
+                        <span class="stat-value damage-stat" id="sessionFireballDamage">0</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Missiles:</span>
+                        <span class="stat-value damage-stat" id="sessionMissilesDamage">0</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Tremors:</span>
+                        <span class="stat-value damage-stat" id="sessionTremorsDamage">0</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Chain Lightning:</span>
+                        <span class="stat-value damage-stat" id="sessionChainLightningDamage">0</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Earthquake:</span>
+                        <span class="stat-value damage-stat" id="sessionEarthquakeDamage">0</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Thunder Storm:</span>
+                        <span class="stat-value damage-stat" id="sessionThunderStormDamage">0</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Tornado:</span>
+                        <span class="stat-value damage-stat" id="sessionTornadoDamage">0</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Inferno Wave:</span>
+                        <span class="stat-value damage-stat" id="sessionInfernoDamage">0</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Total Damage:</span>
+                        <span class="stat-value damage-stat" id="sessionTotalDamage">0</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Game Statistics -->
+            <div class="profile-section">
+                <div class="profile-title">📊 Game Statistics</div>
+                <div class="stat-row">
+                    <span class="stat-label">Games Played:</span>
+                    <span class="stat-value" id="totalGames">0</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">Best Time:</span>
+                    <span class="stat-value best-stat" id="bestTime">0:00</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">High Score:</span>
+                    <span class="stat-value best-stat" id="highScore">0</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">Max Level:</span>
+                    <span class="stat-value best-stat" id="maxLevel">1</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">Total Play Time:</span>
+                    <span class="stat-value" id="totalPlayTime">0:00</span>
+                </div>
+            </div>
+            
+            <!-- Enemy Kills -->
+            <div class="profile-section">
+                <div class="profile-title">⚔️ Enemy Kills</div>
+                <div class="stat-row">
+                    <span class="stat-label">Basic Enemies:</span>
+                    <span class="stat-value kill-stat" id="basicKills">0</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">Veteran Enemies:</span>
+                    <span class="stat-value kill-stat" id="veteranKills">0</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">Elite Enemies:</span>
+                    <span class="stat-value kill-stat" id="eliteKills">0</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">Boss Enemies:</span>
+                    <span class="stat-value kill-stat" id="bossKills">0</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">Total Kills:</span>
+                    <span class="stat-value kill-stat" id="totalKills">0</span>
+                </div>
+            </div>
+            
+            <!-- Damage Statistics -->
+            <div class="profile-section">
+                <div class="profile-title">⚡ Damage Dealt</div>
+                <div class="profile-subtitle">Weapon Damage</div>
+                <div class="stat-row">
+                    <span class="stat-label">Basic Weapon:</span>
+                    <span class="stat-value damage-stat" id="basicWeaponDamage">0</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">Fireballs:</span>
+                    <span class="stat-value damage-stat" id="fireballDamage">0</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">Missiles:</span>
+                    <span class="stat-value damage-stat" id="missilesDamage">0</span>
+                </div>
+                
+                <div class="profile-subtitle">Special Abilities</div>
+                <div class="stat-row">
+                    <span class="stat-label">Tremors:</span>
+                    <span class="stat-value damage-stat" id="tremorsDamage">0</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">Chain Lightning:</span>
+                    <span class="stat-value damage-stat" id="chainLightningDamage">0</span>
+                </div>
+                
+                <div class="profile-subtitle">Ultimate Powers</div>
+                <div class="stat-row">
+                    <span class="stat-label">Earthquake:</span>
+                    <span class="stat-value damage-stat" id="earthquakeDamage">0</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">Thunder Storm:</span>
+                    <span class="stat-value damage-stat" id="thunderStormDamage">0</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">Tornado Vortex:</span>
+                    <span class="stat-value damage-stat" id="tornadoDamage">0</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">Inferno Wave:</span>
+                    <span class="stat-value damage-stat" id="infernoDamage">0</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">Total Damage:</span>
+                    <span class="stat-value damage-stat" id="totalDamage">0</span>
+                </div>
+            </div>
+            
+            <!-- Element Mastery -->
+            <div class="profile-section">
+                <div class="profile-title">🔥 Element Mastery</div>
+                <div class="element-mastery-grid">
+                    <div class="element-mastery-item">
+                        <div class="element-mastery-icon fire"></div>
+                        <div class="mastery-text">Fire</div>
+                        <div class="mastery-level" id="fireMastery">0</div>
+                    </div>
+                    <div class="element-mastery-item">
+                        <div class="element-mastery-icon water"></div>
+                        <div class="mastery-text">Water</div>
+                        <div class="mastery-level" id="waterMastery">0</div>
+                    </div>
+                    <div class="element-mastery-item">
+                        <div class="element-mastery-icon earth"></div>
+                        <div class="mastery-text">Earth</div>
+                        <div class="mastery-level" id="earthMastery">0</div>
+                    </div>
+                    <div class="element-mastery-item">
+                        <div class="element-mastery-icon air"></div>
+                        <div class="mastery-text">Air</div>
+                        <div class="mastery-level" id="airMastery">0</div>
+                    </div>
+                    <div class="element-mastery-item">
+                        <div class="element-mastery-icon lightning"></div>
+                        <div class="mastery-text">Lightning</div>
+                        <div class="mastery-level" id="lightningMastery">0</div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
