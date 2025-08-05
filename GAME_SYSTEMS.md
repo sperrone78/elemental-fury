@@ -1,6 +1,6 @@
 # Elemental Fury - Game Systems & Variables
 
-*Last Updated: August 4, 2025 - Version 2.6.0*
+*Last Updated: August 5, 2025 - Version 2.7.0*
 
 ## Table of Contents
 1. [Player Systems](#player-systems)
@@ -89,20 +89,40 @@ Level 6: Freezing Touch Ultimate
 
 ### Earth Mastery (6 Levels)
 ```javascript
-// Tremors (Radius Attack)
+// Armor System (Damage Reduction)
+Level 1-3: +5 armor per level (15 total)
+Level 4-6: +3 armor per level (24 total max)
+
+// Tremors (Radius Attack) - Unlocked Level 3+
 baseDamage: 40
 range: 80px
-cooldown: Variable by level
+cooldown: 3s → 2.5s → 2s → 1.5s (faster per level)
 Level 4+: +10 damage per level above 3
 Level 6: Earthquake Stomp Ultimate
+  - Radius: 150px
+  - Damage: 100
+  - Cooldown: 8 seconds
+  - Effect: Stuns enemies for 1.5 seconds
 ```
 
 ### Air Mastery (6 Levels)
 ```javascript
-// Twin Missiles
+// Weapon Range Bonus
+Level 1-3: +25% weapon range per level (up to +75%)
+
+// Twin Missiles - Unlocked Level 3+
 baseProjectiles: 2 additional missiles
 angle: ±0.3 radians from main direction
-Level 6: Tornado Vortex Ultimate
+Level 4-6: +20% projectile speed per level
+
+// Tornado Vortex Ultimate - Level 6
+cooldown: 2.5 seconds
+damage: 45 per hit
+damageInterval: 0.3 seconds
+tornadoDuration: 12 seconds
+tornadoRadius: 35px
+movementSpeed: Random (vx/vy ±1 units)
+effect: Moving tornadoes with high damage output
 ```
 
 ### Lightning Mastery (6 Levels)
@@ -131,6 +151,7 @@ xpDrop: 5
 health: 120 (+100% from basic)
 speed: 1.2
 radius: 12
+armor: 5 (damage reduction)
 scoreReward: 25
 xpDrop: 15
 spawnChance: 8% per level after 10 (max 80%)
@@ -139,29 +160,40 @@ spawnChance: 8% per level after 10 (max 80%)
 health: 250 (+108% from veteran)  
 speed: 1.5
 radius: 14
+armor: 5 (damage reduction)
 scoreReward: 50
 xpDrop: 25
 spawnChance: 2% per level after 20 (max 50%)
 
 // Boss Enemies
 BasicBoss: { health: 200, xpDrop: 5, scoreReward: 100 }
-VeteranBoss: { health: 500, xpDrop: 8, scoreReward: 250 }
-EliteBoss: { health: 1000, xpDrop: 12, scoreReward: 500 }
+VeteranBoss: { health: 300, xpDrop: 8, scoreReward: 250 }
+EliteBoss: { health: 400, xpDrop: 12, scoreReward: 500 }
 ```
 
 ### Spawn System
 ```javascript
 // Wave Manager
 baseSpawnInterval: 2 seconds
-spawnRateIncrease: 15% per player level
+levelScaling: 25% faster per level
+timeScaling: 10% faster per minute of gameplay
+combinedScaling: levelScaling × timeScaling
+minimumInterval: 0.1 seconds (prevents instant spawning)
 maxConcurrentEnemies: No hard limit
-spawnLocations: 4 sides of screen (random)
+spawnLocations: 4 sides of screen (random, inside visible frame)
 ```
 
 ### Boss Spawn Conditions
-- **Time-based**: Every 60 seconds
-- **Kill-based**: Every 50 kills
-- **Boss Type**: Determined by player level and RNG
+**Guaranteed Level-Based Spawns:**
+- **Levels 5 & 10**: Basic Boss (200 HP)
+- **Levels 15 & 20**: Veteran Boss (300 HP)
+- **Levels 25 & 30**: Elite Boss (400 HP + 10 armor)
+
+**Random Time-Based Spawns:**
+- **Levels 10-19**: Basic Boss every 15 seconds
+- **Levels 20-29**: Basic + Veteran Boss every 12 seconds  
+- **Level 30+**: All Boss types every 10 seconds
+- **Boss Type**: RNG weighted by level (Basic 40-60%, Veteran 30-40%, Elite 10-30%)
 
 ---
 
@@ -242,8 +274,9 @@ spawnRateIncrease: 15% per level
 
 // Power Scaling
 elementDamageScaling: Linear per level
-bossHealthScaling: 200 → 500 → 1000
+bossHealthScaling: 200 → 300 → 400
 diamondEconomy: Balanced for ~10-60 diamonds per game
+enemyArmorScaling: 0 → 5 → 5 → 10 (basic → veteran → elite → elite boss)
 ```
 
 ### Statistical Tracking
