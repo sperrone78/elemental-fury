@@ -83,8 +83,20 @@ Level 6: Inferno Wave Ultimate
 
 ### Water Mastery (6 Levels)
 ```javascript
-Level 1-3: Basic effects
+// Water Globes - Orbital Attack System
+Level 1-5: +1 globe per level (max 5 globes)
+globeRadius: 5px
+orbitRadius: 45px
+damage: 15 per globe
+rotationSpeed: 0.02 radians per frame
+particleEffects: Blue splash on impact
+
+// Health Bonus
+Level 1-5: +10% health per level (multiplicative)
+Level 7-10: Additional +10% health per level
+
 Level 6: Freezing Touch Ultimate
+Level 10+: Fusion ultimates available
 ```
 
 ### Earth Mastery (6 Levels)
@@ -93,11 +105,14 @@ Level 6: Freezing Touch Ultimate
 Level 1-3: +5 armor per level (15 total)
 Level 4-6: +3 armor per level (24 total max)
 
-// Tremors (Radius Attack) - Unlocked Level 3+
-baseDamage: 40
-range: 80px
-cooldown: 3s → 2.5s → 2s → 1.5s (faster per level)
-Level 4+: +10 damage per level above 3
+// Tremors (Ongoing AOE Field) - Unlocked Level 1+
+baseDamage: 18 per pulse
+pulseInterval: 0.5 seconds (ongoing damage)
+baseRange: 80px
+rangeScaling: +20px per level (levels 2-5): 80→100→120→140→160px
+levelScaling: +2 damage per level above 1
+visualEffects: Faint dashed range indicator, screen shake, earth particles
+
 Level 6: Earthquake Stomp Ultimate
   - Radius: 150px
   - Damage: 100
@@ -108,12 +123,20 @@ Level 6: Earthquake Stomp Ultimate
 ### Air Mastery (6 Levels)
 ```javascript
 // Weapon Range Bonus
-Level 1-3: +25% weapon range per level (up to +75%)
+Level 1-5: +10% weapon range per level
 
-// Twin Missiles - Unlocked Level 3+
-baseProjectiles: 2 additional missiles
-angle: ±0.3 radians from main direction
-Level 4-6: +20% projectile speed per level
+// Directional Missiles - Progressive 360° Coverage
+Level 1: 1 missile at 45° (northeast)
+Level 2: 2 missiles at 45°, 315° (northeast, southeast)
+Level 3: 3 missiles add 180° (west)
+Level 4: 4 missiles add 90° (north)
+Level 5: 5 missiles add 270° (south) - full coverage
+
+// Missile Specs
+damage: 70% of base weapon damage
+speed: 10 units/frame
+visualDesign: Realistic rocket with nose, body, fins, exhaust
+rotationalRendering: Points in travel direction
 
 // Tornado Vortex Ultimate - Level 6
 cooldown: 2.5 seconds
@@ -127,11 +150,20 @@ effect: Moving tornadoes with high damage output
 
 ### Lightning Mastery (6 Levels)
 ```javascript
-// Chain Lightning
-baseDamage: Variable
-maxBounces: Scales with level
-range: 120px between targets
+// Chain Lightning - Enhanced Range System
+baseDamage: 30 (scales with weapon damage)
+baseChains: 3 initial chains
+bonusChains: +1 per Lightning mastery level
+damageReduction: 80% of previous chain damage
+chainDelay: 0.1 seconds between hops
+
+// Range System
+initialStrikeRange: 150px from player
+chainHopRange: 200px between targets (enhanced - 1/4 map width)
+cooldown: 2 seconds
+
 Level 6: Thunder Storm Ultimate
+Level 7-10: Enhanced storm radius and duration
 ```
 
 ---
@@ -284,7 +316,7 @@ enemyArmorScaling: 0 → 5 → 5 → 10 (basic → veteran → elite → elite b
 // Session Stats (per game)
 survivalTime, score, level, xpGained
 enemiesKilled: { basic, veteran, elite, boss, total }
-damageDealt: { basicWeapon, fireball, missiles, tremors, 
+damageDealt: { basicWeapon, fireball, waterGlobe, missiles, tremors, 
                chainLightning, earthquakeStormp, thunderStorm, 
                tornadoVortex, infernoWave, total }
 elementLevels: { fire, water, earth, air, lightning }
@@ -342,4 +374,34 @@ gameState: 'waiting' | 'playing' | 'gameOver' | 'shop'
 
 ---
 
-*This document reflects the current state of Elemental Fury v2.6.0. All values are subject to balance adjustments based on player feedback and testing.*
+## Recent Updates (August 5, 2025)
+
+### ✅ Water Globes Implementation
+- **NEW**: Orbital water globes that circle around the player
+- **Scaling**: 1 globe at level 1, +1 per level (max 5 at level 5)
+- **Mechanics**: 5px radius globes at 45px orbit, 15 damage per hit
+- **Visual**: Blue orbs with splash particle effects on impact
+- **Stats**: Added to damage tracking across all UI sections
+
+### ✅ Air Missiles Redesign
+- **NEW**: Progressive directional missile system
+- **Scaling**: 1-5 missiles at specific angles (45°, 315°, 180°, 90°, 270°)
+- **Visual**: Realistic rocket graphics with directional rendering
+- **Mechanics**: Each missile deals 70% weapon damage
+- **Strategy**: Evolves from focused fire to full 360° coverage
+
+### ✅ Chain Lightning Enhancement
+- **Enhanced**: Chain hop range increased from 100px to 200px
+- **Impact**: Much better enemy-to-enemy chaining across battlefield
+- **Range**: Now covers 1/4 of map width for each hop
+- **Effectiveness**: Dramatically improved chain reactions at all levels
+
+### ✅ UI and Balance Improvements
+- **Fixed**: All damage displays show whole numbers (no decimals)
+- **Updated**: Ability descriptions match actual gameplay mechanics
+- **Enhanced**: Initial level descriptions are simple and clear
+- **Tracking**: Water Globe damage added to all statistics displays
+
+---
+
+*This document reflects the current state of Elemental Fury v2.7.0. All values are subject to balance adjustments based on player feedback and testing.*

@@ -29,6 +29,9 @@ class Game {
         this.targetFPS = 60;
         this.fixedTimeStep = 1 / this.targetFPS;
         
+        // Screen shake for visual effects
+        this.screenShake = 0;
+        
         this.waveManager = new WaveManager();
         this.upgradeSystem = new UpgradeSystem();
         this.upgradeSystem.game = this;
@@ -46,12 +49,14 @@ class Game {
     }
     
     startGame() {
-        console.log('Starting game...');
         this.gameState = 'playing';
         this.gameOver = false;
         this.player = new Player(this.width / 2, this.height / 2);
         this.player.game = this;
         this.player.weapons = [new BasicWeapon(this.player)];
+        
+        // Load equipped mastery rings from profile
+        this.player.masteryRings = [...this.playerProfile.masteryRings.equipped];
         this.gameTime = 0;
         this.score = 0;
         this.enemies = [];
@@ -106,6 +111,7 @@ class Game {
             damageDealt: {
                 basicWeapon: 0,
                 fireball: 0,
+                waterGlobe: 0,
                 tremors: 0,
                 earthquakeStormp: 0,
                 chainLightning: 0,
@@ -128,8 +134,9 @@ class Game {
     // Track damage dealt by attack type
     recordDamage(attackType, damage) {
         if (this.sessionStats.damageDealt[attackType] !== undefined) {
-            this.sessionStats.damageDealt[attackType] += damage;
-            this.sessionStats.damageDealt.total += damage;
+            const roundedDamage = Math.floor(damage);
+            this.sessionStats.damageDealt[attackType] += roundedDamage;
+            this.sessionStats.damageDealt.total += roundedDamage;
         }
     }
     
@@ -202,6 +209,19 @@ class Game {
                 }
             });
         }
+        
+        // Mastery Ring purchase buttons
+        const elements = ['fire', 'water', 'earth', 'air', 'lightning'];
+        elements.forEach(element => {
+            const buyBtn = document.getElementById(`buy${element.charAt(0).toUpperCase() + element.slice(1)}Ring`);
+            if (buyBtn) {
+                buyBtn.addEventListener('click', () => {
+                    if (this.gameState === 'shop') {
+                        this.purchaseMasteryRing(element);
+                    }
+                });
+            }
+        });
     }
     
     gameLoop(currentTime = 0) {
@@ -324,21 +344,40 @@ class Game {
             this.sessionStats.elementLevels[element] = this.player.upgradeCount[element];
         }
         
+        // Update screen shake (decay over time)
+        if (this.screenShake > 0) {
+            this.screenShake = Math.max(0, this.screenShake - this.deltaTime * 15); // Decay shake over time
+        }
+        
         this.updateUI();
         this.updateCurrentSessionDisplay(); // Update current session stats during gameplay
     }
     
     render() {
+        // Clear background
         this.ctx.fillStyle = '#111';
         this.ctx.fillRect(0, 0, this.width, this.height);
         
         if (this.gameState === 'playing' && this.player) {
+            // Apply screen shake if active
+            if (this.screenShake > 0) {
+                this.ctx.save();
+                const shakeX = (Math.random() - 0.5) * this.screenShake;
+                const shakeY = (Math.random() - 0.5) * this.screenShake;
+                this.ctx.translate(shakeX, shakeY);
+            }
+            
             this.player.render(this.ctx);
             this.enemies.forEach(enemy => enemy.render(this.ctx));
             this.projectiles.forEach(projectile => projectile.render(this.ctx));
             this.enemyProjectiles.forEach(projectile => projectile.render(this.ctx));
             this.particles.forEach(particle => particle.render(this.ctx));
             this.pickups.forEach(pickup => pickup.render(this.ctx));
+            
+            // Restore context if screen shake was applied
+            if (this.screenShake > 0) {
+                this.ctx.restore();
+            }
         } else if (this.gameState === 'waiting' || this.gameState === 'gameOver') {
             // Show start widget
             document.getElementById('startWidget').style.display = 'block';
@@ -398,6 +437,7 @@ class Game {
                     if (this.sessionStats) {
                         document.getElementById('finalBasicDamage').textContent = formatNumber(this.sessionStats.damageDealt.basicWeapon);
                         document.getElementById('finalFireballDamage').textContent = formatNumber(this.sessionStats.damageDealt.fireball);
+                        document.getElementById('finalWaterGlobeDamage').textContent = formatNumber(this.sessionStats.damageDealt.waterGlobe);
                         document.getElementById('finalMissilesDamage').textContent = formatNumber(this.sessionStats.damageDealt.missiles);
                         document.getElementById('finalTremorsDamage').textContent = formatNumber(this.sessionStats.damageDealt.tremors);
                         document.getElementById('finalChainLightningDamage').textContent = formatNumber(this.sessionStats.damageDealt.chainLightning);
@@ -665,15 +705,15 @@ class Game {
         if (this.gameState !== 'playing' || !this.player) return;
         
         // Update health display and bar
-        document.getElementById('health').textContent = this.player.health;
-        document.getElementById('maxHealth').textContent = this.player.maxHealth;
+        document.getElementById('health').textContent = Math.floor(this.player.health);
+        document.getElementById('maxHealth').textContent = Math.floor(this.player.maxHealth);
         const healthPercent = (this.player.health / this.player.maxHealth) * 100;
         document.getElementById('health-bar').style.width = `${Math.max(0, healthPercent)}%`;
         
         // Update XP display and bar
         document.getElementById('level').textContent = this.player.level;
-        document.getElementById('xp').textContent = this.player.xp;
-        document.getElementById('xpNext').textContent = this.player.xpToNext;
+        document.getElementById('xp').textContent = Math.floor(this.player.xp);
+        document.getElementById('xpNext').textContent = Math.floor(this.player.xpToNext);
         const xpPercent = (this.player.xp / this.player.xpToNext) * 100;
         document.getElementById('xp-bar').style.width = `${xpPercent}%`;
         
@@ -693,7 +733,7 @@ class Game {
         
         elements.forEach(element => {
             const count = this.player.upgradeCount[element] || 0;
-            const percentage = (count / 6) * 100;
+            const percentage = (count / 10) * 100;
             
             document.getElementById(`${element}-level`).textContent = count;
             document.getElementById(`${element}-progress`).style.width = `${percentage}%`;
@@ -752,6 +792,7 @@ class Game {
         // Update damage statistics
         document.getElementById('basicWeaponDamage').textContent = formatNumber(stats.damageDealt.basicWeapon);
         document.getElementById('fireballDamage').textContent = formatNumber(stats.damageDealt.fireball);
+        document.getElementById('waterGlobeDamage').textContent = formatNumber(stats.damageDealt.waterGlobe);
         document.getElementById('missilesDamage').textContent = formatNumber(stats.damageDealt.missiles);
         document.getElementById('tremorsDamage').textContent = formatNumber(stats.damageDealt.tremors);
         document.getElementById('chainLightningDamage').textContent = formatNumber(stats.damageDealt.chainLightning);
@@ -841,6 +882,54 @@ class Game {
             buyButton.textContent = 'Buy';
             buyButton.disabled = false;
         }
+        
+        // Update Mastery Rings
+        const elements = ['fire', 'water', 'earth', 'air', 'lightning'];
+        elements.forEach(element => {
+            const isOwned = this.playerProfile.masteryRings.owned[element];
+            const isEquipped = this.playerProfile.masteryRings.equipped.includes(element);
+            const price = this.playerProfile.getMasteryRingPrice(element);
+            
+            // Update status text
+            const statusElement = document.getElementById(`${element}RingStatus`);
+            if (isEquipped) {
+                statusElement.textContent = 'Equipped';
+                statusElement.style.color = '#00ff00';
+            } else if (isOwned) {
+                statusElement.textContent = 'Owned (Click to equip)';
+                statusElement.style.color = '#ffaa00';
+            } else {
+                statusElement.textContent = 'Not Owned';
+                statusElement.style.color = '#ccc';
+            }
+            
+            // Update price and button
+            const priceElement = document.getElementById(`${element}RingPrice`);
+            const buyBtn = document.getElementById(`buy${element.charAt(0).toUpperCase() + element.slice(1)}Ring`);
+            
+            if (isOwned) {
+                priceElement.textContent = '0';
+                if (isEquipped) {
+                    buyBtn.textContent = 'Unequip';
+                    buyBtn.disabled = false;
+                } else if (this.playerProfile.masteryRings.equipped.length >= 2) {
+                    buyBtn.textContent = 'No Slots';
+                    buyBtn.disabled = true;
+                } else {
+                    buyBtn.textContent = 'Equip';
+                    buyBtn.disabled = false;
+                }
+            } else {
+                priceElement.textContent = price;
+                if (availableDiamonds < price) {
+                    buyBtn.textContent = 'Buy';
+                    buyBtn.disabled = true;
+                } else {
+                    buyBtn.textContent = 'Buy';
+                    buyBtn.disabled = false;
+                }
+            }
+        });
     }
     
     // Purchase XP Vortex upgrade
@@ -848,6 +937,23 @@ class Game {
         if (this.playerProfile.purchaseUpgrade('xpVortex')) {
             this.updateShopDisplay();
             this.updateDiamondDisplay(); // Update header display
+        }
+    }
+    
+    purchaseMasteryRing(elementType) {
+        const isOwned = this.playerProfile.masteryRings.owned[elementType];
+        
+        if (isOwned) {
+            // Handle equip/unequip
+            if (this.playerProfile.equipMasteryRing(elementType)) {
+                this.updateShopDisplay();
+            }
+        } else {
+            // Handle purchase
+            if (this.playerProfile.purchaseMasteryRing(elementType)) {
+                this.updateShopDisplay();
+                this.updateDiamondDisplay(); // Update header display
+            }
         }
     }
     
@@ -879,6 +985,7 @@ class Game {
         // Update detailed damage breakdown for current session
         document.getElementById('sessionBasicDamage').textContent = formatNumber(this.sessionStats.damageDealt.basicWeapon);
         document.getElementById('sessionFireballDamage').textContent = formatNumber(this.sessionStats.damageDealt.fireball);
+        document.getElementById('sessionWaterGlobeDamage').textContent = formatNumber(this.sessionStats.damageDealt.waterGlobe);
         document.getElementById('sessionMissilesDamage').textContent = formatNumber(this.sessionStats.damageDealt.missiles);
         document.getElementById('sessionTremorsDamage').textContent = formatNumber(this.sessionStats.damageDealt.tremors);
         document.getElementById('sessionChainLightningDamage').textContent = formatNumber(this.sessionStats.damageDealt.chainLightning);
@@ -914,6 +1021,11 @@ class Player {
             air: 0       // was range
         };
         
+        // New progression system tracking
+        this.chosenElements = []; // Max 3 distinct elements per run
+        this.masteryRings = []; // Max 2 equipped rings (from PlayerProfile)
+        this.allElementsMasteredShown = false; // Flag to track if mastery message has been shown
+        
         this.specialAbilities = {
             radiusAttack: false,
             fireball: false,
@@ -927,6 +1039,9 @@ class Player {
             tornadoVortex: false,
             thunderStorm: false
         };
+        
+        // Water globes array
+        this.waterGlobes = [];
         
         this.shieldHealth = 0;
         this.maxShieldHealth = 50;
@@ -998,11 +1113,14 @@ class Player {
             this.updateThunderStorm();
         }
         
+        // Update water globes
+        this.waterGlobes.forEach(globe => globe.update(deltaTime));
+        
         // Health regeneration
         if (this.healthRegen > 0) {
             if (!this.lastRegenTick) this.lastRegenTick = this.game.gameTime;
             if (this.game.gameTime - this.lastRegenTick >= 1) {
-                this.health = Math.min(this.maxHealth, this.health + this.healthRegen);
+                this.health = Math.floor(Math.min(this.maxHealth, this.health + this.healthRegen));
                 this.lastRegenTick = this.game.gameTime;
             }
         }
@@ -1010,25 +1128,32 @@ class Player {
     
     render(ctx) {
         if (this.specialAbilities.radiusAttack) {
-            if (!this.radiusAttackCooldown) this.radiusAttackCooldown = 0;
-            const timeSinceAttack = this.game.gameTime - this.radiusAttackCooldown;
-            const cooldownDuration = 3;
-            const pulseProgress = (timeSinceAttack % cooldownDuration) / cooldownDuration;
+            const earthLevel = this.upgradeCount.earth || 0;
             
-            if (timeSinceAttack < 0.3) {
-                const blastAlpha = (0.3 - timeSinceAttack) / 0.3;
-                ctx.strokeStyle = `rgba(139, 69, 19, ${blastAlpha * 0.8})`;
-                ctx.lineWidth = 4;
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, 80, 0, Math.PI * 2);
-                ctx.stroke();
-            } else {
-                const pulseRadius = 20 + (pulseProgress * 15);
-                const pulseAlpha = 0.4 * (1 - pulseProgress);
-                ctx.strokeStyle = `rgba(139, 69, 19, ${pulseAlpha})`;
+            // Calculate current tremor range (same logic as in updateRadiusAttack)
+            let tremorRange = 80; // Base range
+            if (earthLevel >= 2) {
+                tremorRange = 80 + (earthLevel - 1) * 20; // +20px per level: 100, 120, 140, 160
+            }
+            
+            // Show faint outline of tremor range
+            ctx.strokeStyle = `rgba(139, 69, 19, 0.2)`;
+            ctx.lineWidth = 1;
+            ctx.setLineDash([5, 5]); // Dashed line for subtlety
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, tremorRange, 0, Math.PI * 2);
+            ctx.stroke();
+            ctx.setLineDash([]); // Reset line dash
+            
+            // Add subtle pulse effect when tremors are active
+            if (!this.tremorCooldown) this.tremorCooldown = 0;
+            const timeSinceTremor = this.game.gameTime - this.tremorCooldown;
+            if (timeSinceTremor < 0.1) { // Brief flash when tremor pulses
+                const pulseAlpha = (0.1 - timeSinceTremor) / 0.1;
+                ctx.strokeStyle = `rgba(139, 69, 19, ${pulseAlpha * 0.3})`;
                 ctx.lineWidth = 2;
                 ctx.beginPath();
-                ctx.arc(this.x, this.y, pulseRadius, 0, Math.PI * 2);
+                ctx.arc(this.x, this.y, tremorRange, 0, Math.PI * 2);
                 ctx.stroke();
             }
         }
@@ -1067,6 +1192,9 @@ class Player {
         ctx.arc(this.x - 5, this.y - 5, 3, 0, Math.PI * 2);
         ctx.arc(this.x + 5, this.y - 5, 3, 0, Math.PI * 2);
         ctx.fill();
+        
+        // Render water globes
+        this.waterGlobes.forEach(globe => globe.render(ctx));
     }
     
     
@@ -1083,13 +1211,19 @@ class Player {
         this.xp = 0;
         this.xpToNext = Math.floor(this.xpToNext * 1.2);
         
-        console.log(`Player reached level ${this.level}`);
         
         // Mark that we need to spawn a boss after upgrade menu closes
         if (this.level === 5 || this.level === 10 || 
             this.level === 15 || this.level === 20 || 
             this.level === 25 || this.level === 30) {
             this.game.pendingBossSpawn = true;
+        }
+        
+        // Check if all elements are mastered and we've already shown the message
+        const availableUpgrades = this.game.upgradeSystem.getRandomUpgrades(3);
+        if (availableUpgrades.length === 0 && this.allElementsMasteredShown) {
+            // All elements mastered and message already shown - skip upgrade screen
+            return;
         }
         
         this.game.upgradeSystem.showUpgradeMenu();
@@ -1100,9 +1234,9 @@ class Player {
         const fireLevel = this.upgradeCount.fire || 0;
         let cooldown = 2.0; // Base 2 second cooldown
         
-        if (fireLevel >= 4) {
-            // Levels 4-6 reduce cooldown: 2s -> 1.25s -> 1s -> 0.5s
-            const reduction = (fireLevel - 3) * 0.5; // 0.5s reduction per level after 3
+        if (fireLevel >= 2) {
+            // Levels 2-5 reduce cooldown progressively
+            const reduction = (fireLevel - 1) * 0.25; // 0.25s reduction per level after 1
             cooldown = Math.max(0.5, cooldown - reduction);
         }
         
@@ -1143,29 +1277,56 @@ class Player {
     }
     
     updateRadiusAttack() {
-        if (!this.radiusAttackCooldown) this.radiusAttackCooldown = 0;
+        if (!this.tremorCooldown) this.tremorCooldown = 0;
         
-        // Scale cooldown based on earth mastery level (levels 4-6 get faster tremors)
         const earthLevel = this.upgradeCount.earth || 0;
-        let cooldown = 3; // Base 3 second cooldown
-        if (earthLevel >= 4) {
-            cooldown = Math.max(1, 3 - (earthLevel - 3) * 0.5); // 2.5s at level 4, 2s at level 5, 1.5s at level 6
-        }
         
-        if (this.game.gameTime - this.radiusAttackCooldown >= cooldown) {
+        // Ongoing AOE damage every 0.5 seconds
+        const pulseInterval = 0.5;
+        
+        if (this.game.gameTime - this.tremorCooldown >= pulseInterval) {
+            // Calculate range based on earth level (levels 2-5 increase range)
+            let tremorRange = 80; // Base range
+            if (earthLevel >= 2) {
+                tremorRange = 80 + (earthLevel - 1) * 20; // +20px per level: 100, 120, 140, 160
+            }
+            
+            // Calculate damage with level scaling  
+            const baseDamage = 18; // Further reduced for better balance
+            const damage = baseDamage + (earthLevel >= 2 ? (earthLevel - 1) * 2 : 0); // +2 damage per level
+            
+            let enemiesHit = 0;
             this.game.enemies.forEach(enemy => {
                 const dx = enemy.x - this.x;
                 const dy = enemy.y - this.y;
                 const distance = Math.sqrt(dx * dx + dy * dy);
                 
-                if (distance <= 80) {
-                    const damage = 40 + (earthLevel >= 4 ? (earthLevel - 3) * 10 : 0); // Bonus damage at higher levels
+                if (distance <= tremorRange) {
                     enemy.takeDamage(damage);
                     this.game.recordDamage('tremors', damage);
-                    this.game.particles.push(new ExplosionParticle(enemy.x, enemy.y));
+                    enemiesHit++;
+                    
+                    // Add ground crack particle effects
+                    this.game.particles.push(new TremorParticle(enemy.x, enemy.y));
                 }
             });
-            this.radiusAttackCooldown = this.game.gameTime;
+            
+            // Visual feedback when tremors are active and hitting enemies
+            if (enemiesHit > 0) {
+                // Add screen shake effect
+                this.game.screenShake = Math.min(this.game.screenShake + 2, 8);
+                
+                // Add central tremor particles around player
+                for (let i = 0; i < 3; i++) {
+                    const angle = Math.random() * Math.PI * 2;
+                    const dist = Math.random() * tremorRange * 0.7;
+                    const px = this.x + Math.cos(angle) * dist;
+                    const py = this.y + Math.sin(angle) * dist;
+                    this.game.particles.push(new TremorParticle(px, py));
+                }
+            }
+            
+            this.tremorCooldown = this.game.gameTime;
         }
     }
     
@@ -1181,8 +1342,8 @@ class Player {
             });
             
             if (enemiesInRange.length > 0) {
-                const baseChains = 3;
-                const bonusChains = Math.floor((this.upgradeCount.lightning - 3) / 1);
+                const baseChains = 4; // Increased from 3 to 4 for better chaining
+                const bonusChains = Math.max(0, this.upgradeCount.lightning - 1); // +1 chain per level
                 const totalChains = baseChains + Math.max(0, bonusChains);
                 
                 this.performLightningChain(enemiesInRange[0], enemiesInRange, totalChains, 30);
@@ -1200,7 +1361,7 @@ class Player {
         let fromX = this.x;
         let fromY = this.y;
         
-        if (bouncesLeft < 3) {
+        if (bouncesLeft < 4) {
             const previousTarget = availableEnemies.find(e => e.wasLastLightningTarget);
             if (previousTarget) {
                 fromX = previousTarget.x;
@@ -1218,7 +1379,7 @@ class Player {
                 const dx = enemy.x - startEnemy.x;
                 const dy = enemy.y - startEnemy.y;
                 const distance = Math.sqrt(dx * dx + dy * dy);
-                return distance <= 100;
+                return distance <= 300; // Increased to 3/8 of map width for better chaining
             });
             
             if (nearbyEnemies.length > 0) {
@@ -1498,18 +1659,11 @@ class Enemy {
         const distance = Math.sqrt(dx * dx + dy * dy);
         
         // Debug stuck level-up bosses
-        if (this.isVeteran && this.health === 300 && Math.random() < 0.01) {
-            console.log(`Enemy movement calc: dx=${dx.toFixed(1)}, dy=${dy.toFixed(1)}, distance=${distance.toFixed(1)}, speed=${this.speed}, deltaTime=${deltaTime?.toFixed(3)}`);
-        }
         
         if (distance > 0 && !isNaN(distance)) {
             const moveX = (dx / distance) * this.speed * deltaTime * 60;
             const moveY = (dy / distance) * this.speed * deltaTime * 60;
             
-            // Debug movement values
-            if (this.isVeteran && this.health === 300 && Math.random() < 0.01) {
-                console.log(`Movement values: moveX=${moveX.toFixed(3)}, moveY=${moveY.toFixed(3)}, will apply=${!isNaN(moveX) && !isNaN(moveY)}`);
-            }
             
             // Validate movement before applying
             if (!isNaN(moveX) && !isNaN(moveY)) {
@@ -2015,20 +2169,24 @@ class BasicWeapon {
             ));
             
             if (this.owner.specialAbilities.missiles) {
-                const angle1 = Math.atan2(dirY, dirX) + 0.3;
-                const angle2 = Math.atan2(dirY, dirX) - 0.3;
+                // Get Air mastery level to determine number of missiles
+                const airLevel = this.owner.upgradeCount.air || 0;
+                const missileCount = Math.min(airLevel, 5); // Max 5 missiles
                 
-                this.owner.game.projectiles.push(new MissileProjectile(
-                    this.owner.x, this.owner.y,
-                    Math.cos(angle1), Math.sin(angle1),
-                    this.damage * 0.7, this.range
-                ));
+                // Missile angles in degrees (converted to radians)
+                // 45°, 315°, 180°, 90°, 270°
+                const missileAngles = [45, 315, 180, 90, 270];
                 
-                this.owner.game.projectiles.push(new MissileProjectile(
-                    this.owner.x, this.owner.y,
-                    Math.cos(angle2), Math.sin(angle2),
-                    this.damage * 0.7, this.range
-                ));
+                for (let i = 0; i < missileCount; i++) {
+                    const angleInDegrees = missileAngles[i];
+                    const angleInRadians = (angleInDegrees * Math.PI) / 180;
+                    
+                    this.owner.game.projectiles.push(new MissileProjectile(
+                        this.owner.x, this.owner.y,
+                        Math.cos(angleInRadians), Math.sin(angleInRadians),
+                        this.damage * 0.7, this.range
+                    ));
+                }
             }
         }
     }
@@ -2205,8 +2363,8 @@ class FireballProjectile extends Projectile {
                 
                 // Enhanced DOT based on fire mastery level
                 const fireLevel = game.player.upgradeCount.fire || 0;
-                const dotDamage = 5 + Math.max(0, (fireLevel - 3) * 2);
-                const dotDuration = 3 + Math.max(0, (fireLevel - 3) * 1);
+                const dotDamage = 5 + Math.max(0, (fireLevel - 1) * 1);
+                const dotDuration = 3 + Math.max(0, (fireLevel - 1) * 0.5);
                 
                 game.dotEffects.push(new DOTEffect(enemy, dotDamage, dotDuration, 1));
             }
@@ -2242,8 +2400,8 @@ class FireballProjectile extends Projectile {
                 
                 // Add DOT to secondary explosion targets too
                 const fireLevel = game.player.upgradeCount.fire || 0;
-                const dotDamage = 3 + Math.max(0, (fireLevel - 3) * 1);
-                const dotDuration = 2 + Math.max(0, (fireLevel - 3) * 0.5);
+                const dotDamage = 3 + Math.max(0, (fireLevel - 1) * 0.5);
+                const dotDuration = 2 + Math.max(0, (fireLevel - 1) * 0.25);
                 
                 game.dotEffects.push(new DOTEffect(enemy, dotDamage, dotDuration, 1));
             }
@@ -2271,16 +2429,167 @@ class MissileProjectile extends Projectile {
     }
     
     render(ctx) {
-        ctx.fillStyle = '#00ffff';
+        ctx.save();
+        
+        // Calculate angle of missile direction for rotation
+        const angle = Math.atan2(this.dirY, this.dirX);
+        
+        // Move to missile position and rotate
+        ctx.translate(this.x, this.y);
+        ctx.rotate(angle);
+        
+        // Draw missile body (elongated rectangle)
+        ctx.fillStyle = '#cccccc';
+        ctx.fillRect(-6, -2, 10, 4);
+        
+        // Draw missile nose cone (triangle)
+        ctx.fillStyle = '#ff4444';
+        ctx.beginPath();
+        ctx.moveTo(4, 0);
+        ctx.lineTo(8, -2);
+        ctx.lineTo(8, 2);
+        ctx.closePath();
+        ctx.fill();
+        
+        // Draw missile fins (small triangles at back)
+        ctx.fillStyle = '#999999';
+        ctx.beginPath();
+        ctx.moveTo(-6, -2);
+        ctx.lineTo(-8, -3);
+        ctx.lineTo(-6, -1);
+        ctx.closePath();
+        ctx.fill();
+        
+        ctx.beginPath();
+        ctx.moveTo(-6, 2);
+        ctx.lineTo(-8, 3);
+        ctx.lineTo(-6, 1);
+        ctx.closePath();
+        ctx.fill();
+        
+        // Draw exhaust trail (small orange rectangle)
+        ctx.fillStyle = '#ff8800';
+        ctx.fillRect(-10, -1, 4, 2);
+        
+        ctx.restore();
+    }
+}
+
+class WaterGlobe {
+    constructor(player, index) {
+        this.player = player;
+        this.index = index;
+        this.radius = 5;
+        this.orbitRadius = 45;
+        this.damage = 15;
+        this.angle = (index * Math.PI * 2) / Math.max(1, this.getGlobeCount()); // Evenly distribute globes
+        this.rotationSpeed = 0.02; // Radians per frame
+    }
+    
+    getGlobeCount() {
+        // Get the current water mastery level to determine number of globes
+        const waterLevel = this.player.upgradeCount.water || 0;
+        return Math.min(waterLevel, 5); // Max 5 globes at level 5
+    }
+    
+    update(deltaTime) {
+        // Update angle for orbital motion
+        this.angle += this.rotationSpeed;
+        if (this.angle > Math.PI * 2) {
+            this.angle -= Math.PI * 2;
+        }
+        
+        // Calculate position around player
+        this.x = this.player.x + Math.cos(this.angle) * this.orbitRadius;
+        this.y = this.player.y + Math.sin(this.angle) * this.orbitRadius;
+        
+        // Check for enemy collisions
+        this.checkCollisions();
+    }
+    
+    checkCollisions() {
+        const enemies = this.player.game.enemies;
+        for (let i = enemies.length - 1; i >= 0; i--) {
+            const enemy = enemies[i];
+            const dx = this.x - enemy.x;
+            const dy = this.y - enemy.y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            
+            if (distance < this.radius + enemy.radius) {
+                // Damage enemy
+                enemy.takeDamage(this.damage);
+                this.player.game.recordDamage('waterGlobe', this.damage);
+                
+                // Create impact particle effect
+                this.createImpactEffect();
+                
+                // Remove enemy if dead
+                if (enemy.health <= 0) {
+                    enemies.splice(i, 1);
+                    this.player.game.score += enemy.scoreReward || 10;
+                    this.player.game.pickups.push(new XPPickup(enemy.x, enemy.y, enemy.xpReward));
+                }
+            }
+        }
+    }
+    
+    createImpactEffect() {
+        // Create water splash particles
+        for (let i = 0; i < 5; i++) {
+            this.player.game.particles.push(new WaterSplashParticle(this.x, this.y));
+        }
+    }
+    
+    render(ctx) {
+        // Main globe
+        ctx.fillStyle = '#4db8ff';
         ctx.beginPath();
         ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
         ctx.fill();
         
-        ctx.strokeStyle = '#0088ff';
-        ctx.lineWidth = 1;
+        // Inner highlight
+        ctx.fillStyle = '#80d4ff';
+        ctx.beginPath();
+        ctx.arc(this.x - 2, this.y - 2, this.radius * 0.4, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // Outer glow effect
+        ctx.strokeStyle = '#66ccff';
+        ctx.lineWidth = 2;
         ctx.beginPath();
         ctx.arc(this.x, this.y, this.radius + 1, 0, Math.PI * 2);
         ctx.stroke();
+    }
+}
+
+class WaterSplashParticle {
+    constructor(x, y) {
+        this.x = x;
+        this.y = y;
+        this.vx = (Math.random() - 0.5) * 6;
+        this.vy = (Math.random() - 0.5) * 6;
+        this.life = 0.5;
+        this.maxLife = 0.5;
+        this.shouldRemove = false;
+        this.radius = Math.random() * 2 + 1;
+    }
+    
+    update(deltaTime) {
+        this.x += this.vx * deltaTime * 60;
+        this.y += this.vy * deltaTime * 60;
+        this.life -= deltaTime;
+        
+        if (this.life <= 0) {
+            this.shouldRemove = true;
+        }
+    }
+    
+    render(ctx) {
+        const alpha = this.life / this.maxLife;
+        ctx.fillStyle = `rgba(77, 184, 255, ${alpha})`;
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+        ctx.fill();
     }
 }
 
@@ -2535,7 +2844,22 @@ class DelayedLightningChain {
         
         if (this.timer >= this.delay) {
             if (this.target && this.target.health > 0) {
-                this.player.performLightningChain(this.target, this.availableEnemies, this.bouncesLeft, this.damage);
+                // Use fresh enemy list to avoid stale references
+                const freshEnemies = this.player.game.enemies;
+                this.player.performLightningChain(this.target, freshEnemies, this.bouncesLeft, this.damage);
+            } else {
+                // Target is dead, try to find another nearby enemy to continue the chain
+                const nearbyEnemies = this.player.game.enemies.filter(enemy => {
+                    const dx = enemy.x - (this.target ? this.target.x : this.player.x);
+                    const dy = enemy.y - (this.target ? this.target.y : this.player.y);
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    return distance <= 300;
+                });
+                
+                if (nearbyEnemies.length > 0) {
+                    const newTarget = nearbyEnemies[Math.floor(Math.random() * nearbyEnemies.length)];
+                    this.player.performLightningChain(newTarget, this.player.game.enemies, this.bouncesLeft, this.damage);
+                }
             }
             this.shouldRemove = true;
         }
@@ -2910,6 +3234,56 @@ class DebrisParticle {
     }
 }
 
+class TremorParticle {
+    constructor(x, y) {
+        this.x = x;
+        this.y = y;
+        this.vx = (Math.random() - 0.5) * 2;
+        this.vy = (Math.random() - 0.5) * 2;
+        this.life = 0.8;
+        this.maxLife = 0.8;
+        this.shouldRemove = false;
+        this.size = 3 + Math.random() * 4;
+        this.rotation = Math.random() * Math.PI * 2;
+        this.color = Math.random() > 0.5 ? 'brown' : 'gray';
+    }
+    
+    update(deltaTime) {
+        this.x += this.vx * deltaTime * 60;
+        this.y += this.vy * deltaTime * 60;
+        this.vx *= 0.95; // Slow down over time
+        this.vy *= 0.95;
+        this.life -= deltaTime;
+        
+        if (this.life <= 0) {
+            this.shouldRemove = true;
+        }
+    }
+    
+    render(ctx) {
+        const alpha = this.life / this.maxLife;
+        ctx.save();
+        ctx.translate(this.x, this.y);
+        ctx.rotate(this.rotation);
+        
+        if (this.color === 'brown') {
+            ctx.fillStyle = `rgba(139, 69, 19, ${alpha})`;
+        } else {
+            ctx.fillStyle = `rgba(128, 128, 128, ${alpha})`;
+        }
+        
+        // Draw jagged rock/earth chunk
+        ctx.beginPath();
+        ctx.moveTo(-this.size/2, -this.size/3);
+        ctx.lineTo(this.size/3, -this.size/2);
+        ctx.lineTo(this.size/2, this.size/3);
+        ctx.lineTo(-this.size/3, this.size/2);
+        ctx.closePath();
+        ctx.fill();
+        ctx.restore();
+    }
+}
+
 class StormClouds {
     constructor(x, y, radius) {
         this.x = x;
@@ -3204,6 +3578,7 @@ class PlayerProfile {
             damageDealt: {
                 basicWeapon: 0,
                 fireball: 0,
+                waterGlobe: 0,
                 tremors: 0,
                 earthquakeStormp: 0,
                 chainLightning: 0,
@@ -3242,6 +3617,12 @@ class PlayerProfile {
             xpVortex: 0 // Level 0-5, increases XP pickup range
         };
         
+        // Mastery Ring system (new progression feature)
+        this.masteryRings = {
+            owned: { fire: false, water: false, earth: false, air: false, lightning: false },
+            equipped: [] // Max 2 rings equipped at once
+        };
+        
         this.load();
     }
     
@@ -3256,9 +3637,9 @@ class PlayerProfile {
                     this.mergeDeep(this.statistics, data.statistics || {});
                     this.mergeDeep(this.preferences, data.preferences || {});
                     this.mergeDeep(this.shopUpgrades, data.shopUpgrades || {});
+                    this.mergeDeep(this.masteryRings, data.masteryRings || {});
                 } else {
                     // Handle version migration in the future
-                    console.log('Profile version mismatch, keeping defaults');
                 }
             }
         } catch (error) {
@@ -3274,6 +3655,7 @@ class PlayerProfile {
                 statistics: this.statistics,
                 preferences: this.preferences,
                 shopUpgrades: this.shopUpgrades,
+                masteryRings: this.masteryRings,
                 lastSaved: new Date().toISOString()
             };
             localStorage.setItem('elemental-fury-profile', JSON.stringify(data));
@@ -3319,7 +3701,7 @@ class PlayerProfile {
         
         // Update damage dealt
         for (const attackType in sessionStats.damageDealt) {
-            this.statistics.damageDealt[attackType] += sessionStats.damageDealt[attackType];
+            this.statistics.damageDealt[attackType] += Math.floor(sessionStats.damageDealt[attackType]);
         }
         
         // Update element mastery stats
@@ -3379,6 +3761,46 @@ class PlayerProfile {
         return true;
     }
     
+    // Purchase mastery ring
+    purchaseMasteryRing(elementType) {
+        const price = 50; // All mastery rings cost 50 diamonds
+        
+        if (this.masteryRings.owned[elementType]) return false; // Already owned
+        if (this.statistics.totalDiamondsEarned - this.statistics.totalDiamondsSpent < price) {
+            return false; // Not enough diamonds
+        }
+        
+        // Purchase successful
+        this.statistics.totalDiamondsSpent += price;
+        this.masteryRings.owned[elementType] = true;
+        this.save();
+        return true;
+    }
+    
+    // Equip/unequip mastery ring
+    equipMasteryRing(elementType) {
+        if (!this.masteryRings.owned[elementType]) return false; // Don't own ring
+        
+        const currentIndex = this.masteryRings.equipped.indexOf(elementType);
+        if (currentIndex !== -1) {
+            // Ring is equipped, unequip it
+            this.masteryRings.equipped.splice(currentIndex, 1);
+            this.save();
+            return true;
+        } else if (this.masteryRings.equipped.length < 2) {
+            // Ring not equipped and have slot available
+            this.masteryRings.equipped.push(elementType);
+            this.save();
+            return true;
+        }
+        return false; // No slots available
+    }
+    
+    // Check if element can go past level 5
+    canUpgradePastLevel5(elementType) {
+        return this.masteryRings.equipped.includes(elementType);
+    }
+    
     // Get available diamonds for spending
     getAvailableDiamonds() {
         return (this.statistics.totalDiamondsEarned || 0) - (this.statistics.totalDiamondsSpent || 0);
@@ -3397,6 +3819,11 @@ class PlayerProfile {
         
         return prices[upgradeType][currentLevel];
     }
+    
+    // Get mastery ring price (always 50 for unowned rings)
+    getMasteryRingPrice(elementType) {
+        return this.masteryRings.owned[elementType] ? 0 : 50;
+    }
 }
 
 class WaveManager {
@@ -3407,18 +3834,57 @@ class WaveManager {
         this.baseSpawnInterval = 2;
         this.currentSpawnInterval = 2;
         this.baseBossSpawnInterval = 15; // Base time between random boss spawns
+        this.levelStartTime = 0; // Track when current level started
+        this.currentPlayerLevel = 1;
     }
     
     update(gameTime, game, playerLevel, deltaTime) {
-        // More aggressive spawn rate scaling - level AND time based
-        const levelScaling = 1 + (playerLevel - 1) * 0.25;
-        const timeScaling = 1 + (gameTime / 60) * 0.1; // 10% faster every minute
-        const combinedScaling = levelScaling * timeScaling;
+        // Track level changes to reset level timer
+        if (playerLevel !== this.currentPlayerLevel) {
+            this.levelStartTime = gameTime;
+            this.currentPlayerLevel = playerLevel;
+        }
+        
+        // Calculate time spent in current level
+        const timeInLevel = gameTime - this.levelStartTime;
+        
+        // MUCH more aggressive scaling after level 20
+        let levelScaling;
+        if (playerLevel >= 25) {
+            // Level 25+: Extremely aggressive (60% faster per level)
+            levelScaling = 1 + (playerLevel - 1) * 0.6;
+        } else if (playerLevel >= 20) {
+            // Level 20-24: Very aggressive (40% faster per level)
+            levelScaling = 1 + (playerLevel - 1) * 0.4;
+        } else {
+            // Level 1-19: Original scaling (25% faster per level)
+            levelScaling = 1 + (playerLevel - 1) * 0.25;
+        }
+        
+        // Global time scaling (10% faster every minute)
+        const globalTimeScaling = 1 + (gameTime / 60) * 0.1;
+        
+        // Within-level acceleration - gets faster the longer you stay at a level
+        // This prevents "sitting in the middle" strategy
+        let levelTimeScaling = 1;
+        if (playerLevel >= 15) {
+            // After level 15, spawn rate increases significantly within each level
+            levelTimeScaling = 1 + (timeInLevel / 30) * 0.5; // 50% faster every 30 seconds in level
+        }
+        
+        const combinedScaling = levelScaling * globalTimeScaling * levelTimeScaling;
         
         this.currentSpawnInterval = this.baseSpawnInterval / combinedScaling;
         
-        // Lower minimum spawn interval to make it more challenging
-        this.currentSpawnInterval = Math.max(0.1, this.currentSpawnInterval);
+        // Much lower minimum for high levels
+        let minInterval = 0.1;
+        if (playerLevel >= 25) {
+            minInterval = 0.05; // Insanely fast spawning at level 25+
+        } else if (playerLevel >= 20) {
+            minInterval = 0.07; // Very fast spawning at level 20+
+        }
+        
+        this.currentSpawnInterval = Math.max(minInterval, this.currentSpawnInterval);
         
         // Regular enemy spawning
         if (gameTime - this.lastSpawn >= this.currentSpawnInterval) {
@@ -3436,16 +3902,24 @@ class WaveManager {
         let spawnInterval = this.baseBossSpawnInterval;
         
         if (playerLevel >= 30) {
-            // Level 30+: All bosses can spawn (after Elite introduction)
-            spawnInterval = 10; // Every 10 seconds
+            // Level 30+: All bosses can spawn - MUCH more frequent
+            spawnInterval = 5; // Every 5 seconds (was 10)
+            const roll = Math.random();
+            if (roll < 0.3) bossType = 'basic';
+            else if (roll < 0.6) bossType = 'veteran';
+            else bossType = 'elite';
+            shouldSpawnBoss = true;
+        } else if (playerLevel >= 25) {
+            // Level 25-29: Basic and Veteran + some Elite bosses
+            spawnInterval = 6; // Every 6 seconds
             const roll = Math.random();
             if (roll < 0.4) bossType = 'basic';
-            else if (roll < 0.7) bossType = 'veteran';
+            else if (roll < 0.8) bossType = 'veteran';
             else bossType = 'elite';
             shouldSpawnBoss = true;
         } else if (playerLevel >= 20) {
-            // Level 20-29: Basic and Veteran bosses can spawn (after Veteran introduction)
-            spawnInterval = 12; // Every 12 seconds
+            // Level 20-24: Basic and Veteran bosses - more frequent
+            spawnInterval = 8; // Every 8 seconds (was 12)
             const roll = Math.random();
             if (roll < 0.6) bossType = 'basic';
             else bossType = 'veteran';
@@ -3491,6 +3965,8 @@ class UpgradeSystem {
             option.onclick = () => {
                 this.upgradeMenu.style.display = 'none';
                 this.game.isPaused = false;
+                // Mark that we've shown the mastery message
+                this.game.player.allElementsMasteredShown = true;
             };
             this.upgradeOptions.appendChild(option);
         } else {
@@ -3522,157 +3998,353 @@ class UpgradeSystem {
     }
     
     getRandomUpgrades(count) {
-        const allUpgrades = [
-            { 
+        // New progression spec implementation
+        // Rule: Max 3 distinct elements per run, levels 1-10, rings required for 6-10
+        
+        const elementData = {
+            fire: {
+                name: 'Fire Mastery',
+                ability: 'Fireball',
+                initialDescription: 'Shoots a fireball at the closest enemy',
+                effect: 'Faster fireball cooldown, +10% DPS to all attacks'
+            },
+            water: {
                 name: 'Water Mastery', 
-                description: 'Healing Waters: +20 Max Health', 
-                type: 'water',
-                effect: () => { 
-                    const level = this.game.player.upgradeCount.water;
-                    
-                    if (level < 3) {
-                        this.game.player.maxHealth += 20; 
-                        this.game.player.health += 20;
-                    } else if (level < 6) {
-                        this.game.player.healthRegen += 2;
-                    }
-                    
-                    this.game.player.upgradeCount.water++;
-                    
-                    if (this.game.player.upgradeCount.water === 3) {
-                        this.game.player.specialAbilities.shield = true;
-                        this.game.player.shieldHealth = this.game.player.maxShieldHealth;
-                    } else if (this.game.player.upgradeCount.water === 6) {
-                        this.game.player.specialAbilities.freezingTouch = true;
-                    }
-                }
+                ability: 'Water Globes',
+                initialDescription: 'Creates orbiting water globes that damage enemies',
+                effect: '+1 globe, +10% Health'
             },
-            { 
-                name: 'Earth Mastery', 
-                description: 'Stone Skin: +5 Armor (Damage Reduction)', 
-                type: 'earth',
-                effect: () => { 
-                    const level = this.game.player.upgradeCount.earth;
-                    
-                    if (level < 3) {
-                        this.game.player.armor += 5;
-                    } else if (level < 6) {
-                        this.game.player.armor += 3;
-                    }
-                    
-                    this.game.player.upgradeCount.earth++;
-                    
-                    if (this.game.player.upgradeCount.earth === 3) {
-                        this.game.player.specialAbilities.radiusAttack = true;
-                    } else if (this.game.player.upgradeCount.earth === 6) {
-                        this.game.player.specialAbilities.earthquakeStormp = true;
-                    }
-                }
+            earth: {
+                name: 'Earth Mastery',
+                ability: 'Tremor',
+                initialDescription: 'Creates ongoing tremor field that pulses damage around you',
+                effect: 'Increased tremor range, +3 Armor'
             },
-            { 
-                name: 'Fire Mastery', 
-                description: 'Blazing Power: +50% Weapon Damage', 
-                type: 'fire',
-                effect: () => { 
-                    const level = this.game.player.upgradeCount.fire;
-                    
-                    if (level < 3) {
-                        this.game.player.weapons.forEach(w => w.damage *= 1.5);
-                    } else if (level < 6) {
-                        // Extend DOT duration and damage
-                        // This will be handled in DOT effect creation
-                    }
-                    
-                    this.game.player.upgradeCount.fire++;
-                    
-                    if (this.game.player.upgradeCount.fire === 3) {
-                        this.game.player.specialAbilities.fireball = true;
-                    } else if (this.game.player.upgradeCount.fire === 6) {
-                        this.game.player.specialAbilities.infernoWave = true;
-                    }
-                }
+            lightning: {
+                name: 'Lightning Mastery',
+                ability: 'Chain Lightning',
+                initialDescription: 'Lightning bolts that chain between enemies',
+                effect: '+1 chain, +10% attack speed all attacks'
             },
-            { 
-                name: 'Lightning Mastery', 
-                description: 'Swift Strike: +33% Attack Speed', 
-                type: 'lightning',
-                effect: () => { 
-                    const level = this.game.player.upgradeCount.lightning;
-                    
-                    if (level < 3) {
-                        this.game.player.weapons.forEach(w => w.cooldown *= 0.75);
-                    } else if (level < 6) {
-                        // Increase chain count (handled in lightning chain logic)
-                    }
-                    
-                    this.game.player.upgradeCount.lightning++;
-                    
-                    if (this.game.player.upgradeCount.lightning === 3) {
-                        this.game.player.specialAbilities.lightning = true;
-                    } else if (this.game.player.upgradeCount.lightning === 6) {
-                        this.game.player.specialAbilities.thunderStorm = true;
-                    }
-                }
-            },
-            { 
-                name: 'Air Mastery', 
-                description: 'Wind\'s Reach: +25% Weapon Range', 
-                type: 'air',
-                effect: () => { 
-                    const level = this.game.player.upgradeCount.air;
-                    
-                    if (level < 3) {
-                        this.game.player.weapons.forEach(w => w.range *= 1.25);
-                    } else if (level < 6) {
-                        this.game.player.weapons.forEach(w => w.speed = (w.speed || 8) * 1.2);
-                    }
-                    
-                    this.game.player.upgradeCount.air++;
-                    
-                    if (this.game.player.upgradeCount.air === 3) {
-                        this.game.player.specialAbilities.missiles = true;
-                    } else if (this.game.player.upgradeCount.air === 6) {
-                        this.game.player.specialAbilities.tornadoVortex = true;
-                    }
-                }
+            air: {
+                name: 'Air Mastery',
+                ability: 'Missiles',
+                initialDescription: 'Fires additional missiles alongside regular attacks',
+                effect: '+1 missile, +10% attack range all attacks'
             }
-        ];
+        };
         
-        // Filter out maxed elements (level 6)
-        const availableUpgrades = allUpgrades.filter(upgrade => {
-            const count = this.game.player.upgradeCount[upgrade.type];
-            return count < 6;
-        }).map(upgrade => {
-            let desc = upgrade.description;
-            const count = this.game.player.upgradeCount[upgrade.type];
+        const availableElements = [];
+        
+        // Generate upgrade options based on progression rules
+        for (const [elementType, data] of Object.entries(elementData)) {
+            const currentLevel = this.game.player.upgradeCount[elementType] || 0;
+            const isChosen = this.game.player.chosenElements.includes(elementType);
+            const hasRing = this.game.player.masteryRings.includes(elementType);
             
-            // Update description based on current level
-            if (upgrade.type === 'water' && count >= 3) {
-                desc = 'Flowing Vitality: +2 Health Regen/sec';
-            } else if (upgrade.type === 'earth' && count >= 3) {
-                desc = 'Stone Fortification: +3 Armor + Tremor Fury';
-            } else if (upgrade.type === 'fire' && count >= 3) {
-                desc = 'Fireball Mastery: Faster Auto-Fireballs';
-            } else if (upgrade.type === 'lightning' && count >= 3) {
-                desc = 'Chain Lightning: +1 Bounce Count';
-            } else if (upgrade.type === 'air' && count >= 3) {
-                desc = 'Wind Speed: +20% Projectile Speed';
+            // Skip if maxed out (level 10)
+            if (currentLevel >= 10) continue;
+            
+            // Skip if trying to go past level 5 without ring
+            if (currentLevel >= 5 && !hasRing) continue;
+            
+            // Skip if not chosen and already have 3 distinct elements
+            if (!isChosen && this.game.player.chosenElements.length >= 3) continue;
+            
+            // This element is available for upgrade
+            const nextLevel = currentLevel + 1;
+            let description;
+            
+            // Level 1: Show ability name + simple description
+            if (currentLevel === 0) {
+                description = `${data.ability} - ${data.initialDescription}`;
+            } else {
+                // Level 2+: Just show the effect
+                description = data.effect;
             }
             
-            if (count > 0) {
-                desc += ` (${count}/6)`;
+            // Add level-specific abilities
+            if (nextLevel === 6) {
+                const level6Abilities = {
+                    fire: 'Inferno Wave',
+                    water: 'Freezing Touch', 
+                    earth: 'Earthquake (10% chance per tremor + stuns)',
+                    lightning: 'Thunder Storm',
+                    air: 'Tornado Vortex'
+                };
+                description += ` → Unlocks ${level6Abilities[elementType]}`;
             }
-            if (count >= 3 && count < 6) {
-                desc += ' ⚡';
-            } else if (count >= 6) {
-                desc += ' 🌟';
+            
+            // Add ring requirement warning
+            if (currentLevel === 5 && !hasRing) {
+                description += ' ⚠️ Requires Mastery Ring';
             }
-            return { ...upgrade, description: desc };
-        });
+            
+            availableElements.push({
+                name: data.name,
+                description,
+                type: elementType,
+                currentLevel,
+                nextLevel,
+                effect: () => this.applyElementUpgrade(elementType, nextLevel)
+            });
+        }
         
-        // Handle case where there might be fewer available upgrades than requested
-        const shuffled = availableUpgrades.sort(() => Math.random() - 0.5);
+        // Randomize and return requested count
+        const shuffled = availableElements.sort(() => Math.random() - 0.5);
         return shuffled.slice(0, Math.min(count, shuffled.length));
+    }
+    
+    applyElementUpgrade(elementType, newLevel) {
+        const player = this.game.player;
+        
+        // Add to chosen elements if not already there
+        if (!player.chosenElements.includes(elementType)) {
+            player.chosenElements.push(elementType);
+        }
+        
+        // Update level
+        player.upgradeCount[elementType] = newLevel;
+        
+        // Apply effects based on element and level (from progression spec)
+        switch (elementType) {
+            case 'fire':
+                this.applyFireUpgrade(newLevel);
+                break;
+            case 'water':
+                this.applyWaterUpgrade(newLevel); 
+                break;
+            case 'earth':
+                this.applyEarthUpgrade(newLevel);
+                break;
+            case 'lightning':
+                this.applyLightningUpgrade(newLevel);
+                break;
+            case 'air':
+                this.applyAirUpgrade(newLevel);
+                break;
+        }
+        
+        // Track stats
+        this.game.sessionStats.elementLevels[elementType] = newLevel;
+        this.game.sessionStats.upgradesChosen++;
+    }
+    
+    applyFireUpgrade(level) {
+        const player = this.game.player;
+        
+        // Levels 1-5: +1 fireball, +10% DPS to all attacks
+        if (level <= 5) {
+            player.weapons.forEach(w => w.damage = Math.floor(w.damage * 1.1));
+            if (level === 1) {
+                player.specialAbilities.fireball = true;
+            }
+        }
+        
+        // Level 6: Inferno Wave
+        if (level === 6) {
+            player.specialAbilities.infernoWave = true;
+        }
+        
+        // Levels 7-10: +10% DPS + 10% Range on Inferno Wave  
+        if (level >= 7) {
+            player.weapons.forEach(w => w.damage = Math.floor(w.damage * 1.1));
+            // Inferno Wave range/damage boost handled in ability code
+        }
+        
+        // Level 10: Check for fusion ultimates
+        if (level === 10) {
+            this.checkForFusionUltimates();
+        }
+    }
+    
+    applyWaterUpgrade(level) {
+        const player = this.game.player;
+        
+        // Levels 1-5: +1 globe, +10% Health
+        if (level <= 5) {
+            player.maxHealth = Math.floor(player.maxHealth * 1.1);
+            player.health = Math.floor(Math.min(player.health * 1.1, player.maxHealth));
+            this.updateWaterGlobes(player, level);
+        }
+        
+        // Level 6: Freezing Touch
+        if (level === 6) {
+            player.specialAbilities.freezingTouch = true;
+        }
+        
+        // Levels 7-10: +10% Health +10% Extra damage taken by frozen enemies
+        if (level >= 7) {
+            player.maxHealth = Math.floor(player.maxHealth * 1.1);
+            player.health = Math.floor(Math.min(player.health * 1.1, player.maxHealth));
+            // Frozen damage bonus handled in damage calculation
+        }
+        
+        // Level 10: Check for fusion ultimates
+        if (level === 10) {
+            this.checkForFusionUltimates();
+        }
+    }
+    
+    updateWaterGlobes(player, level) {
+        // Clear existing globes
+        player.waterGlobes = [];
+        
+        // Create new globes based on level (1 globe per level, max 5)
+        const globeCount = Math.min(level, 5);
+        for (let i = 0; i < globeCount; i++) {
+            player.waterGlobes.push(new WaterGlobe(player, i));
+        }
+    }
+    
+    applyEarthUpgrade(level) {
+        const player = this.game.player;
+        
+        // Levels 1-5: +25% more frequent tremors, +3 Armor
+        if (level <= 5) {
+            player.armor += 3;
+            if (level === 1) {
+                player.specialAbilities.radiusAttack = true;
+            }
+        }
+        
+        // Level 6: Earthquake (10% chance per tremor + stuns)
+        if (level === 6) {
+            player.specialAbilities.earthquakeStormp = true;
+        }
+        
+        // Levels 7-10: +3 armor +10% chance to start earthquake + 10% frequency to tremor
+        if (level >= 7) {
+            player.armor += 3;
+            // Earthquake chance and tremor frequency handled in ability code
+        }
+        
+        // Level 10: Check for fusion ultimates
+        if (level === 10) {
+            this.checkForFusionUltimates();
+        }
+    }
+    
+    applyLightningUpgrade(level) {
+        const player = this.game.player;
+        
+        // Levels 1-5: +1 chain, +10% attack speed all attacks
+        if (level <= 5) {
+            player.weapons.forEach(w => w.cooldown = Math.floor(w.cooldown * 0.9 * 100) / 100);
+            if (level === 1) {
+                player.specialAbilities.lightning = true;
+            }
+        }
+        
+        // Level 6: Thunder Storm
+        if (level === 6) {
+            player.specialAbilities.thunderStorm = true;
+        }
+        
+        // Levels 7-10: +10% radius of storm clouds +10% duration of storm
+        if (level >= 7) {
+            player.weapons.forEach(w => w.cooldown = Math.floor(w.cooldown * 0.9 * 100) / 100);
+            // Storm radius/duration handled in ability code
+        }
+        
+        // Level 10: Check for fusion ultimates
+        if (level === 10) {
+            this.checkForFusionUltimates();
+        }
+    }
+    
+    applyAirUpgrade(level) {
+        const player = this.game.player;
+        
+        // Levels 1-5: +1 missile, +10% attack range all attacks
+        if (level <= 5) {
+            player.weapons.forEach(w => w.range = Math.floor(w.range * 1.1));
+            if (level === 1) {
+                player.specialAbilities.missiles = true;
+            }
+        }
+        
+        // Level 6: Tornado Vortex
+        if (level === 6) {
+            player.specialAbilities.tornadoVortex = true;
+        }
+        
+        // Levels 7-10: +1 extra tornado per spawn
+        if (level >= 7) {
+            player.weapons.forEach(w => w.range = Math.floor(w.range * 1.1));
+            // Extra tornado count handled in ability code
+        }
+        
+        // Level 10: Check for fusion ultimates
+        if (level === 10) {
+            this.checkForFusionUltimates();
+        }
+    }
+    
+    // Check and unlock fusion ultimates when two elements reach level 10
+    checkForFusionUltimates() {
+        const player = this.game.player;
+        const level10Elements = [];
+        
+        // Find all elements at level 10
+        for (const [element, level] of Object.entries(player.upgradeCount)) {
+            if (level >= 10) {
+                level10Elements.push(element);
+            }
+        }
+        
+        // Need at least 2 elements at level 10 for fusion
+        if (level10Elements.length < 2) return;
+        
+        // Check for specific fusion combinations
+        const fusionTable = {
+            'fire+air': 'wildfire',
+            'fire+earth': 'magmaSurge', 
+            'fire+water': 'steamBurst',
+            'air+water': 'tempest',
+            'earth+lightning': 'seismicShock',
+            'water+lightning': 'thunderStorm' // Enhanced version
+        };
+        
+        // Check all possible pairs
+        for (let i = 0; i < level10Elements.length; i++) {
+            for (let j = i + 1; j < level10Elements.length; j++) {
+                const element1 = level10Elements[i];
+                const element2 = level10Elements[j];
+                
+                // Create fusion key (alphabetical order)
+                const fusionKey1 = `${element1}+${element2}`;
+                const fusionKey2 = `${element2}+${element1}`;
+                
+                const fusionAbility = fusionTable[fusionKey1] || fusionTable[fusionKey2];
+                
+                if (fusionAbility && !player.specialAbilities[fusionAbility]) {
+                    player.specialAbilities[fusionAbility] = true;
+                    
+                    // Show fusion unlock notification
+                    this.showFusionUnlockNotification(element1, element2, fusionAbility);
+                }
+            }
+        }
+    }
+    
+    // Show notification when fusion ultimate is unlocked
+    showFusionUnlockNotification(element1, element2, fusionAbility) {
+        const fusionNames = {
+            wildfire: 'Wildfire - Fast-spreading burning ground',
+            magmaSurge: 'Magma Surge - Lava wave with DoT and slow',
+            steamBurst: 'Steam Burst - High-pressure AoE that obscures vision',
+            tempest: 'Tempest - Moving storm that pulls enemies',
+            seismicShock: 'Seismic Shock - Earthquake with chain stun',
+            thunderStorm: 'Enhanced Thunder Storm - Lightning rain around player'
+        };
+        
+        const fusionName = fusionNames[fusionAbility] || fusionAbility;
+        
+        // Create a visual notification (could be expanded)
+        console.log(`FUSION ULTIMATE UNLOCKED! ${element1.toUpperCase()} + ${element2.toUpperCase()} = ${fusionName}`);
+        
+        // TODO: Add visual notification system for fusion unlocks
     }
     
     selectUpgrade(upgrade) {

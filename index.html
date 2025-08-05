@@ -815,11 +815,11 @@
                     <div class="element-icon fire"></div>
                     Fire Mastery
                 </div>
-                <div class="powerup-level">Level: <span id="fire-level">0</span>/6</div>
+                <div class="powerup-level">Level: <span id="fire-level">0</span>/10</div>
                 <div class="powerup-bar">
                     <div class="powerup-progress fire" id="fire-progress" style="width: 0%"></div>
                 </div>
-                <div class="special-ability" id="fire-ability">🔥 Fireball Unleashed</div>
+                <div class="special-ability" id="fire-ability">🔥 Fireball</div>
                 <div class="special-ability" id="fire-ultimate">🌋 Inferno Wave (Lvl 6)</div>
             </div>
             
@@ -828,11 +828,11 @@
                     <div class="element-icon water"></div>
                     Water Mastery
                 </div>
-                <div class="powerup-level">Level: <span id="water-level">0</span>/6</div>
+                <div class="powerup-level">Level: <span id="water-level">0</span>/10</div>
                 <div class="powerup-bar">
                     <div class="powerup-progress water" id="water-progress" style="width: 0%"></div>
                 </div>
-                <div class="special-ability" id="water-ability">🛡️ Protective Shield</div>
+                <div class="special-ability" id="water-ability">💧 Water Globes</div>
                 <div class="special-ability" id="water-ultimate">❄️ Freezing Touch (Lvl 6)</div>
             </div>
             
@@ -841,11 +841,11 @@
                     <div class="element-icon air"></div>
                     Air Mastery
                 </div>
-                <div class="powerup-level">Level: <span id="air-level">0</span>/6</div>
+                <div class="powerup-level">Level: <span id="air-level">0</span>/10</div>
                 <div class="powerup-bar">
                     <div class="powerup-progress air" id="air-progress" style="width: 0%"></div>
                 </div>
-                <div class="special-ability" id="air-ability">🚀 Twin Missiles</div>
+                <div class="special-ability" id="air-ability">🚀 Missiles</div>
                 <div class="special-ability" id="air-ultimate">🌪️ Tornado Vortex (Lvl 6)</div>
             </div>
             
@@ -854,11 +854,11 @@
                     <div class="element-icon earth"></div>
                     Earth Mastery
                 </div>
-                <div class="powerup-level">Level: <span id="earth-level">0</span>/6</div>
+                <div class="powerup-level">Level: <span id="earth-level">0</span>/10</div>
                 <div class="powerup-bar">
                     <div class="powerup-progress earth" id="earth-progress" style="width: 0%"></div>
                 </div>
-                <div class="special-ability" id="earth-ability">🌊 Tremors</div>
+                <div class="special-ability" id="earth-ability">🌍 Tremor</div>
                 <div class="special-ability" id="earth-ultimate">🌍 Earthquake Stomp (Lvl 6)</div>
             </div>
             
@@ -867,11 +867,11 @@
                     <div class="element-icon lightning"></div>
                     Lightning Mastery
                 </div>
-                <div class="powerup-level">Level: <span id="lightning-level">0</span>/6</div>
+                <div class="powerup-level">Level: <span id="lightning-level">0</span>/10</div>
                 <div class="powerup-bar">
                     <div class="powerup-progress lightning" id="lightning-progress" style="width: 0%"></div>
                 </div>
-                <div class="special-ability" id="lightning-ability">⚡ Swift Strike</div>
+                <div class="special-ability" id="lightning-ability">⚡ Chain Lightning</div>
                 <div class="special-ability" id="lightning-ultimate">⛈️ Thunder Storm (Lvl 6)</div>
             </div>
         </div>
@@ -937,6 +937,7 @@
                                 <div style="font-size: 13px; line-height: 1.4;">
                                     <div>Basic Weapon: <span id="finalBasicDamage">0</span></div>
                                     <div>Fireballs: <span id="finalFireballDamage">0</span></div>
+                                    <div>Water Globes: <span id="finalWaterGlobeDamage">0</span></div>
                                     <div>Missiles: <span id="finalMissilesDamage">0</span></div>
                                     <div>Tremors: <span id="finalTremorsDamage">0</span></div>
                                     <div>Chain Lightning: <span id="finalChainLightningDamage">0</span></div>
@@ -982,6 +983,77 @@
                         <div class="item-purchase">
                             <div class="item-price">💎 <span id="xpVortexPrice">10</span></div>
                             <button id="buyXpVortex" class="shop-buy-btn">Buy</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Mastery Rings Section -->
+                    <div style="margin: 20px 0; padding: 10px 0; border-top: 1px solid #555;">
+                        <h3 style="color: #ffaa00; margin: 0 0 15px 0; font-size: 16px;">🔮 Elemental Mastery Rings</h3>
+                        <div style="font-size: 12px; color: #ccc; margin-bottom: 15px;">Required for levels 6-10. Max 2 equipped.</div>
+                    </div>
+                    
+                    <div class="shop-item" id="fireRingItem">
+                        <div class="item-icon">🔥</div>
+                        <div class="item-details">
+                            <div class="item-name" id="fireRingName">Fire Mastery Ring</div>
+                            <div class="item-description">Unlocks Fire levels 6-10</div>
+                            <div class="item-level" id="fireRingStatus">Not Owned</div>
+                        </div>
+                        <div class="item-purchase">
+                            <div class="item-price">💎 <span id="fireRingPrice">50</span></div>
+                            <button id="buyFireRing" class="shop-buy-btn">Buy</button>
+                        </div>
+                    </div>
+                    
+                    <div class="shop-item" id="waterRingItem">
+                        <div class="item-icon">💧</div>
+                        <div class="item-details">
+                            <div class="item-name" id="waterRingName">Water Mastery Ring</div>
+                            <div class="item-description">Unlocks Water levels 6-10</div>
+                            <div class="item-level" id="waterRingStatus">Not Owned</div>
+                        </div>
+                        <div class="item-purchase">
+                            <div class="item-price">💎 <span id="waterRingPrice">50</span></div>
+                            <button id="buyWaterRing" class="shop-buy-btn">Buy</button>
+                        </div>
+                    </div>
+                    
+                    <div class="shop-item" id="earthRingItem">
+                        <div class="item-icon">🌍</div>
+                        <div class="item-details">
+                            <div class="item-name" id="earthRingName">Earth Mastery Ring</div>
+                            <div class="item-description">Unlocks Earth levels 6-10</div>
+                            <div class="item-level" id="earthRingStatus">Not Owned</div>
+                        </div>
+                        <div class="item-purchase">
+                            <div class="item-price">💎 <span id="earthRingPrice">50</span></div>
+                            <button id="buyEarthRing" class="shop-buy-btn">Buy</button>
+                        </div>
+                    </div>
+                    
+                    <div class="shop-item" id="airRingItem">
+                        <div class="item-icon">🌪️</div>
+                        <div class="item-details">
+                            <div class="item-name" id="airRingName">Air Mastery Ring</div>
+                            <div class="item-description">Unlocks Air levels 6-10</div>
+                            <div class="item-level" id="airRingStatus">Not Owned</div>
+                        </div>
+                        <div class="item-purchase">
+                            <div class="item-price">💎 <span id="airRingPrice">50</span></div>
+                            <button id="buyAirRing" class="shop-buy-btn">Buy</button>
+                        </div>
+                    </div>
+                    
+                    <div class="shop-item" id="lightningRingItem">
+                        <div class="item-icon">⚡</div>
+                        <div class="item-details">
+                            <div class="item-name" id="lightningRingName">Lightning Mastery Ring</div>
+                            <div class="item-description">Unlocks Lightning levels 6-10</div>
+                            <div class="item-level" id="lightningRingStatus">Not Owned</div>
+                        </div>
+                        <div class="item-purchase">
+                            <div class="item-price">💎 <span id="lightningRingPrice">50</span></div>
+                            <button id="buyLightningRing" class="shop-buy-btn">Buy</button>
                         </div>
                     </div>
                 </div>
@@ -1053,6 +1125,10 @@
                     <div class="stat-row">
                         <span class="stat-label">Fireballs:</span>
                         <span class="stat-value damage-stat" id="sessionFireballDamage">0</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Water Globes:</span>
+                        <span class="stat-value damage-stat" id="sessionWaterGlobeDamage">0</span>
                     </div>
                     <div class="stat-row">
                         <span class="stat-label">Missiles:</span>
@@ -1150,6 +1226,10 @@
                 <div class="stat-row">
                     <span class="stat-label">Fireballs:</span>
                     <span class="stat-value damage-stat" id="fireballDamage">0</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">Water Globes:</span>
+                    <span class="stat-value damage-stat" id="waterGlobeDamage">0</span>
                 </div>
                 <div class="stat-row">
                     <span class="stat-label">Missiles:</span>
