@@ -16,9 +16,18 @@ Elemental Fury is a top-down survival game where players master 5 elemental powe
 - **Experience System**: Gain XP to level up and choose upgrades
 
 ### Controls
-- **WASD**: Movement
+
+#### 🖥️ Desktop Controls
+- **WASD/Arrow Keys**: Movement
 - **Mouse**: Aim attacks
 - **SPACE/ENTER**: Start game or restart after game over
+
+#### 📱 Mobile Controls
+- **Device Tilt**: Move your character by tilting your phone
+  - Tilt left/right for horizontal movement
+  - Tilt forward/back for vertical movement
+- **Auto-Aim**: Aiming follows your movement direction automatically
+- **Touch**: Tap to start game or restart after game over
 
 ## 🔥 Elemental Mastery System
 
@@ -135,6 +144,7 @@ Elemental Fury is a top-down survival game where players master 5 elemental powe
 
 ### Technologies Used
 - **Frontend**: HTML5 Canvas, JavaScript (ES6+)
+- **Mobile Support**: Device Orientation API, Touch Events
 - **Hosting**: Firebase Hosting
 - **Deployment**: Automated via Firebase CLI
 

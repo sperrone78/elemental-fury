@@ -80,6 +80,7 @@ export class Player {
         
         let dx = 0, dy = 0;
         
+        // Desktop keyboard controls
         if (keys['w'] || keys['arrowup']) dy -= 1;
         if (keys['s'] || keys['arrowdown']) dy += 1;
         if (keys['a'] || keys['arrowleft']) dx -= 1;
@@ -293,8 +294,8 @@ export class Player {
             }
             
             // Calculate damage with level scaling  
-            const baseDamage = 18; // Further reduced for better balance
-            const damage = baseDamage + (earthLevel >= 2 ? (earthLevel - 1) * 2 : 0); // +2 damage per level
+            const baseDamage = 7; // Significantly reduced for better balance (2.5x nerf)
+            const damage = baseDamage + (earthLevel >= 2 ? (earthLevel - 1) * 1 : 0); // +1 damage per level
             
             let enemiesHit = 0;
             this.game.enemies.forEach(enemy => {
@@ -305,8 +306,12 @@ export class Player {
                     this.game.recordDamage('tremors', damage);
                     enemiesHit++;
                     
-                    // Add ground crack particle effects
-                    this.game.particles.push(new TremorParticle(enemy.x, enemy.y));
+                    // Add enhanced ground crack particle effects
+                    for (let i = 0; i < 3; i++) {
+                        const offsetX = (Math.random() - 0.5) * 20;
+                        const offsetY = (Math.random() - 0.5) * 20;
+                        this.game.particles.push(new TremorParticle(enemy.x + offsetX, enemy.y + offsetY));
+                    }
                 }
             });
             
@@ -315,10 +320,10 @@ export class Player {
                 // Add screen shake effect
                 this.game.screenShake = Math.min(this.game.screenShake + 2, 8);
                 
-                // Add central tremor particles around player
-                for (let i = 0; i < 3; i++) {
+                // Add enhanced central tremor particles around player
+                for (let i = 0; i < 8; i++) {
                     const angle = Math.random() * Math.PI * 2;
-                    const dist = Math.random() * tremorRange * 0.7;
+                    const dist = Math.random() * tremorRange * 0.8;
                     const px = this.x + Math.cos(angle) * dist;
                     const py = this.y + Math.sin(angle) * dist;
                     this.game.particles.push(new TremorParticle(px, py));

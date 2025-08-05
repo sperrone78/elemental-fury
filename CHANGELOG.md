@@ -2,6 +2,53 @@
 
 All notable changes to Elemental Fury are documented here.
 
+## [2.9.1] - 2025-08-05 - Tremor Balance & Visual Enhancement
+
+### ⚖️ Balance Changes - Earth Element
+- **Tremor Damage Nerf**: Reduced base damage from 18→7 (2.4x reduction)
+  - Level scaling reduced from +2 to +1 damage per level
+  - Max damage at Level 5: 26→11 (from ~52 DPS to ~22 DPS)
+  - Addressed overpowered nature while maintaining earth element viability
+
+### 🎨 Enhanced - Tremor Visual Effects  
+- **4x More Particles**: Increased particle count from 4 to 16+ per tremor pulse
+- **Enhanced Per-Enemy Effects**: 3 particles per enemy hit (was 1)
+- **Improved Central Effects**: 8 particles around player (was 3) with wider coverage
+- **Particle Variety**: 
+  - Larger size range (2-10px) with random scaling (1.0x-1.5x)
+  - Rotation animation on all particles
+  - Subtle glow effects for better visibility
+  - Enhanced brown/gray earth tones
+
+### 🐛 Fixed - UI System
+- **Dynamic Level Display**: Ring-based max level (Level X/5 → Level X/10 with mastery ring)
+- **Progress Bar Accuracy**: Progress percentage now based on actual maximum level
+- **Mastery Ring Integration**: Ultimate abilities only visible with corresponding mastery ring
+- **JavaScript Syntax**: Fixed duplicate variable declaration causing load errors
+
+## [2.9.0] - 2025-01-26 - Mobile Support & Tilt Controls
+
+### 📱 Added - Mobile Support
+- **Device Orientation Controls**: Tilt your device to move the character
+  - Left/right tilt for horizontal movement
+  - Forward/back tilt for vertical movement  
+  - 5-degree deadzone to prevent jittery movement
+- **Automatic Aiming**: Aim direction follows movement automatically on mobile
+- **Mobile Detection**: Automatic detection of mobile devices and touch capabilities
+- **Touch Optimizations**: 
+  - Prevented zoom on double-tap
+  - Disabled text selection and touch callouts
+  - Added touch-action manipulation
+- **Mobile UI**: Side panels hidden on mobile for maximum screen space
+- **Permission Handling**: iOS 13+ device orientation permission requests
+- **Mobile Instructions**: Helpful overlay explaining tilt controls
+
+### 🎨 Enhanced - Mobile Experience
+- **Responsive Canvas**: Auto-scales to fit mobile screens
+- **Touch-Friendly**: All interactions work with touch
+- **Full-Screen Gaming**: Optimized viewport for mobile browsers
+- **Performance**: Reduced DOM updates for better mobile performance
+
 ## [2.8.0] - 2025-01-26 - Modern Canvas UI Redesign
 
 ### 🎨 Added - Modern Canvas-Based UI

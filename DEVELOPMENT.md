@@ -4,6 +4,33 @@ This document outlines the technical implementation details and recent changes m
 
 ## 📋 Recent Updates
 
+### Earth Element Balance & Visual Enhancement (v2.9.1)
+
+#### Tremor Damage Rebalance
+- **Base Damage**: 18 → 7 (61% reduction)
+- **Level Scaling**: +2 → +1 damage per level 
+- **Max DPS**: ~52 → ~22 (58% reduction at Level 5)
+- **Implementation**: Modified `updateRadiusAttack()` in `Player.js`
+
+#### Enhanced Particle System
+- **TremorParticle Class Improvements**:
+  - Size range: 3-7px → 2-10px with random scaling (1.0x-1.5x)
+  - Added rotation animation with random speed
+  - Glow effects via `ctx.shadowBlur = 4`
+  - Enhanced color variations (brown/gray earth tones)
+- **Spawn Rate Increase**: 4 → 16+ particles per pulse
+  - 3 particles per enemy hit (was 1)
+  - 8 central particles around player (was 3)
+  - 20px random offset spread for enemy hit effects
+
+#### UI System Enhancements
+- **Dynamic Level Display**: `updatePowerupDisplay()` modified to show:
+  - "Level X/5" without mastery ring
+  - "Level X/10" with mastery ring
+- **Progress Bar Accuracy**: Percentage calculated based on actual max level
+- **Ultimate Ability Visibility**: Only shown when player has corresponding mastery ring
+- **Ring Integration**: `player.masteryRings.includes(element)` check for all ultimate displays
+
 ### Frame Rate Independence System (v2.2.0)
 - **DeltaTime Implementation**: Added consistent frame rate normalization across all devices
 - **Variable Timestep**: Game loop now uses proper deltaTime calculations instead of fixed 1/60 timesteps

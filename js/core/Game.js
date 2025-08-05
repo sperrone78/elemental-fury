@@ -785,24 +785,37 @@ export class Game {
         
         elements.forEach(element => {
             const count = this.player.upgradeCount[element] || 0;
-            const percentage = (count / 10) * 100;
+            const hasRing = this.player && this.player.masteryRings && this.player.masteryRings.includes(element);
+            const maxLevel = hasRing ? 10 : 5;
+            const percentage = (count / maxLevel) * 100;
             
-            document.getElementById(`${element}-level`).textContent = count;
+            document.getElementById(`${element}-level`).textContent = `${count}/${maxLevel}`;
             document.getElementById(`${element}-progress`).style.width = `${percentage}%`;
             
             const abilityElement = document.getElementById(`${element}-ability`);
             const ultimateElement = document.getElementById(`${element}-ultimate`);
             
-            if (count >= 3) {
+            // Handle ability visibility (level 1 unlocks abilities)
+            if (count >= 1) {
                 abilityElement.classList.add('unlocked');
+                abilityElement.classList.remove('available');
             } else {
-                abilityElement.classList.remove('unlocked');
+                // Hide completely when no levels in this element
+                abilityElement.classList.remove('unlocked', 'available');
             }
             
-            if (count >= 6) {
+            // Handle ultimate visibility (level 6 requirement + mastery ring required)
+            
+            if (hasRing && count >= 6) {
                 ultimateElement.classList.add('unlocked');
-            } else {
+                ultimateElement.classList.remove('available');
+            } else if (hasRing && count >= 5) {
+                // Show as available but not unlocked when at level 5 and has mastery ring
+                ultimateElement.classList.add('available');
                 ultimateElement.classList.remove('unlocked');
+            } else {
+                // Hide completely when no mastery ring or not close to ultimate
+                ultimateElement.classList.remove('unlocked', 'available');
             }
         });
     }
