@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Modular Imports</title>
+</head>
+<body>
+    <h1>Testing Modular Game Imports</h1>
+    <div id="status">Loading...</div>
+    
+    <script type="module">
+        try {
+            console.log('Starting import test...');
+            
+            // Test utils first
+            const { GAME_CONFIG } = await import('./js/utils/Constants.js');
+            console.log('✅ Constants imported:', GAME_CONFIG);
+            
+            const { MathUtils } = await import('./js/utils/MathUtils.js');
+            console.log('✅ MathUtils imported');
+            
+            // Test core classes
+            const { Player } = await import('./js/core/Player.js');
+            console.log('✅ Player imported');
+            
+            const { Game } = await import('./js/core/Game.js');
+            console.log('✅ Game imported');
+            
+            // Try to create a game instance
+            const game = new Game();
+            console.log('✅ Game instance created successfully!');
+            
+            document.getElementById('status').innerHTML = `
+                <div style="color: green;">
+                    ✅ All imports successful!<br>
+                    Game instance created successfully.<br>
+                    <a href="index.html">Go to Game</a>
+                </div>
+            `;
+            
+        } catch (error) {
+            console.error('❌ Import error:', error);
+            document.getElementById('status').innerHTML = `
+                <div style="color: red;">
+                    ❌ Import failed: ${error.message}<br>
+                    Check console for details.
+                </div>
+            `;
+        }
+    </script>
+</body>
+</html>
