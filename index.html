@@ -16,20 +16,11 @@
             color: white;
         }
         
-        #topHeader {
-            height: 60px;
-            background: #222;
-            border-bottom: 2px solid #333;
-            display: flex;
-            align-items: center;
-            padding: 0 20px;
-            justify-content: space-between;
-        }
-        
         #gameContainer {
             display: flex;
             width: 100%;
-            height: calc(100vh - 60px);
+            height: 100vh;
+            position: relative;
         }
         
         #leftPanel {
@@ -118,62 +109,7 @@
             color: #00ff00;
         }
         
-        .header-left, .header-center, .header-right {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-        }
-        
-        .stat-group {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        
-        .stat-bar {
-            width: 120px;
-            height: 10px;
-            background: #333;
-            border-radius: 5px;
-            overflow: hidden;
-            border: 1px solid #555;
-        }
-        
-        .health-bar {
-            height: 100%;
-            background: linear-gradient(90deg, #ff0000, #00ff00);
-            border-radius: 4px;
-            transition: width 0.3s ease;
-        }
-        
-        .xp-bar {
-            height: 100%;
-            background: linear-gradient(90deg, #0066ff, #00ffff);
-            border-radius: 4px;
-            transition: width 0.3s ease;
-        }
-        
-        .stat-text {
-            font-size: 14px;
-            color: #ccc;
-            min-width: 60px;
-        }
-        
-        .level-display {
-            font-size: 18px;
-            font-weight: bold;
-            color: #ffff00;
-        }
-        
-        .timer-display {
-            font-size: 16px;
-            color: #ff8800;
-        }
-        
-        .score-display {
-            font-size: 16px;
-            color: #00ff88;
-        }
+
         
         #upgradeMenu {
             position: absolute;
@@ -778,34 +714,6 @@
     </style>
 </head>
 <body>
-    <div id="topHeader">
-        <div class="header-left">
-            <div class="stat-group">
-                <span class="stat-text">Health:</span>
-                <div class="stat-bar">
-                    <div class="health-bar" id="health-bar" style="width: 100%"></div>
-                </div>
-                <span class="stat-text"><span id="health">100</span>/<span id="maxHealth">100</span></span>
-            </div>
-            <div class="stat-group">
-                <span class="stat-text">XP:</span>
-                <div class="stat-bar">
-                    <div class="xp-bar" id="xp-bar" style="width: 0%"></div>
-                </div>
-                <span class="stat-text"><span id="xp">0</span>/<span id="xpNext">10</span></span>
-            </div>
-        </div>
-        
-        <div class="header-center">
-            <div class="level-display">Level <span id="level">1</span></div>
-        </div>
-        
-        <div class="header-right">
-            <div class="timer-display">⏱️ <span id="timer">0:00</span></div>
-            <div class="score-display">🏆 <span id="score">0</span></div>
-        </div>
-    </div>
-    
     <div id="gameContainer">
         <div id="leftPanel">
             <h2>Elemental Powers</h2>
@@ -935,16 +843,16 @@
                             <div>
                                 <div style="font-weight: bold; color: #ff6644; margin-bottom: 8px;">💥 Damage Sources</div>
                                 <div style="font-size: 13px; line-height: 1.4;">
-                                    <div>Basic Weapon: <span id="finalBasicDamage">0</span></div>
-                                    <div>Fireballs: <span id="finalFireballDamage">0</span></div>
-                                    <div>Water Globes: <span id="finalWaterGlobeDamage">0</span></div>
-                                    <div>Missiles: <span id="finalMissilesDamage">0</span></div>
-                                    <div>Tremors: <span id="finalTremorsDamage">0</span></div>
-                                    <div>Chain Lightning: <span id="finalChainLightningDamage">0</span></div>
-                                    <div>Earthquake: <span id="finalEarthquakeDamage">0</span></div>
-                                    <div>Thunder Storm: <span id="finalThunderStormDamage">0</span></div>
-                                    <div>Tornado: <span id="finalTornadoDamage">0</span></div>
-                                    <div>Inferno Wave: <span id="finalInfernoDamage">0</span></div>
+                                    <div id="finalBasicDamageRow">Basic Weapon: <span id="finalBasicDamage">0</span></div>
+                                    <div id="finalFireballDamageRow">Fireballs: <span id="finalFireballDamage">0</span></div>
+                                    <div id="finalWaterGlobeDamageRow">Water Globes: <span id="finalWaterGlobeDamage">0</span></div>
+                                    <div id="finalMissilesDamageRow">Missiles: <span id="finalMissilesDamage">0</span></div>
+                                    <div id="finalTremorsDamageRow">Tremors: <span id="finalTremorsDamage">0</span></div>
+                                    <div id="finalChainLightningDamageRow">Chain Lightning: <span id="finalChainLightningDamage">0</span></div>
+                                    <div id="finalEarthquakeDamageRow">Earthquake: <span id="finalEarthquakeDamage">0</span></div>
+                                    <div id="finalThunderStormDamageRow">Thunder Storm: <span id="finalThunderStormDamage">0</span></div>
+                                    <div id="finalTornadoDamageRow">Tornado: <span id="finalTornadoDamage">0</span></div>
+                                    <div id="finalInfernoDamageRow">Inferno Wave: <span id="finalInfernoDamage">0</span></div>
                                 </div>
                                 
                                 <div style="font-weight: bold; color: #00aaff; margin: 12px 0 8px 0;">🔥 Elements Used</div>

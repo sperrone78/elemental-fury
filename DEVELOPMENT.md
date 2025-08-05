@@ -87,8 +87,9 @@ class Game {
     }
     
     startGame() { /* Initialize new game */ }
-    updateUI() { /* Update health, XP, score displays */ }
+    updateUI() { /* Update side panel displays only */ }
     render() { /* Handle different game states */ }
+    renderCanvasUI() { /* Modern UI rendered directly on canvas */ }
 }
 ```
 
@@ -158,9 +159,30 @@ User presses SPACE/ENTER → startGame() → 'playing' state (restart)
 - **Stunned**: `#ffff44` (bright yellow)
 - **Normal**: `#ff4444` (red)
 
+### Modern Canvas UI Architecture
+
+#### Canvas-Rendered Elements
+- **Health Bar**: Compact 120px rounded bar with gradient colors
+  - Green (>60% health) → Yellow (30-60%) → Red (<30%)
+  - Semi-transparent background with subtle white border
+- **XP Bar**: Blue gradient progress bar below health
+- **Level Display**: Shows "Lv.X" next to XP bar
+- **Timer**: Top-right with clock emoji, auto-sizing background
+- **Score**: Below timer with trophy emoji, comma-separated values
+
+#### Technical Implementation
+```javascript
+renderCanvasUI() {
+    // Modern rounded rectangles with gradients
+    // Auto-sizing pill backgrounds
+    // Browser compatibility fallback for roundRect
+    // Performance-optimized canvas rendering
+}
+```
+
 ### UI Feedback
 - **Unlocked Abilities**: Green highlight class
-- **Progress Bars**: Animated width transitions
+- **Progress Bars**: Animated width transitions  
 - **Blinking Prompt**: CSS keyframe animation
 
 ## 🔧 Performance Optimizations

@@ -433,18 +433,36 @@ class Game {
                     document.getElementById('finalKills').textContent = this.sessionStats ? this.sessionStats.enemiesKilled.total : 0;
                     document.getElementById('finalTotalDamage').textContent = this.sessionStats ? formatNumber(this.sessionStats.damageDealt.total) : 0;
                     
-                    // Populate detailed damage breakdown
+                    // Populate detailed damage breakdown - only show sources greater than 0
                     if (this.sessionStats) {
-                        document.getElementById('finalBasicDamage').textContent = formatNumber(this.sessionStats.damageDealt.basicWeapon);
-                        document.getElementById('finalFireballDamage').textContent = formatNumber(this.sessionStats.damageDealt.fireball);
-                        document.getElementById('finalWaterGlobeDamage').textContent = formatNumber(this.sessionStats.damageDealt.waterGlobe);
-                        document.getElementById('finalMissilesDamage').textContent = formatNumber(this.sessionStats.damageDealt.missiles);
-                        document.getElementById('finalTremorsDamage').textContent = formatNumber(this.sessionStats.damageDealt.tremors);
-                        document.getElementById('finalChainLightningDamage').textContent = formatNumber(this.sessionStats.damageDealt.chainLightning);
-                        document.getElementById('finalEarthquakeDamage').textContent = formatNumber(this.sessionStats.damageDealt.earthquakeStormp);
-                        document.getElementById('finalThunderStormDamage').textContent = formatNumber(this.sessionStats.damageDealt.thunderStorm);
-                        document.getElementById('finalTornadoDamage').textContent = formatNumber(this.sessionStats.damageDealt.tornadoVortex);
-                        document.getElementById('finalInfernoDamage').textContent = formatNumber(this.sessionStats.damageDealt.infernoWave);
+                        const damageData = [
+                            { id: 'finalBasicDamage', parentId: 'finalBasicDamageRow', value: this.sessionStats.damageDealt.basicWeapon },
+                            { id: 'finalFireballDamage', parentId: 'finalFireballDamageRow', value: this.sessionStats.damageDealt.fireball },
+                            { id: 'finalWaterGlobeDamage', parentId: 'finalWaterGlobeDamageRow', value: this.sessionStats.damageDealt.waterGlobe },
+                            { id: 'finalMissilesDamage', parentId: 'finalMissilesDamageRow', value: this.sessionStats.damageDealt.missiles },
+                            { id: 'finalTremorsDamage', parentId: 'finalTremorsDamageRow', value: this.sessionStats.damageDealt.tremors },
+                            { id: 'finalChainLightningDamage', parentId: 'finalChainLightningDamageRow', value: this.sessionStats.damageDealt.chainLightning },
+                            { id: 'finalEarthquakeDamage', parentId: 'finalEarthquakeDamageRow', value: this.sessionStats.damageDealt.earthquakeStormp },
+                            { id: 'finalThunderStormDamage', parentId: 'finalThunderStormDamageRow', value: this.sessionStats.damageDealt.thunderStorm },
+                            { id: 'finalTornadoDamage', parentId: 'finalTornadoDamageRow', value: this.sessionStats.damageDealt.tornadoVortex },
+                            { id: 'finalInfernoDamage', parentId: 'finalInfernoDamageRow', value: this.sessionStats.damageDealt.infernoWave }
+                        ];
+                        
+                        damageData.forEach(({ id, parentId, value }) => {
+                            const element = document.getElementById(id);
+                            const parentElement = document.getElementById(parentId);
+                            
+                            if (value > 0) {
+                                element.textContent = formatNumber(value);
+                                if (parentElement) {
+                                    parentElement.style.display = 'block';
+                                }
+                            } else {
+                                if (parentElement) {
+                                    parentElement.style.display = 'none';
+                                }
+                            }
+                        });
                         
                         // Show elements used
                         const elementsUsed = [];

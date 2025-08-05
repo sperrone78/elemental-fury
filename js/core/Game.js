@@ -428,6 +428,9 @@ export class Game {
             if (this.screenShake > 0) {
                 this.ctx.restore();
             }
+            
+            // Render UI elements on canvas
+            this.renderCanvasUI();
         } else if (this.gameState === 'waiting' || this.gameState === 'gameOver') {
             // Show start widget
             document.getElementById('startWidget').style.display = 'block';
@@ -524,18 +527,36 @@ export class Game {
         document.getElementById('finalKills').textContent = this.sessionStats ? this.sessionStats.enemiesKilled.total : 0;
         document.getElementById('finalTotalDamage').textContent = this.sessionStats ? formatNumber(this.sessionStats.damageDealt.total) : 0;
         
-        // Populate detailed damage breakdown
+        // Populate detailed damage breakdown - only show sources greater than 0
         if (this.sessionStats) {
-            document.getElementById('finalBasicDamage').textContent = formatNumber(this.sessionStats.damageDealt.basicWeapon);
-            document.getElementById('finalFireballDamage').textContent = formatNumber(this.sessionStats.damageDealt.fireball);
-            document.getElementById('finalWaterGlobeDamage').textContent = formatNumber(this.sessionStats.damageDealt.waterGlobe);
-            document.getElementById('finalMissilesDamage').textContent = formatNumber(this.sessionStats.damageDealt.missiles);
-            document.getElementById('finalTremorsDamage').textContent = formatNumber(this.sessionStats.damageDealt.tremors);
-            document.getElementById('finalChainLightningDamage').textContent = formatNumber(this.sessionStats.damageDealt.chainLightning);
-            document.getElementById('finalEarthquakeDamage').textContent = formatNumber(this.sessionStats.damageDealt.earthquakeStormp);
-            document.getElementById('finalThunderStormDamage').textContent = formatNumber(this.sessionStats.damageDealt.thunderStorm);
-            document.getElementById('finalTornadoDamage').textContent = formatNumber(this.sessionStats.damageDealt.tornadoVortex);
-            document.getElementById('finalInfernoDamage').textContent = formatNumber(this.sessionStats.damageDealt.infernoWave);
+            const damageData = [
+                { id: 'finalBasicDamage', parentId: 'finalBasicDamageRow', value: this.sessionStats.damageDealt.basicWeapon },
+                { id: 'finalFireballDamage', parentId: 'finalFireballDamageRow', value: this.sessionStats.damageDealt.fireball },
+                { id: 'finalWaterGlobeDamage', parentId: 'finalWaterGlobeDamageRow', value: this.sessionStats.damageDealt.waterGlobe },
+                { id: 'finalMissilesDamage', parentId: 'finalMissilesDamageRow', value: this.sessionStats.damageDealt.missiles },
+                { id: 'finalTremorsDamage', parentId: 'finalTremorsDamageRow', value: this.sessionStats.damageDealt.tremors },
+                { id: 'finalChainLightningDamage', parentId: 'finalChainLightningDamageRow', value: this.sessionStats.damageDealt.chainLightning },
+                { id: 'finalEarthquakeDamage', parentId: 'finalEarthquakeDamageRow', value: this.sessionStats.damageDealt.earthquakeStormp },
+                { id: 'finalThunderStormDamage', parentId: 'finalThunderStormDamageRow', value: this.sessionStats.damageDealt.thunderStorm },
+                { id: 'finalTornadoDamage', parentId: 'finalTornadoDamageRow', value: this.sessionStats.damageDealt.tornadoVortex },
+                { id: 'finalInfernoDamage', parentId: 'finalInfernoDamageRow', value: this.sessionStats.damageDealt.infernoWave }
+            ];
+            
+            damageData.forEach(({ id, parentId, value }) => {
+                const element = document.getElementById(id);
+                const parentElement = document.getElementById(parentId);
+                
+                if (value > 0) {
+                    element.textContent = formatNumber(value);
+                    if (parentElement) {
+                        parentElement.style.display = 'block';
+                    }
+                } else {
+                    if (parentElement) {
+                        parentElement.style.display = 'none';
+                    }
+                }
+            });
             
             // Show elements used
             const elementsUsed = [];
@@ -755,27 +776,7 @@ export class Game {
     updateUI() {
         if (this.gameState !== 'playing' || !this.player) return;
         
-        // Update health display and bar
-        document.getElementById('health').textContent = Math.floor(this.player.health);
-        document.getElementById('maxHealth').textContent = Math.floor(this.player.maxHealth);
-        const healthPercent = (this.player.health / this.player.maxHealth) * 100;
-        document.getElementById('health-bar').style.width = `${Math.max(0, healthPercent)}%`;
-        
-        // Update XP display and bar
-        document.getElementById('level').textContent = this.player.level;
-        document.getElementById('xp').textContent = Math.floor(this.player.xp);
-        document.getElementById('xpNext').textContent = Math.floor(this.player.xpToNext);
-        const xpPercent = (this.player.xp / this.player.xpToNext) * 100;
-        document.getElementById('xp-bar').style.width = `${xpPercent}%`;
-        
-        // Update score
-        document.getElementById('score').textContent = this.score;
-        
-        // Update timer
-        const minutes = Math.floor(this.gameTime / 60);
-        const seconds = Math.floor(this.gameTime % 60);
-        document.getElementById('timer').textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
-        
+        // All UI is now rendered on canvas in renderCanvasUI()
         this.updatePowerupDisplay();
     }
     
@@ -1064,5 +1065,138 @@ export class Game {
         });
         
         document.getElementById('sessionTotalDamage').textContent = formatNumber(this.sessionStats.damageDealt.total);
+    }
+    
+    renderCanvasUI() {
+        if (!this.player) return;
+        
+        const ctx = this.ctx;
+        ctx.save();
+        
+        // Fallback for roundRect if not supported
+        if (!ctx.roundRect) {
+            ctx.roundRect = function(x, y, width, height, radius) {
+                this.beginPath();
+                this.moveTo(x + radius, y);
+                this.lineTo(x + width - radius, y);
+                this.quadraticCurveTo(x + width, y, x + width, y + radius);
+                this.lineTo(x + width, y + height - radius);
+                this.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+                this.lineTo(x + radius, y + height);
+                this.quadraticCurveTo(x, y + height, x, y + height - radius);
+                this.lineTo(x, y + radius);
+                this.quadraticCurveTo(x, y, x + radius, y);
+                this.closePath();
+            };
+        }
+        
+        // Modern compact health bar
+        const healthBarWidth = 120;
+        const healthBarHeight = 8;
+        const healthBarX = 15;
+        const healthBarY = 15;
+        
+        // Health bar background (rounded)
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
+        ctx.beginPath();
+        ctx.roundRect(healthBarX - 2, healthBarY - 2, healthBarWidth + 4, healthBarHeight + 4, 4);
+        ctx.fill();
+        
+        // Health bar border (subtle)
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.roundRect(healthBarX, healthBarY, healthBarWidth, healthBarHeight, 3);
+        ctx.stroke();
+        
+        // Health bar fill (gradient)
+        const healthPercent = this.player.health / this.player.maxHealth;
+        const gradient = ctx.createLinearGradient(healthBarX, 0, healthBarX + healthBarWidth, 0);
+        if (healthPercent > 0.6) {
+            gradient.addColorStop(0, '#4ade80'); // green
+            gradient.addColorStop(1, '#22c55e');
+        } else if (healthPercent > 0.3) {
+            gradient.addColorStop(0, '#fbbf24'); // yellow
+            gradient.addColorStop(1, '#f59e0b');
+        } else {
+            gradient.addColorStop(0, '#ef4444'); // red
+            gradient.addColorStop(1, '#dc2626');
+        }
+        ctx.fillStyle = gradient;
+        ctx.beginPath();
+        ctx.roundRect(healthBarX + 1, healthBarY + 1, (healthBarWidth - 2) * healthPercent, healthBarHeight - 2, 2);
+        ctx.fill();
+        
+        // Health text (compact)
+        ctx.fillStyle = '#ffffff';
+        ctx.font = 'bold 10px Arial';
+        ctx.textAlign = 'left';
+        ctx.fillText(`${Math.floor(this.player.health)}`, healthBarX + healthBarWidth + 8, healthBarY + 6);
+        
+        // Modern compact XP bar
+        const xpBarY = healthBarY + healthBarHeight + 8;
+        
+        // XP bar background
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
+        ctx.beginPath();
+        ctx.roundRect(healthBarX - 2, xpBarY - 2, healthBarWidth + 4, healthBarHeight + 4, 4);
+        ctx.fill();
+        
+        // XP bar border
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.roundRect(healthBarX, xpBarY, healthBarWidth, healthBarHeight, 3);
+        ctx.stroke();
+        
+        // XP bar fill (blue gradient)
+        const xpPercent = this.player.xp / this.player.xpToNext;
+        const xpGradient = ctx.createLinearGradient(healthBarX, 0, healthBarX + healthBarWidth, 0);
+        xpGradient.addColorStop(0, '#3b82f6');
+        xpGradient.addColorStop(1, '#1d4ed8');
+        ctx.fillStyle = xpGradient;
+        ctx.beginPath();
+        ctx.roundRect(healthBarX + 1, xpBarY + 1, (healthBarWidth - 2) * xpPercent, healthBarHeight - 2, 2);
+        ctx.fill();
+        
+        // XP text (compact)
+        ctx.fillStyle = '#ffffff';
+        ctx.font = 'bold 10px Arial';
+        ctx.fillText(`Lv.${this.player.level}`, healthBarX + healthBarWidth + 8, xpBarY + 6);
+        
+        // Top-right UI elements (Timer, Score)
+        const rightX = this.width - 15;
+        const rightY = 15;
+        
+        // Timer background
+        const timerText = `${Math.floor(this.gameTime / 60)}:${Math.floor(this.gameTime % 60).toString().padStart(2, '0')}`;
+        ctx.font = 'bold 14px Arial';
+        ctx.textAlign = 'right';
+        const timerWidth = ctx.measureText(timerText).width + 16;
+        
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
+        ctx.beginPath();
+        ctx.roundRect(rightX - timerWidth, rightY - 2, timerWidth, 18, 9);
+        ctx.fill();
+        
+        // Timer text
+        ctx.fillStyle = '#ff8800';
+        ctx.fillText(`⏱️ ${timerText}`, rightX - 8, rightY + 11);
+        
+        // Score background
+        const scoreText = this.score.toLocaleString();
+        const scoreY = rightY + 25;
+        const scoreWidth = ctx.measureText(scoreText).width + 20;
+        
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
+        ctx.beginPath();
+        ctx.roundRect(rightX - scoreWidth, scoreY - 2, scoreWidth, 18, 9);
+        ctx.fill();
+        
+        // Score text
+        ctx.fillStyle = '#00ff88';
+        ctx.fillText(`🏆 ${scoreText}`, rightX - 8, scoreY + 11);
+        
+        ctx.restore();
     }
 }

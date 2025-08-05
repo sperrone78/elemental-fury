@@ -2,6 +2,28 @@
 
 All notable changes to Elemental Fury are documented here.
 
+## [2.8.0] - 2025-01-26 - Modern Canvas UI Redesign
+
+### 🎨 Added - Modern Canvas-Based UI
+- **Canvas-Rendered Interface**: All UI elements now rendered directly on game canvas for seamless integration
+- **Compact Health Bar**: 60% smaller modern bar with gradient colors (green→yellow→red based on health)
+- **Compact XP Bar**: Sleek blue gradient progress bar below health
+- **Rounded Design**: Modern pill-shaped UI elements with subtle semi-transparent borders
+- **Auto-sizing Elements**: Timer and score backgrounds automatically adjust to content width
+- **Browser Compatibility**: Fallback for roundRect method on older browsers
+
+### 🗑️ Removed - Legacy HTML UI
+- **Header Bar Removal**: Eliminated top header, reclaiming 60px of screen space
+- **Below-Canvas UI**: Removed HTML-based level/timer/score display
+- **DOM Dependencies**: Reduced HTML DOM updates during gameplay for better performance
+
+### 📍 Enhanced - UI Positioning
+- **Health/XP**: Top-left corner overlay on canvas
+- **Timer**: Top-right with clock emoji ⏱️
+- **Score**: Below timer with trophy emoji 🏆  
+- **Level**: Compact "Lv.X" display next to XP bar
+- **Full Viewport**: Game now uses 100% of screen height
+
 ## [2.2.0] - 2025-08-04 - Frame Rate Independence & Balance Update
 
 ### 🚀 Added - Frame Rate Independence
