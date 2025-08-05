@@ -239,7 +239,7 @@ firebase deploy
 - **Lightning Strike**: 2 seconds
 - **Earth Ultimate**: 8 seconds
 - **Lightning Ultimate**: 6 seconds
-- **Tornado Spawn**: 5 seconds
+- **Tornado Spawn**: 2.5 seconds
 
 ### Enemy Health Progression
 - **Basic**: 30 HP

@@ -35,16 +35,16 @@ Elemental Fury is a top-down survival game where players master 5 elemental powe
 - **Level 6 Ultimate**: **❄️ Freezing Touch** - Freeze nearby enemies when taking damage
 
 ### Earth Mastery 🌍
-- **Levels 1-3**: +25% movement speed per level
+- **Levels 1-3**: +5 armor per level (damage reduction)
 - **Level 3 Ability**: **🌊 Tremors** - AOE blast every 3 seconds
-- **Levels 4-6**: **Tremor Fury** - Faster tremors (2.5s → 2s → 1.5s) + bonus damage
+- **Levels 4-6**: **Tremor Fury** - +3 armor + faster tremors (2.5s → 2s → 1.5s) + bonus damage
 - **Level 6 Ultimate**: **🌍 Earthquake Stomp** - Massive 150-radius earthquake every 8 seconds
 
 ### Air Mastery 🌪️
 - **Levels 1-3**: +25% weapon range per level
 - **Level 3 Ability**: **🚀 Twin Missiles** - Additional projectiles
 - **Levels 4-6**: +20% projectile speed per level
-- **Level 6 Ultimate**: **🌪️ Tornado Vortex** - Moving tornadoes spawn every 5 seconds
+- **Level 6 Ultimate**: **🌪️ Tornado Vortex** - Powerful tornadoes spawn every 2.5 seconds
 
 ### Lightning Mastery ⚡
 - **Levels 1-3**: +33% attack speed per level (-25% weapon cooldown)
@@ -74,11 +74,25 @@ Elemental Fury is a top-down survival game where players master 5 elemental powe
 - **Features**: Armor (reduces damage by 5), crown effect
 - **Reward**: 30 XP, 50 points
 
-### Boss Enemy (Every 5 levels)
+### Boss Enemies (Level-Specific Spawns)
+
+#### Basic Boss (Levels 5, 10, then random from 25+)
 - **Health**: 200 HP
 - **Damage**: 50 (2 hits to kill player)
 - **Features**: Shoots projectiles, health bar
 - **Reward**: 25 XP (5 pickups), 100 points
+
+#### Veteran Boss (Levels 15, 20, then random from 30+)
+- **Health**: 300 HP
+- **Damage**: 50 (2 hits to kill player)
+- **Features**: Enhanced projectiles, spike barrage
+- **Reward**: 40 XP (8 pickups), 250 points
+
+#### Elite Boss (Level 25+, every 5 levels + random from 40+)
+- **Health**: 400 HP
+- **Damage**: 50 (2 hits to kill player) + 10 armor
+- **Features**: Royal dominance, fast shooting
+- **Reward**: 60 XP (12 pickups), 500 points
 
 ## 🎯 Status Effects
 
@@ -166,6 +180,13 @@ Elemental Fury is a top-down survival game where players master 5 elemental powe
 - Ultimate abilities (level 6) provide massive power spikes
 - Combine elements for maximum effectiveness
 
+### Extreme Late Game (Level 15+)
+- **Critical Phase**: Random boss spawns begin - game becomes significantly harder
+- **Time Pressure**: Spawn rates increase every minute, preventing idle strategies
+- **Shop Strategy**: Essential to purchase XP Vortex upgrades for faster leveling
+- **Element Focus**: Prioritize defensive elements (Earth armor, Water healing)
+- **Level 20+ Warning**: All boss types spawn every 10 seconds - designed to be unwinnable without shop upgrades
+
 ### Ultimate Combinations
 - **Fire + Earth**: Explosions + Earthquakes for crowd control
 - **Lightning + Air**: Speed + Chain damage for fast clear
@@ -175,8 +196,16 @@ Elemental Fury is a top-down survival game where players master 5 elemental powe
 
 ### Level Up Mechanics
 - **XP Requirements**: Increase by 20% each level
-- **Boss Spawns**: Every 5 levels
+- **Specific Boss Spawns**: 
+  - Levels 5 & 10: Basic Boss
+  - Levels 12, 15 & 20: Veteran Boss
+  - Level 18 & 25+: Elite Boss (every 5 levels)
+- **Random Boss Spawns**: 
+  - Levels 10-14: Basic Bosses (every 20s)
+  - Levels 15-19: Basic + Veteran Bosses (every 15s)
+  - Level 20+: All Boss Types (every 10s)
 - **Enemy Scaling**: More veterans/elites at higher levels
+- **Spawn Rate Scaling**: 25% increase per level + 10% increase per minute of play time
 - **Choice System**: 3 random upgrades per level (filtered for available elements)
 
 ### Mastery Milestones

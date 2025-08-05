@@ -18,6 +18,7 @@ class Game {
         this.isPaused = false;
         this.gameOver = false;
         this.gameState = 'waiting'; // 'waiting', 'playing', 'gameOver', 'shop'
+        this.pendingBossSpawn = false; // Flag for spawning boss after upgrade menu
         
         this.keys = {};
         this.mousePos = { x: 0, y: 0 };
@@ -61,6 +62,7 @@ class Game {
         this.dotEffects = [];
         document.getElementById('startWidget').style.display = 'none';
         document.getElementById('upgradeMenu').style.display = 'none';
+        document.getElementById('pauseOverlay').style.display = 'none';
         
         // Reset upgrade system
         this.upgradeSystem = new UpgradeSystem();
@@ -143,9 +145,11 @@ class Game {
         document.addEventListener('keydown', (e) => {
             this.keys[e.key.toLowerCase()] = true;
             
-            // Handle keyboard shortcuts for game over and shop states
+            // Handle keyboard shortcuts for different game states
             if (this.gameState === 'waiting' && (e.key === ' ' || e.key === 'Enter')) {
                 this.startGame();
+            } else if (this.gameState === 'playing' && e.key === ' ') {
+                this.togglePause();
             } else if (this.gameState === 'shop' && e.key === 'Escape') {
                 this.exitShop();
             }
@@ -600,46 +604,62 @@ class Game {
         const side = Math.floor(Math.random() * 4);
         let x, y;
         
+        // Spawn bosses INSIDE the visible frame to avoid any edge issues
         switch(side) {
-            case 0: x = Math.random() * this.width; y = -35; break;
-            case 1: x = this.width + 35; y = Math.random() * this.height; break;
-            case 2: x = Math.random() * this.width; y = this.height + 35; break;
-            case 3: x = -35; y = Math.random() * this.height; break;
+            case 0: x = 50 + Math.random() * (this.width - 100); y = 50; break; // Top edge, inside frame
+            case 1: x = this.width - 50; y = 50 + Math.random() * (this.height - 100); break; // Right edge, inside frame
+            case 2: x = 50 + Math.random() * (this.width - 100); y = this.height - 50; break; // Bottom edge, inside frame
+            case 3: x = 50; y = 50 + Math.random() * (this.height - 100); break; // Left edge, inside frame
         }
+        
         
         const playerLevel = this.player.level;
         let boss;
         
-        if (playerLevel >= 25) {
-            // Elite bosses start appearing at level 25
-            const eliteBossChance = Math.min(60, (playerLevel - 25) * 4); // 4% per level after 25, max 60%
-            const veteranBossChance = Math.min(80, (playerLevel - 15) * 6); // 6% per level after 15, max 80%
-            
-            const roll = Math.random() * 100;
-            if (roll < eliteBossChance) {
-                boss = new EliteBoss(x, y);
-            } else if (roll < eliteBossChance + veteranBossChance) {
-                boss = new VeteranBoss(x, y);
-            } else {
-                boss = new BossEnemy(x, y);
-            }
-        } else if (playerLevel >= 15) {
-            // Veteran bosses start appearing at level 15
-            const veteranBossChance = Math.min(75, (playerLevel - 15) * 7.5); // 7.5% per level after 15, max 75%
-            
-            const roll = Math.random() * 100;
-            if (roll < veteranBossChance) {
-                boss = new VeteranBoss(x, y);
-            } else {
-                boss = new BossEnemy(x, y);
-            }
-        } else {
+        // Specific boss types for specific levels (guaranteed spawns)
+        if (playerLevel === 5 || playerLevel === 10) {
             boss = new BossEnemy(x, y);
+        } else if (playerLevel === 15 || playerLevel === 20) {
+            boss = new VeteranBoss(x, y);
+        } else if (playerLevel === 25 || playerLevel === 30) {
+            boss = new EliteBoss(x, y);
+        } else {
+            // Original random logic for other levels or random spawns
+            if (playerLevel >= 25) {
+                // Elite bosses start appearing at level 25
+                const eliteBossChance = Math.min(60, (playerLevel - 25) * 4); // 4% per level after 25, max 60%
+                const veteranBossChance = Math.min(80, (playerLevel - 15) * 6); // 6% per level after 15, max 80%
+                
+                const roll = Math.random() * 100;
+                if (roll < eliteBossChance) {
+                    boss = new EliteBoss(x, y);
+                } else if (roll < eliteBossChance + veteranBossChance) {
+                    boss = new VeteranBoss(x, y);
+                } else {
+                    boss = new BossEnemy(x, y);
+                }
+            } else if (playerLevel >= 15) {
+                // Veteran bosses start appearing at level 15
+                const veteranBossChance = Math.min(75, (playerLevel - 15) * 7.5); // 7.5% per level after 15, max 75%
+                
+                const roll = Math.random() * 100;
+                if (roll < veteranBossChance) {
+                    boss = new VeteranBoss(x, y);
+                } else {
+                    boss = new BossEnemy(x, y);
+                }
+            } else {
+                boss = new BossEnemy(x, y);
+            }
         }
         
         boss.game = this;
         this.enemies.push(boss);
+        
+        // Debug: Check if all bosses in array have game reference
+        const bossesInArray = this.enemies.filter(e => e.isBoss);
     }
+    
     
     updateUI() {
         if (this.gameState !== 'playing' || !this.player) return;
@@ -769,6 +789,32 @@ class Game {
     exitShop() {
         this.gameState = this.previousGameState || 'waiting'; // Return to previous state
         document.getElementById('shopMenu').style.display = 'none';
+    }
+    
+    // Toggle pause state
+    togglePause() {
+        if (this.gameState !== 'playing') return;
+        
+        this.isPaused = !this.isPaused;
+        const pauseOverlay = document.getElementById('pauseOverlay');
+        
+        if (this.isPaused) {
+            this.updatePauseStats();
+            pauseOverlay.style.display = 'block';
+        } else {
+            pauseOverlay.style.display = 'none';
+        }
+    }
+    
+    // Update pause overlay stats
+    updatePauseStats() {
+        const minutes = Math.floor(this.gameTime / 60);
+        const seconds = Math.floor(this.gameTime % 60);
+        const timeString = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+        
+        document.getElementById('pauseTime').textContent = timeString;
+        document.getElementById('pauseLevel').textContent = this.player.level;
+        document.getElementById('pauseScore').textContent = this.score.toLocaleString();
     }
     
     // Update shop display with current prices and levels
@@ -1037,8 +1083,13 @@ class Player {
         this.xp = 0;
         this.xpToNext = Math.floor(this.xpToNext * 1.2);
         
-        if (this.level % 5 === 0) {
-            this.game.spawnBoss();
+        console.log(`Player reached level ${this.level}`);
+        
+        // Mark that we need to spawn a boss after upgrade menu closes
+        if (this.level === 5 || this.level === 10 || 
+            this.level === 15 || this.level === 20 || 
+            this.level === 25 || this.level === 30) {
+            this.game.pendingBossSpawn = true;
         }
         
         this.game.upgradeSystem.showUpgradeMenu();
@@ -1240,7 +1291,7 @@ class Player {
     updateTornadoVortex() {
         if (!this.tornadoCooldown) this.tornadoCooldown = 0;
         
-        if (this.game.gameTime - this.tornadoCooldown >= 5) { // Spawn tornado every 5 seconds
+        if (this.game.gameTime - this.tornadoCooldown >= 2.5) { // Spawn tornado every 2.5 seconds (was 5)
             // Spawn tornado near player but not on top of them
             const angle = Math.random() * Math.PI * 2;
             const distance = 50 + Math.random() * 100; // 50-150 pixels from player
@@ -1427,13 +1478,44 @@ class Enemy {
             return; // Don't move when stunned
         }
         
+        // Validate player and enemy coordinates before movement calculation
+        if (!player || isNaN(player.x) || isNaN(player.y) || isNaN(this.x) || isNaN(this.y)) {
+            console.warn('Invalid coordinates detected in Enemy update:', {
+                playerX: player?.x,
+                playerY: player?.y,
+                enemyX: this.x,
+                enemyY: this.y
+            });
+            return; // Skip movement if coordinates are invalid
+        }
+        
+        // Debug logging for VeteranBoss movement - focus on stuck ones
+        if (this.isVeteran && this.health === 300 && Math.random() < 0.05) { // Focus on full-health (level-up) bosses
+        }
+        
         const dx = player.x - this.x;
         const dy = player.y - this.y;
         const distance = Math.sqrt(dx * dx + dy * dy);
         
-        if (distance > 0) {
-            this.x += (dx / distance) * this.speed * deltaTime * 60;
-            this.y += (dy / distance) * this.speed * deltaTime * 60;
+        // Debug stuck level-up bosses
+        if (this.isVeteran && this.health === 300 && Math.random() < 0.01) {
+            console.log(`Enemy movement calc: dx=${dx.toFixed(1)}, dy=${dy.toFixed(1)}, distance=${distance.toFixed(1)}, speed=${this.speed}, deltaTime=${deltaTime?.toFixed(3)}`);
+        }
+        
+        if (distance > 0 && !isNaN(distance)) {
+            const moveX = (dx / distance) * this.speed * deltaTime * 60;
+            const moveY = (dy / distance) * this.speed * deltaTime * 60;
+            
+            // Debug movement values
+            if (this.isVeteran && this.health === 300 && Math.random() < 0.01) {
+                console.log(`Movement values: moveX=${moveX.toFixed(3)}, moveY=${moveY.toFixed(3)}, will apply=${!isNaN(moveX) && !isNaN(moveY)}`);
+            }
+            
+            // Validate movement before applying
+            if (!isNaN(moveX) && !isNaN(moveY)) {
+                this.x += moveX;
+                this.y += moveY;
+            }
         }
     }
     
@@ -1547,10 +1629,14 @@ class VeteranBoss extends Enemy {
         this.lastSpikeBarrage = 0;
         this.spikeBarrageCooldown = 4;
         this.game = null;
+        
+        // Track initial position for debug
+        this.initialX = this.x;
+        this.initialY = this.y;
     }
     
-    update(player) {
-        super.update(player);
+    update(player, deltaTime) {
+        super.update(player, deltaTime);
         
         if (this.game) {
             // Regular shooting
@@ -1666,8 +1752,8 @@ class EliteBoss extends Enemy {
         this.game = null;
     }
     
-    update(player) {
-        super.update(player);
+    update(player, deltaTime) {
+        super.update(player, deltaTime);
         
         if (this.game) {
             // Faster shooting than other bosses
@@ -2546,14 +2632,14 @@ class Tornado {
         this.x = x;
         this.y = y;
         this.game = game;
-        this.radius = 20;
-        this.life = 10; // 10 seconds as requested
-        this.maxLife = 10;
+        this.radius = 35; // Increased from 20
+        this.life = 12; // Increased from 10 seconds
+        this.maxLife = 12;
         this.shouldRemove = false;
         this.rotation = 0;
-        this.damage = 25;
+        this.damage = 45; // Increased from 25
         this.lastDamage = 0;
-        this.damageInterval = 0.5; // Damage every 0.5 seconds
+        this.damageInterval = 0.3; // Damage every 0.3 seconds (was 0.5)
         
         // Random movement properties
         this.vx = (Math.random() - 0.5) * 2; // Random velocity -1 to 1
@@ -3317,18 +3403,63 @@ class WaveManager {
     constructor() {
         this.enemySpawnRate = 1;
         this.lastSpawn = 0;
+        this.lastBossSpawn = 0;
         this.baseSpawnInterval = 2;
         this.currentSpawnInterval = 2;
+        this.baseBossSpawnInterval = 15; // Base time between random boss spawns
     }
     
     update(gameTime, game, playerLevel, deltaTime) {
-        this.currentSpawnInterval = this.baseSpawnInterval / (1 + (playerLevel - 1) * 0.15);
+        // More aggressive spawn rate scaling - level AND time based
+        const levelScaling = 1 + (playerLevel - 1) * 0.25;
+        const timeScaling = 1 + (gameTime / 60) * 0.1; // 10% faster every minute
+        const combinedScaling = levelScaling * timeScaling;
         
-        this.currentSpawnInterval = Math.max(0.3, this.currentSpawnInterval);
+        this.currentSpawnInterval = this.baseSpawnInterval / combinedScaling;
         
+        // Lower minimum spawn interval to make it more challenging
+        this.currentSpawnInterval = Math.max(0.1, this.currentSpawnInterval);
+        
+        // Regular enemy spawning
         if (gameTime - this.lastSpawn >= this.currentSpawnInterval) {
             game.spawnEnemy();
             this.lastSpawn = gameTime;
+        }
+        
+        // Random boss spawning during rounds based on level
+        this.handleRandomBossSpawning(gameTime, game, playerLevel);
+    }
+    
+    handleRandomBossSpawning(gameTime, game, playerLevel) {
+        let shouldSpawnBoss = false;
+        let bossType = 'basic';
+        let spawnInterval = this.baseBossSpawnInterval;
+        
+        if (playerLevel >= 30) {
+            // Level 30+: All bosses can spawn (after Elite introduction)
+            spawnInterval = 10; // Every 10 seconds
+            const roll = Math.random();
+            if (roll < 0.4) bossType = 'basic';
+            else if (roll < 0.7) bossType = 'veteran';
+            else bossType = 'elite';
+            shouldSpawnBoss = true;
+        } else if (playerLevel >= 20) {
+            // Level 20-29: Basic and Veteran bosses can spawn (after Veteran introduction)
+            spawnInterval = 12; // Every 12 seconds
+            const roll = Math.random();
+            if (roll < 0.6) bossType = 'basic';
+            else bossType = 'veteran';
+            shouldSpawnBoss = true;
+        } else if (playerLevel >= 10) {
+            // Level 10-19: Only Basic bosses can spawn randomly (after Basic introduction)
+            spawnInterval = 15; // Every 15 seconds
+            bossType = 'basic';
+            shouldSpawnBoss = true;
+        }
+        
+        if (shouldSpawnBoss && gameTime - this.lastBossSpawn >= spawnInterval) {
+            game.spawnBoss();
+            this.lastBossSpawn = gameTime;
         }
     }
 }
@@ -3349,8 +3480,14 @@ class UpgradeSystem {
         if (upgrades.length === 0) {
             // All elements are maxed out
             const option = document.createElement('div');
-            option.className = 'upgrade-option';
-            option.innerHTML = `<strong>All Elements Mastered!</strong><br>You have achieved maximum mastery in all elements. Continue your journey!`;
+            option.className = 'upgrade-option mastered';
+            option.innerHTML = `
+                <div class="upgrade-header">
+                    <div style="font-size: 24px;">🎆</div>
+                    <div class="upgrade-title">All Elements Mastered!</div>
+                </div>
+                <div class="upgrade-description">You have achieved maximum mastery in all elements. Continue your legendary journey!</div>
+            `;
             option.onclick = () => {
                 this.upgradeMenu.style.display = 'none';
                 this.game.isPaused = false;
@@ -3359,8 +3496,25 @@ class UpgradeSystem {
         } else {
             upgrades.forEach((upgrade, index) => {
                 const option = document.createElement('div');
-                option.className = 'upgrade-option';
-                option.innerHTML = `<strong>${upgrade.name}</strong><br>${upgrade.description}`;
+                option.className = `upgrade-option ${upgrade.type}`;
+                
+                // Create element icon
+                const elementIcons = {
+                    fire: '🔥',
+                    water: '💧', 
+                    earth: '🌍',
+                    air: '🌪️',
+                    lightning: '⚡'
+                };
+                
+                option.innerHTML = `
+                    <div class="upgrade-header">
+                        <div class="upgrade-element-icon ${upgrade.type}"></div>
+                        <div class="upgrade-title">${upgrade.name}</div>
+                    </div>
+                    <div class="upgrade-description">${upgrade.description}</div>
+                `;
+                
                 option.onclick = () => this.selectUpgrade(upgrade);
                 this.upgradeOptions.appendChild(option);
             });
@@ -3395,13 +3549,13 @@ class UpgradeSystem {
             },
             { 
                 name: 'Earth Mastery', 
-                description: 'Stone Steps: +25% Movement Speed', 
+                description: 'Stone Skin: +5 Armor (Damage Reduction)', 
                 type: 'earth',
                 effect: () => { 
                     const level = this.game.player.upgradeCount.earth;
                     
                     if (level < 3) {
-                        this.game.player.speed *= 1.25;
+                        this.game.player.armor += 5;
                     } else if (level < 6) {
                         this.game.player.armor += 3;
                     }
@@ -3496,7 +3650,7 @@ class UpgradeSystem {
             if (upgrade.type === 'water' && count >= 3) {
                 desc = 'Flowing Vitality: +2 Health Regen/sec';
             } else if (upgrade.type === 'earth' && count >= 3) {
-                desc = 'Tremor Fury: Faster Tremors + Bonus Damage';
+                desc = 'Stone Fortification: +3 Armor + Tremor Fury';
             } else if (upgrade.type === 'fire' && count >= 3) {
                 desc = 'Fireball Mastery: Faster Auto-Fireballs';
             } else if (upgrade.type === 'lightning' && count >= 3) {
@@ -3526,6 +3680,12 @@ class UpgradeSystem {
         this.game.sessionStats.upgradesChosen++;
         this.upgradeMenu.style.display = 'none';
         this.game.isPaused = false;
+        
+        // Spawn boss after upgrade menu closes if one was pending
+        if (this.game.pendingBossSpawn) {
+            this.game.spawnBoss();
+            this.game.pendingBossSpawn = false;
+        }
     }
 }
 
