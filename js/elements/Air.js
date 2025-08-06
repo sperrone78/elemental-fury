@@ -1,58 +1,165 @@
 /**
- * Air Element Classes - Missile Projectile and Tornado
+ * Air Element Classes - Wind Blade Projectile and Tornado
  */
 import { Projectile } from '../entities/weapons/Projectile.js';
 import { ELEMENT_CONFIG, GAME_CONFIG } from '../utils/Constants.js';
+import { MathUtils } from '../utils/MathUtils.js';
 
-export class MissileProjectile extends Projectile {
-    constructor(x, y, dirX, dirY, damage, range) {
+export class WindBladeProjectile extends Projectile {
+    constructor(x, y, dirX, dirY, damage, range, game) {
         super(x, y, dirX, dirY, damage, range);
-        this.speed = ELEMENT_CONFIG.AIR.MISSILE.SPEED;
-        this.radius = 2;
+        this.game = game;
+        this.speed = ELEMENT_CONFIG.AIR.WIND_BLADE.SPEED;
+        this.radius = 6; // Larger hit radius
+        this.visualSize = 12; // Larger visual size
+        this.age = 0;
+        this.seekRadius = ELEMENT_CONFIG.AIR.WIND_BLADE.SEEK_RADIUS;
+        this.seekStrength = ELEMENT_CONFIG.AIR.WIND_BLADE.SEEK_STRENGTH;
+        this.curveIntensity = ELEMENT_CONFIG.AIR.WIND_BLADE.CURVE_INTENSITY;
+        
+        // Calculate when to start seeking (halfway through flight)
+        this.maxFlightTime = range / (this.speed * 60); // Convert to seconds
+        this.seekStartTime = this.maxFlightTime * 0.5; // Halfway point
+        this.distanceTraveled = 0;
+        
+        // Initial curve direction (left or right)
+        this.curveDirection = Math.random() > 0.5 ? 1 : -1;
+        this.initialDirection = { x: dirX, y: dirY };
+        
+        // Visual trail
+        this.trail = [];
+        this.maxTrailLength = 10; // Longer trail
+        
+        // Rotation for visual effect
+        this.rotation = Math.atan2(dirY, dirX);
+        this.rotationSpeed = 0.25; // Slightly slower rotation
+    }
+    
+    update(deltaTime) {
+        this.age += deltaTime;
+        
+        // Add current position to trail
+        this.trail.push({ x: this.x, y: this.y, alpha: 1.0 });
+        if (this.trail.length > this.maxTrailLength) {
+            this.trail.shift();
+        }
+        
+        // Update trail alpha
+        this.trail.forEach((point, index) => {
+            point.alpha = (index + 1) / this.trail.length * 0.6;
+        });
+        
+        // Seeking behavior - find closest enemy
+        let closestEnemy = null;
+        let closestDistance = this.seekRadius;
+        
+        if (this.game && this.game.enemies) {
+            this.game.enemies.forEach(enemy => {
+                const distance = MathUtils.distance(this.x, this.y, enemy.x, enemy.y);
+                if (distance < closestDistance) {
+                    closestEnemy = enemy;
+                    closestDistance = distance;
+                }
+            });
+        }
+        
+        // Apply seeking force if enemy found (after halfway point)
+        if (closestEnemy && this.age > this.seekStartTime) { // Start seeking halfway through flight
+            const seekX = closestEnemy.x - this.x;
+            const seekY = closestEnemy.y - this.y;
+            const seekDistance = Math.sqrt(seekX * seekX + seekY * seekY);
+            
+            if (seekDistance > 0) {
+                const normalizedSeekX = seekX / seekDistance;
+                const normalizedSeekY = seekY / seekDistance;
+                
+                // Blend current direction with seek direction
+                this.dirX = MathUtils.lerp(this.dirX, normalizedSeekX, this.seekStrength * deltaTime);
+                this.dirY = MathUtils.lerp(this.dirY, normalizedSeekY, this.seekStrength * deltaTime);
+                
+                // Normalize the new direction
+                const newMagnitude = Math.sqrt(this.dirX * this.dirX + this.dirY * this.dirY);
+                if (newMagnitude > 0) {
+                    this.dirX /= newMagnitude;
+                    this.dirY /= newMagnitude;
+                }
+            }
+        } else {
+            // Apply initial curving motion when no target
+            const perpX = -this.initialDirection.y * this.curveDirection;
+            const perpY = this.initialDirection.x * this.curveDirection;
+            const curveForce = Math.sin(this.age * this.curveIntensity) * 0.3;
+            
+            this.dirX += perpX * curveForce * deltaTime;
+            this.dirY += perpY * curveForce * deltaTime;
+            
+            // Normalize
+            const magnitude = Math.sqrt(this.dirX * this.dirX + this.dirY * this.dirY);
+            if (magnitude > 0) {
+                this.dirX /= magnitude;
+                this.dirY /= magnitude;
+            }
+        }
+        
+        // Update rotation for visual spinning
+        this.rotation += this.rotationSpeed * deltaTime * 60;
+        
+        // Call parent update for movement and range checking
+        super.update(deltaTime);
     }
     
     render(ctx) {
         ctx.save();
         
-        // Calculate angle of missile direction for rotation
-        const angle = Math.atan2(this.dirY, this.dirX);
+        // Draw trail first
+        this.trail.forEach((point, index) => {
+            if (index > 0) {
+                const prevPoint = this.trail[index - 1];
+                ctx.strokeStyle = `rgba(173, 216, 230, ${point.alpha * 0.5})`;
+                ctx.lineWidth = 2 * (point.alpha);
+                ctx.beginPath();
+                ctx.moveTo(prevPoint.x, prevPoint.y);
+                ctx.lineTo(point.x, point.y);
+                ctx.stroke();
+            }
+        });
         
-        // Move to missile position and rotate
+        // Draw wind blade
         ctx.translate(this.x, this.y);
-        ctx.rotate(angle);
+        ctx.rotate(this.rotation);
         
-        // Draw missile body (elongated rectangle)
-        ctx.fillStyle = '#cccccc';
-        ctx.fillRect(-6, -2, 10, 4);
+        // Main blade (crescent shape)
+        ctx.fillStyle = 'rgba(173, 216, 230, 0.9)';
+        ctx.strokeStyle = 'rgba(135, 206, 235, 1.0)';
+        ctx.lineWidth = 1;
         
-        // Draw missile nose cone (triangle)
-        ctx.fillStyle = '#ff4444';
         ctx.beginPath();
-        ctx.moveTo(4, 0);
-        ctx.lineTo(8, -2);
-        ctx.lineTo(8, 2);
+        // Draw larger crescent moon shape
+        ctx.arc(0, 0, this.visualSize, 0.3, Math.PI - 0.3);
+        ctx.arc(3, 0, this.visualSize * 0.75, Math.PI + 0.3, -0.3);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+        
+        // Inner glow effect
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+        ctx.beginPath();
+        ctx.arc(0, 0, this.visualSize * 0.5, 0.5, Math.PI - 0.5);
+        ctx.arc(3, 0, this.visualSize * 0.4, Math.PI + 0.5, -0.5);
         ctx.closePath();
         ctx.fill();
         
-        // Draw missile fins (small triangles at back)
-        ctx.fillStyle = '#999999';
-        ctx.beginPath();
-        ctx.moveTo(-6, -2);
-        ctx.lineTo(-8, -3);
-        ctx.lineTo(-6, -1);
-        ctx.closePath();
-        ctx.fill();
-        
-        ctx.beginPath();
-        ctx.moveTo(-6, 2);
-        ctx.lineTo(-8, 3);
-        ctx.lineTo(-6, 1);
-        ctx.closePath();
-        ctx.fill();
-        
-        // Draw exhaust trail (small orange rectangle)
-        ctx.fillStyle = '#ff8800';
-        ctx.fillRect(-10, -1, 4, 2);
+        // Wind particles around blade (more for larger size)
+        for (let i = 0; i < 6; i++) {
+            const angle = (this.age * 4 + i * Math.PI/3) % (Math.PI * 2);
+            const particleX = Math.cos(angle) * (this.visualSize + 4);
+            const particleY = Math.sin(angle) * (this.visualSize * 0.6);
+            
+            ctx.fillStyle = `rgba(173, 216, 230, ${0.3 + 0.3 * Math.sin(this.age * 6 + i)})`;
+            ctx.beginPath();
+            ctx.arc(particleX, particleY, 1.5, 0, Math.PI * 2);
+            ctx.fill();
+        }
         
         ctx.restore();
     }

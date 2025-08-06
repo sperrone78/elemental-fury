@@ -104,10 +104,13 @@ export const ELEMENT_CONFIG = {
     },
     AIR: {
         RANGE_BONUS_PER_LEVEL: 0.1,
-        MISSILE: {
-            DAMAGE_MULTIPLIER: 0.7,
-            SPEED: 10,
-            ANGLES: [45, 315, 180, 90, 270] // degrees for levels 1-5
+        WIND_BLADE: {
+            DAMAGE_MULTIPLIER: 0.8,
+            SPEED: 7,
+            SEEK_RADIUS: 120,
+            SEEK_STRENGTH: 2.5,
+            CURVE_INTENSITY: 6.0,
+            COUNT: [0, 1, 2, 3, 4, 5] // blades per level (0 for no level, then levels 1-5)
         },
         TORNADO: {
             COOLDOWN: 2.5,

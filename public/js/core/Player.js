@@ -38,7 +38,7 @@ export class Player {
         this.specialAbilities = {
             radiusAttack: false,
             fireball: false,
-            missiles: false,
+            windBlades: false,
             shield: false,
             lightning: false,
             // Advanced abilities (level 6)

@@ -91,9 +91,9 @@ export class UpgradeSystem {
             },
             air: {
                 name: 'Air Mastery',
-                ability: 'Missiles',
-                initialDescription: 'Fires additional missiles alongside regular attacks',
-                effect: '+1 missile, +10% attack range all attacks'
+                ability: 'Wind Blades',
+                initialDescription: 'Summons seeking wind blades that curve toward enemies',
+                effect: '+1 wind blade, +10% attack range all attacks'
             }
         };
         
@@ -319,11 +319,11 @@ export class UpgradeSystem {
     applyAirUpgrade(level) {
         const player = this.game.player;
         
-        // Levels 1-5: +1 missile, +10% attack range all attacks
+        // Levels 1-5: +1 wind blade, +10% attack range all attacks
         if (level <= 5) {
             player.weapons.forEach(w => w.range = Math.floor(w.range * (1 + ELEMENT_CONFIG.AIR.RANGE_BONUS_PER_LEVEL)));
             if (level === 1) {
-                player.specialAbilities.missiles = true;
+                player.specialAbilities.windBlades = true;
             }
         }
         

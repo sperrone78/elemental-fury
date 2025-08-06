@@ -1,7 +1,7 @@
-import { WEAPON_CONFIG } from '../../utils/Constants.js';
+import { WEAPON_CONFIG, ELEMENT_CONFIG } from '../../utils/Constants.js';
 import { MathUtils } from '../../utils/MathUtils.js';
 import { Projectile } from './Projectile.js';
-import { MissileProjectile } from '../../elements/Air.js';
+import { WindBladeProjectile } from '../../elements/Air.js';
 
 export class BasicWeapon {
     constructor(owner) {
@@ -35,24 +35,21 @@ export class BasicWeapon {
                 this.damage, this.range
             ));
             
-            if (this.owner.specialAbilities.missiles) {
-                // Get Air mastery level to determine number of missiles
+            if (this.owner.specialAbilities.windBlades) {
+                // Get Air mastery level to determine number of wind blades
                 const airLevel = this.owner.upgradeCount.air || 0;
-                const missileCount = Math.min(airLevel, 5); // Max 5 missiles
+                const bladeCount = ELEMENT_CONFIG.AIR.WIND_BLADE.COUNT[Math.min(airLevel, 5)];
                 
-                // Missile angles in degrees (converted to radians)
-                // 45°, 315°, 180°, 90°, 270°
-                const missileAngles = [45, 315, 180, 90, 270];
-                
-                for (let i = 0; i < missileCount; i++) {
-                    const angleInDegrees = missileAngles[i];
-                    const angleInRadians = MathUtils.degreesToRadians(angleInDegrees);
+                // Fire wind blades at completely random angles around the character
+                for (let i = 0; i < bladeCount; i++) {
+                    const randomAngle = Math.random() * Math.PI * 2; // Full 360 degrees
                     
-                    // Note: MissileProjectile class needs to be extracted and imported
-                    this.owner.game.projectiles.push(new MissileProjectile(
+                    this.owner.game.projectiles.push(new WindBladeProjectile(
                         this.owner.x, this.owner.y,
-                        Math.cos(angleInRadians), Math.sin(angleInRadians),
-                        this.damage * 0.7, this.range
+                        Math.cos(randomAngle), Math.sin(randomAngle),
+                        this.damage * ELEMENT_CONFIG.AIR.WIND_BLADE.DAMAGE_MULTIPLIER, 
+                        this.range,
+                        this.owner.game
                     ));
                 }
             }

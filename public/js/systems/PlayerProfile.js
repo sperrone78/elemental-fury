@@ -29,7 +29,7 @@ export class PlayerProfile {
                 earthquakeStormp: 0,
                 chainLightning: 0,
                 thunderStorm: 0,
-                missiles: 0,
+                windBlades: 0,
                 tornadoVortex: 0,
                 infernoWave: 0,
                 total: 0

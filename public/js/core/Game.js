@@ -10,7 +10,7 @@ import { BossEnemy, VeteranBoss, EliteBoss } from '../entities/enemies/BossEnemy
 import { XPPickup, VeteranXPPickup, EliteXPPickup } from '../entities/pickups/XPPickup.js';
 import { EnemyProjectile, SpikeProjectile } from '../entities/weapons/index.js';
 import { FireballProjectile, InfernoWave } from '../elements/Fire.js';
-import { MissileProjectile, Tornado, WindParticle } from '../elements/Air.js';
+import { WindBladeProjectile, Tornado, WindParticle } from '../elements/Air.js';
 import { WaterGlobe, WaterSplashParticle } from '../elements/Water.js';
 import { 
     ExplosionParticle, 
@@ -146,7 +146,7 @@ export class Game {
                 earthquakeStormp: 0,
                 chainLightning: 0,
                 thunderStorm: 0,
-                missiles: 0,
+                windBlades: 0,
                 tornadoVortex: 0,
                 infernoWave: 0,
                 total: 0
@@ -533,7 +533,7 @@ export class Game {
                 { id: 'finalBasicDamage', parentId: 'finalBasicDamageRow', value: this.sessionStats.damageDealt.basicWeapon },
                 { id: 'finalFireballDamage', parentId: 'finalFireballDamageRow', value: this.sessionStats.damageDealt.fireball },
                 { id: 'finalWaterGlobeDamage', parentId: 'finalWaterGlobeDamageRow', value: this.sessionStats.damageDealt.waterGlobe },
-                { id: 'finalMissilesDamage', parentId: 'finalMissilesDamageRow', value: this.sessionStats.damageDealt.missiles },
+                { id: 'finalWindBladesDamage', parentId: 'finalWindBladesDamageRow', value: this.sessionStats.damageDealt.windBlades },
                 { id: 'finalTremorsDamage', parentId: 'finalTremorsDamageRow', value: this.sessionStats.damageDealt.tremors },
                 { id: 'finalChainLightningDamage', parentId: 'finalChainLightningDamageRow', value: this.sessionStats.damageDealt.chainLightning },
                 { id: 'finalEarthquakeDamage', parentId: 'finalEarthquakeDamageRow', value: this.sessionStats.damageDealt.earthquakeStormp },
@@ -587,8 +587,8 @@ export class Game {
                     if (projectile instanceof FireballProjectile) {
                         this.recordDamage('fireball', projectile.damage);
                         projectile.explode(this);
-                    } else if (projectile instanceof MissileProjectile) {
-                        this.recordDamage('missiles', projectile.damage);
+                    } else if (projectile instanceof WindBladeProjectile) {
+                        this.recordDamage('windBlades', projectile.damage);
                     } else {
                         // Basic weapon projectile
                         this.recordDamage('basicWeapon', projectile.damage);
@@ -856,7 +856,7 @@ export class Game {
         document.getElementById('basicWeaponDamage').textContent = formatNumber(stats.damageDealt.basicWeapon);
         document.getElementById('fireballDamage').textContent = formatNumber(stats.damageDealt.fireball);
         document.getElementById('waterGlobeDamage').textContent = formatNumber(stats.damageDealt.waterGlobe);
-        document.getElementById('missilesDamage').textContent = formatNumber(stats.damageDealt.missiles);
+        document.getElementById('windBladesDamage').textContent = formatNumber(stats.damageDealt.windBlades);
         document.getElementById('tremorsDamage').textContent = formatNumber(stats.damageDealt.tremors);
         document.getElementById('chainLightningDamage').textContent = formatNumber(stats.damageDealt.chainLightning);
         document.getElementById('earthquakeDamage').textContent = formatNumber(stats.damageDealt.earthquakeStormp);
@@ -1138,23 +1138,6 @@ export class Game {
                     shopItems.style.minHeight = '100px';
                 }
                 
-                // ULTRA-AGGRESSIVE: Force parent containers too
-                const shopContent = document.querySelector('.shop-content');
-                if (shopContent) {
-                    shopContent.style.height = 'auto !important';
-                    shopContent.style.minHeight = '400px !important';
-                    shopContent.style.overflow = 'visible !important';
-
-                }
-                
-
-                
-                // Force the rings section with absolute positioning as last resort
-                ringsSection.style.position = 'relative !important';
-                ringsSection.style.top = '0px';
-                ringsSection.style.left = '0px';
-                ringsSection.style.zIndex = '9999';
-                
     
                 
             }
@@ -1320,7 +1303,7 @@ export class Game {
             { id: 'sessionBasicDamage', key: 'basicWeapon', label: 'Basic Weapon' },
             { id: 'sessionFireballDamage', key: 'fireball', label: 'Fireball' },
             { id: 'sessionWaterGlobeDamage', key: 'waterGlobe', label: 'Water Globe' },
-            { id: 'sessionMissilesDamage', key: 'missiles', label: 'Missiles' },
+            { id: 'sessionWindBladesDamage', key: 'windBlades', label: 'Wind Blades' },
             { id: 'sessionTremorsDamage', key: 'tremors', label: 'Tremors' },
             { id: 'sessionChainLightningDamage', key: 'chainLightning', label: 'Chain Lightning' },
             { id: 'sessionEarthquakeDamage', key: 'earthquakeStormp', label: 'Earthquake' },
