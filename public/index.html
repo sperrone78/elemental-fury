@@ -603,19 +603,21 @@
             background: rgba(0, 0, 0, 0.95);
             border: 2px solid #ffaa00;
             border-radius: 10px;
-            padding: 30px;
+            padding: 20px;
             color: #fff;
             z-index: 1001;
-            min-width: 500px;
-            max-width: 600px;
+            min-width: 600px;
+            max-width: 700px;
+            max-height: 80vh;
             box-shadow: 0 0 20px rgba(255, 170, 0, 0.3);
+            overflow: hidden;
         }
         
         .shop-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
             padding-bottom: 10px;
             border-bottom: 1px solid #555;
         }
@@ -629,6 +631,87 @@
             font-size: 18px;
             font-weight: bold;
             color: #00ff88;
+        }
+        
+        /* Shop Tabs */
+        .shop-tabs {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #444;
+        }
+        
+        .shop-tab {
+            flex: 1;
+            padding: 12px 20px;
+            text-align: center;
+            background: rgba(255, 255, 255, 0.05);
+            border: none;
+            color: #ccc;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-radius: 8px 8px 0 0;
+            margin-right: 2px;
+        }
+        
+        .shop-tab:last-child {
+            margin-right: 0;
+        }
+        
+        .shop-tab:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+        }
+        
+        .shop-tab.active {
+            background: linear-gradient(135deg, #ffaa00, #ff8800);
+            color: #000;
+            border-bottom: 2px solid #ffaa00;
+        }
+        
+        .shop-tab.active:hover {
+            background: linear-gradient(135deg, #ff8800, #cc6600);
+        }
+        
+        /* Shop Content */
+        .shop-content {
+            max-height: 50vh;
+            overflow-y: auto;
+            padding-right: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .shop-content::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        .shop-content::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+        }
+        
+        .shop-content::-webkit-scrollbar-thumb {
+            background: #ffaa00;
+            border-radius: 4px;
+        }
+        
+        .shop-content::-webkit-scrollbar-thumb:hover {
+            background: #ff8800;
+        }
+        
+        .shop-section {
+            display: none !important;
+        }
+        
+        .shop-section.active {
+            display: block !important;
+        }
+        
+        /* Force visibility for debugging */
+        #ringsSection.active {
+            display: block !important;
+            visibility: visible !important;
         }
         
         .shop-items {
@@ -939,7 +1022,14 @@
                     <div class="shop-balance">💎 <span id="shopDiamonds">0</span> Diamonds</div>
                 </div>
                 
-                <div class="shop-items">
+                <div class="shop-tabs">
+                    <button class="shop-tab active" id="itemsTab">🎁 Items</button>
+                    <button class="shop-tab" id="ringsTab">💍 Rings</button>
+                </div>
+                
+                <div class="shop-content">
+                    <div class="shop-section active" id="itemsSection">
+                        <div class="shop-items">
                     <div class="shop-item" id="xpVortexItem">
                         <div class="item-icon">🌪️</div>
                         <div class="item-details">
@@ -951,77 +1041,81 @@
                             <div class="item-price">💎 <span id="xpVortexPrice">10</span></div>
                             <button id="buyXpVortex" class="shop-buy-btn">Buy</button>
                         </div>
-                    </div>
-                    
-                    <!-- Mastery Rings Section -->
-                    <div style="margin: 20px 0; padding: 10px 0; border-top: 1px solid #555;">
-                        <h3 style="color: #ffaa00; margin: 0 0 15px 0; font-size: 16px;">🔮 Elemental Mastery Rings</h3>
-                        <div style="font-size: 12px; color: #ccc; margin-bottom: 15px;">Required for levels 6-10. Max 2 equipped.</div>
-                    </div>
-                    
-                    <div class="shop-item" id="fireRingItem">
-                        <div class="item-icon">🔥</div>
-                        <div class="item-details">
-                            <div class="item-name" id="fireRingName">Fire Mastery Ring</div>
-                            <div class="item-description">Unlocks Fire levels 6-10</div>
-                            <div class="item-level" id="fireRingStatus">Not Owned</div>
-                        </div>
-                        <div class="item-purchase">
-                            <div class="item-price">💎 <span id="fireRingPrice">50</span></div>
-                            <button id="buyFireRing" class="shop-buy-btn">Buy</button>
                         </div>
                     </div>
                     
-                    <div class="shop-item" id="waterRingItem">
-                        <div class="item-icon">💧</div>
-                        <div class="item-details">
-                            <div class="item-name" id="waterRingName">Water Mastery Ring</div>
-                            <div class="item-description">Unlocks Water levels 6-10</div>
-                            <div class="item-level" id="waterRingStatus">Not Owned</div>
+                    <div class="shop-section" id="ringsSection">
+                        <div style="margin-bottom: 15px; text-align: center;">
+                            <h3 style="color: #ffaa00; margin: 0 0 10px 0; font-size: 18px;">🔮 Elemental Mastery Rings</h3>
+                            <div style="font-size: 14px; color: #ccc;">Required for levels 6-10. Max 2 equipped.</div>
                         </div>
-                        <div class="item-purchase">
-                            <div class="item-price">💎 <span id="waterRingPrice">50</span></div>
-                            <button id="buyWaterRing" class="shop-buy-btn">Buy</button>
+                        <div class="shop-items">
+                            <div class="shop-item" id="fireRingItem">
+                                <div class="item-icon">🔥</div>
+                                <div class="item-details">
+                                    <div class="item-name" id="fireRingName">Fire Mastery Ring</div>
+                                    <div class="item-description">Unlocks Fire levels 6-10</div>
+                                    <div class="item-level" id="fireRingStatus">Not Owned</div>
+                                </div>
+                                <div class="item-purchase">
+                                    <div class="item-price">💎 <span id="fireRingPrice">50</span></div>
+                                    <button id="buyFireRing" class="shop-buy-btn">Buy</button>
+                                </div>
+                            </div>
+                            
+                            <div class="shop-item" id="waterRingItem">
+                                <div class="item-icon">💧</div>
+                                <div class="item-details">
+                                    <div class="item-name" id="waterRingName">Water Mastery Ring</div>
+                                    <div class="item-description">Unlocks Water levels 6-10</div>
+                                    <div class="item-level" id="waterRingStatus">Not Owned</div>
+                                </div>
+                                <div class="item-purchase">
+                                    <div class="item-price">💎 <span id="waterRingPrice">50</span></div>
+                                    <button id="buyWaterRing" class="shop-buy-btn">Buy</button>
+                                </div>
+                            </div>
+                            
+                            <div class="shop-item" id="earthRingItem">
+                                <div class="item-icon">🌍</div>
+                                <div class="item-details">
+                                    <div class="item-name" id="earthRingName">Earth Mastery Ring</div>
+                                    <div class="item-description">Unlocks Earth levels 6-10</div>
+                                    <div class="item-level" id="earthRingStatus">Not Owned</div>
+                                </div>
+                                <div class="item-purchase">
+                                    <div class="item-price">💎 <span id="earthRingPrice">50</span></div>
+                                    <button id="buyEarthRing" class="shop-buy-btn">Buy</button>
+                                </div>
+                            </div>
+                            
+                            <div class="shop-item" id="airRingItem">
+                                <div class="item-icon">🌪️</div>
+                                <div class="item-details">
+                                    <div class="item-name" id="airRingName">Air Mastery Ring</div>
+                                    <div class="item-description">Unlocks Air levels 6-10</div>
+                                    <div class="item-level" id="airRingStatus">Not Owned</div>
+                                </div>
+                                <div class="item-purchase">
+                                    <div class="item-price">💎 <span id="airRingPrice">50</span></div>
+                                    <button id="buyAirRing" class="shop-buy-btn">Buy</button>
+                                </div>
+                            </div>
+                            
+                            <div class="shop-item" id="lightningRingItem">
+                                <div class="item-icon">⚡</div>
+                                <div class="item-details">
+                                    <div class="item-name" id="lightningRingName">Lightning Mastery Ring</div>
+                                    <div class="item-description">Unlocks Lightning levels 6-10</div>
+                                    <div class="item-level" id="lightningRingStatus">Not Owned</div>
+                                </div>
+                                <div class="item-purchase">
+                                    <div class="item-price">💎 <span id="lightningRingPrice">50</span></div>
+                                    <button id="buyLightningRing" class="shop-buy-btn">Buy</button>
+                                </div>
+                            </div>
                         </div>
-                    </div>
-                    
-                    <div class="shop-item" id="earthRingItem">
-                        <div class="item-icon">🌍</div>
-                        <div class="item-details">
-                            <div class="item-name" id="earthRingName">Earth Mastery Ring</div>
-                            <div class="item-description">Unlocks Earth levels 6-10</div>
-                            <div class="item-level" id="earthRingStatus">Not Owned</div>
-                        </div>
-                        <div class="item-purchase">
-                            <div class="item-price">💎 <span id="earthRingPrice">50</span></div>
-                            <button id="buyEarthRing" class="shop-buy-btn">Buy</button>
-                        </div>
-                    </div>
-                    
-                    <div class="shop-item" id="airRingItem">
-                        <div class="item-icon">🌪️</div>
-                        <div class="item-details">
-                            <div class="item-name" id="airRingName">Air Mastery Ring</div>
-                            <div class="item-description">Unlocks Air levels 6-10</div>
-                            <div class="item-level" id="airRingStatus">Not Owned</div>
-                        </div>
-                        <div class="item-purchase">
-                            <div class="item-price">💎 <span id="airRingPrice">50</span></div>
-                            <button id="buyAirRing" class="shop-buy-btn">Buy</button>
-                        </div>
-                    </div>
-                    
-                    <div class="shop-item" id="lightningRingItem">
-                        <div class="item-icon">⚡</div>
-                        <div class="item-details">
-                            <div class="item-name" id="lightningRingName">Lightning Mastery Ring</div>
-                            <div class="item-description">Unlocks Lightning levels 6-10</div>
-                            <div class="item-level" id="lightningRingStatus">Not Owned</div>
-                        </div>
-                        <div class="item-purchase">
-                            <div class="item-price">💎 <span id="lightningRingPrice">50</span></div>
-                            <button id="buyLightningRing" class="shop-buy-btn">Buy</button>
-                        </div>
+                                            </div>
                     </div>
                 </div>
                 
@@ -1272,6 +1366,7 @@
     
     <script type="module" src="js/main.js?v=2.7.5"></script>
     
+
 
 </body>
 </html>
