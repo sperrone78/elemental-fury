@@ -2,6 +2,7 @@ import { ENEMY_CONFIG, GAME_CONFIG } from '../../utils/Constants.js';
 import { MathUtils } from '../../utils/MathUtils.js';
 import { Enemy, VeteranEnemy } from './Enemy.js';
 import { EnemyProjectile, SpikeProjectile } from '../weapons/index.js';
+import { SummonRing } from '../effects/SummonRing.js';
 
 export class BossEnemy extends Enemy {
     constructor(x, y) {

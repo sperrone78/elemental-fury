@@ -71,6 +71,30 @@
             margin-bottom: 10px;
             display: flex;
             align-items: center;
+            position: relative;
+        }
+        
+        .mastery-ring-icon {
+            margin-left: auto;
+            font-size: 14px;
+            opacity: 0.8;
+            display: none; /* Hidden by default, shown when ring is equipped */
+            animation: ring-shimmer 2s ease-in-out infinite;
+        }
+        
+        .mastery-ring-icon.equipped {
+            display: inline-block;
+        }
+        
+        @keyframes ring-shimmer {
+            0%, 100% { 
+                opacity: 0.8; 
+                transform: scale(1); 
+            }
+            50% { 
+                opacity: 1; 
+                transform: scale(1.1); 
+            }
         }
         
         .element-icon {
@@ -277,6 +301,53 @@
             background: linear-gradient(135deg, rgba(255, 215, 0, 0.25), rgba(255, 255, 255, 0.15));
             border-color: #FFFF00;
             box-shadow: 0 4px 12px rgba(255, 215, 0, 0.5);
+        }
+        
+        /* Ultimate Choice Styling - Subtle */
+        .upgrade-option.ultimate-choice {
+            border: 2px solid #FFD700;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .upgrade-option.ultimate-choice:before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, transparent, rgba(255, 215, 0, 0.3), transparent, rgba(255, 215, 0, 0.3));
+            background-size: 400% 400%;
+            border-radius: 8px;
+            z-index: -1;
+            animation: subtle-shimmer 3s ease infinite;
+        }
+        
+        @keyframes subtle-shimmer {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        /* Test Diamonds Button */
+        .test-diamonds-btn {
+            width: 100%;
+            padding: 8px 12px;
+            background: linear-gradient(135deg, #6600cc, #9944ff);
+            border: 1px solid #bb66ff;
+            border-radius: 6px;
+            color: white;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .test-diamonds-btn:hover {
+            background: linear-gradient(135deg, #7722dd, #aa55ff);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(102, 0, 204, 0.3);
         }
         
         /* Pause Overlay */
@@ -862,6 +933,7 @@
                 <div class="powerup-title">
                     <div class="element-icon fire"></div>
                     Fire Mastery
+                    <span class="mastery-ring-icon" id="fire-ring-icon">💍</span>
                 </div>
                 <div class="powerup-level">Level: <span id="fire-level">0/5</span></div>
                 <div class="powerup-bar">
@@ -875,6 +947,7 @@
                 <div class="powerup-title">
                     <div class="element-icon water"></div>
                     Water Mastery
+                    <span class="mastery-ring-icon" id="water-ring-icon">💍</span>
                 </div>
                 <div class="powerup-level">Level: <span id="water-level">0/5</span></div>
                 <div class="powerup-bar">
@@ -888,6 +961,7 @@
                 <div class="powerup-title">
                     <div class="element-icon air"></div>
                     Air Mastery
+                    <span class="mastery-ring-icon" id="air-ring-icon">💍</span>
                 </div>
                 <div class="powerup-level">Level: <span id="air-level">0/5</span></div>
                 <div class="powerup-bar">
@@ -901,6 +975,7 @@
                 <div class="powerup-title">
                     <div class="element-icon earth"></div>
                     Earth Mastery
+                    <span class="mastery-ring-icon" id="earth-ring-icon">💍</span>
                 </div>
                 <div class="powerup-level">Level: <span id="earth-level">0/5</span></div>
                 <div class="powerup-bar">
@@ -914,6 +989,7 @@
                 <div class="powerup-title">
                     <div class="element-icon lightning"></div>
                     Lightning Mastery
+                    <span class="mastery-ring-icon" id="lightning-ring-icon">💍</span>
                 </div>
                 <div class="powerup-level">Level: <span id="lightning-level">0/5</span></div>
                 <div class="powerup-bar">
@@ -1360,6 +1436,13 @@
                         <div class="mastery-level" id="lightningMastery">0</div>
                     </div>
                 </div>
+            </div>
+            
+            <!-- Testing Section -->
+            <div class="profile-section" style="margin-top: 20px;">
+                <button id="testDiamondsBtn" class="test-diamonds-btn">
+                    💎 +100 Test Diamonds
+                </button>
             </div>
         </div>
     </div>

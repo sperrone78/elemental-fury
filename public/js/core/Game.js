@@ -121,6 +121,7 @@ export class Game {
         this.updateUI();
         this.updateDiamondDisplay(); // Initialize diamond display with current total
         this.updateProfileUI();
+        this.updateRingIcons(); // Initialize ring icons on startup
     }
     
     // Initialize session statistics tracking
@@ -282,7 +283,9 @@ export class Game {
         
         this.enemies.forEach((enemy, index) => {
             enemy.update(this.player, this.deltaTime);
-            if (enemy.health <= 0) {
+            if (enemy.health <= 0 && !enemy.shouldRemove) {
+                // Mark for removal immediately to prevent duplicate XP drops
+                enemy.shouldRemove = true;
                 // Track enemy kill by type
                 if (enemy.isBoss) {
                     this.recordEnemyKill('boss');
@@ -334,9 +337,11 @@ export class Game {
                     this.createXPPickup(enemy.x, enemy.y);
                     this.score += ENEMY_CONFIG.BASIC.SCORE_REWARD;
                 }
-                this.enemies.splice(index, 1);
             }
         });
+        
+        // Remove dead enemies after processing all damage
+        this.enemies = this.enemies.filter(enemy => !enemy.shouldRemove);
         
         this.projectiles.forEach((projectile, index) => {
             projectile.update(this.deltaTime);
@@ -780,6 +785,27 @@ export class Game {
         this.updatePowerupDisplay();
     }
     
+    // Update ring icons regardless of game state (for start screen/game over screen)
+    updateRingIcons() {
+        const elements = ['fire', 'water', 'earth', 'air', 'lightning'];
+        
+        elements.forEach(element => {
+            const ringIconElement = document.getElementById(`${element}-ring-icon`);
+            
+            if (!ringIconElement) {
+                return;
+            }
+            
+            const hasRing = this.playerProfile && this.playerProfile.masteryRings.equipped.includes(element);
+            
+            if (hasRing) {
+                ringIconElement.classList.add('equipped');
+            } else {
+                ringIconElement.classList.remove('equipped');
+            }
+        });
+    }
+    
     updatePowerupDisplay() {
         const elements = ['fire', 'water', 'earth', 'air', 'lightning'];
         
@@ -794,6 +820,14 @@ export class Game {
             
             const abilityElement = document.getElementById(`${element}-ability`);
             const ultimateElement = document.getElementById(`${element}-ultimate`);
+            const ringIconElement = document.getElementById(`${element}-ring-icon`);
+            
+            // Show/hide ring icon based on equipped mastery rings
+            if (hasRing) {
+                ringIconElement.classList.add('equipped');
+            } else {
+                ringIconElement.classList.remove('equipped');
+            }
             
             // Handle ability visibility (level 1 unlocks abilities)
             if (count >= 1) {
@@ -804,17 +838,13 @@ export class Game {
                 abilityElement.classList.remove('unlocked', 'available');
             }
             
-            // Handle ultimate visibility (level 6 requirement + mastery ring required)
+            // Handle ultimate visibility (only show when actually unlocked at level 6)
             
             if (hasRing && count >= 6) {
                 ultimateElement.classList.add('unlocked');
                 ultimateElement.classList.remove('available');
-            } else if (hasRing && count >= 5) {
-                // Show as available but not unlocked when at level 5 and has mastery ring
-                ultimateElement.classList.add('available');
-                ultimateElement.classList.remove('unlocked');
             } else {
-                // Hide completely when no mastery ring or not close to ultimate
+                // Hide completely unless actually unlocked
                 ultimateElement.classList.remove('unlocked', 'available');
             }
         });
@@ -1263,12 +1293,14 @@ export class Game {
             // Handle equip/unequip
             if (this.playerProfile.equipMasteryRing(elementType)) {
                 this.updateShopDisplay();
+                this.updateRingIcons(); // Update ring icons
             }
         } else {
             // Handle purchase
             if (this.playerProfile.purchaseMasteryRing(elementType)) {
                 this.updateShopDisplay();
                 this.updateDiamondDisplay(); // Update header display
+                this.updateRingIcons(); // Update ring icons
             }
         }
     }

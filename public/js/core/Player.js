@@ -31,7 +31,8 @@ export class Player {
         };
         
         // New progression system tracking
-        this.chosenElements = []; // Max 3 distinct elements per run
+        this.chosenElements = []; // Max 3 distinct elements for levels 1-5
+        this.ultimateElements = []; // Elements that reached Level 6 (max 2 for ultimate mastery)
         this.masteryRings = []; // Max 2 equipped rings (from PlayerProfile)
         this.allElementsMasteredShown = false; // Flag to track if mastery message has been shown
         

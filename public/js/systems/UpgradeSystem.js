@@ -35,7 +35,8 @@ export class UpgradeSystem {
         } else {
             upgrades.forEach((upgrade, index) => {
                 const option = document.createElement('div');
-                option.className = `upgrade-option ${upgrade.type}`;
+                const isUltimateChoice = upgrade.nextLevel === 6;
+                option.className = `upgrade-option ${upgrade.type}${isUltimateChoice ? ' ultimate-choice' : ''}`;
                 
                 // Create element icon
                 const elementIcons = {
@@ -46,13 +47,24 @@ export class UpgradeSystem {
                     lightning: '⚡'
                 };
                 
-                option.innerHTML = `
-                    <div class="upgrade-header">
-                        <div class="upgrade-element-icon ${upgrade.type}"></div>
-                        <div class="upgrade-title">${upgrade.name}</div>
-                    </div>
-                    <div class="upgrade-description">${upgrade.description}</div>
-                `;
+                // Special layout for Ultimate choices
+                if (isUltimateChoice) {
+                    option.innerHTML = `
+                        <div class="upgrade-header">
+                            <div class="upgrade-element-icon ${upgrade.type}"></div>
+                            <div class="upgrade-title">${upgrade.name}</div>
+                        </div>
+                        <div class="upgrade-description">${upgrade.description.replace(/\n/g, '<br>')}</div>
+                    `;
+                } else {
+                    option.innerHTML = `
+                        <div class="upgrade-header">
+                            <div class="upgrade-element-icon ${upgrade.type}"></div>
+                            <div class="upgrade-title">${upgrade.name}</div>
+                        </div>
+                        <div class="upgrade-description">${upgrade.description}</div>
+                    `;
+                }
                 
                 option.onclick = () => this.selectUpgrade(upgrade);
                 this.upgradeOptions.appendChild(option);
@@ -61,8 +73,8 @@ export class UpgradeSystem {
     }
     
     getRandomUpgrades(count) {
-        // New progression spec implementation
-        // Rule: Max 3 distinct elements per run, levels 1-10, rings required for 6-10
+        // New progression spec implementation  
+        // Rule: Max 3 distinct elements for levels 1-5, then choose 2 for ultimate mastery (6-10)
         
         const elementData = {
             fire: {
@@ -103,6 +115,7 @@ export class UpgradeSystem {
         for (const [elementType, data] of Object.entries(elementData)) {
             const currentLevel = this.game.player.upgradeCount[elementType] || 0;
             const isChosen = this.game.player.chosenElements.includes(elementType);
+            const isUltimate = this.game.player.ultimateElements.includes(elementType);
             const hasRing = this.game.player.masteryRings.includes(elementType);
             
             // Skip if maxed out (level 10)
@@ -110,6 +123,16 @@ export class UpgradeSystem {
             
             // Skip if trying to go past level 5 without ring
             if (currentLevel >= 5 && !hasRing) continue;
+            
+            // NEW RULE: Only allow 2 elements to reach Level 6
+            if (currentLevel === 5 && this.game.player.ultimateElements.length >= 2 && !isUltimate) {
+                continue; // Can't take a 3rd element to level 6
+            }
+            
+            // NEW RULE: Only elements that reached Level 6 can continue to 7-10
+            if (currentLevel >= 6 && !isUltimate) {
+                continue; // Only Level 6+ elements can continue past level 6
+            }
             
             // Skip if not chosen and already have 3 distinct elements
             if (!isChosen && this.game.player.chosenElements.length >= 3) continue;
@@ -121,21 +144,19 @@ export class UpgradeSystem {
             // Level 1: Show ability name + simple description
             if (currentLevel === 0) {
                 description = `${data.ability} - ${data.initialDescription}`;
-            } else {
-                // Level 2+: Just show the effect
-                description = data.effect;
-            }
-            
-            // Add level-specific abilities
-            if (nextLevel === 6) {
+            } else if (nextLevel === 6) {
+                // Level 6 Ultimate Choice: Show enhanced description
                 const level6Abilities = {
-                    fire: 'Inferno Wave',
-                    water: 'Freezing Touch', 
-                    earth: 'Earthquake (10% chance per tremor + stuns)',
-                    lightning: 'Thunder Storm',
-                    air: 'Tornado Vortex'
+                    fire: '🌋 Inferno Wave - Chain explosions from fireballs',
+                    water: '❄️ Freezing Touch - Freeze nearby enemies when taking damage', 
+                    earth: '🌍 Earthquake Stomp - Massive earthquake every 8 seconds',
+                    lightning: '⛈️ Thunder Storm - 8 targeted lightning strikes every 6 seconds',
+                    air: '🌪️ Tornado Vortex - Powerful moving tornadoes every 2.5 seconds'
                 };
-                description += ` → Unlocks ${level6Abilities[elementType]}`;
+                description = `🎯 ULTIMATE MASTERY 🎯\n${level6Abilities[elementType]}\n\n⚠️ WARNING: You can only choose 2 Elements to reach level 6`;
+            } else {
+                // Level 2-5: Just show the effect
+                description = data.effect;
             }
             
             // Add ring requirement warning
@@ -164,6 +185,11 @@ export class UpgradeSystem {
         // Add to chosen elements if not already there
         if (!player.chosenElements.includes(elementType)) {
             player.chosenElements.push(elementType);
+        }
+        
+        // Track ultimate elements (Level 6+)
+        if (newLevel >= 6 && !player.ultimateElements.includes(elementType)) {
+            player.ultimateElements.push(elementType);
         }
         
         // Update level
@@ -344,20 +370,20 @@ export class UpgradeSystem {
         }
     }
     
-    // Check and unlock fusion ultimates when two elements reach level 10
+    // Check and unlock fusion ultimates when both ultimate elements reach level 10
     checkForFusionUltimates() {
         const player = this.game.player;
-        const level10Elements = [];
+        const level10UltimateElements = [];
         
-        // Find all elements at level 10
-        for (const [element, level] of Object.entries(player.upgradeCount)) {
-            if (level >= 10) {
-                level10Elements.push(element);
+        // Find ultimate elements that reached level 10
+        for (const element of player.ultimateElements) {
+            if ((player.upgradeCount[element] || 0) >= 10) {
+                level10UltimateElements.push(element);
             }
         }
         
-        // Need at least 2 elements at level 10 for fusion
-        if (level10Elements.length < 2) return;
+        // Need both ultimate elements at level 10 for fusion (since we only have 2)
+        if (level10UltimateElements.length < 2) return;
         
         // Check for specific fusion combinations
         const fusionTable = {
@@ -369,24 +395,22 @@ export class UpgradeSystem {
             'water+lightning': 'thunderStorm' // Enhanced version
         };
         
-        // Check all possible pairs
-        for (let i = 0; i < level10Elements.length; i++) {
-            for (let j = i + 1; j < level10Elements.length; j++) {
-                const element1 = level10Elements[i];
-                const element2 = level10Elements[j];
+        // Since we only have 2 ultimate elements, just check that pair
+        if (level10UltimateElements.length === 2) {
+            const element1 = level10UltimateElements[0];
+            const element2 = level10UltimateElements[1];
+            
+            // Create fusion key (alphabetical order)
+            const fusionKey1 = `${element1}+${element2}`;
+            const fusionKey2 = `${element2}+${element1}`;
+            
+            const fusionAbility = fusionTable[fusionKey1] || fusionTable[fusionKey2];
+            
+            if (fusionAbility && !player.specialAbilities[fusionAbility]) {
+                player.specialAbilities[fusionAbility] = true;
                 
-                // Create fusion key (alphabetical order)
-                const fusionKey1 = `${element1}+${element2}`;
-                const fusionKey2 = `${element2}+${element1}`;
-                
-                const fusionAbility = fusionTable[fusionKey1] || fusionTable[fusionKey2];
-                
-                if (fusionAbility && !player.specialAbilities[fusionAbility]) {
-                    player.specialAbilities[fusionAbility] = true;
-                    
-                    // Show fusion unlock notification
-                    this.showFusionUnlockNotification(element1, element2, fusionAbility);
-                }
+                // Show fusion unlock notification
+                this.showFusionUnlockNotification(element1, element2, fusionAbility);
             }
         }
     }
