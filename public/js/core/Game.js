@@ -923,16 +923,11 @@ export class Game {
             // FORCE visibility states to ensure proper switching
             activeSection.style.setProperty('display', 'block', 'important');
             inactiveSection.style.setProperty('display', 'none', 'important');
-            console.log(`Tab switch: ${activeSection.id} visible, ${inactiveSection.id} hidden`);
+
             
-            // CRITICAL: Ensure the active class is actually applied
-            console.log('Classes after switch:', {
-                activeSection: activeSection.classList.toString(),
-                inactiveSection: inactiveSection.classList.toString()
-            });
+            // Ensure the active class is applied for proper CSS visibility
             
             // DYNAMIC SHOP SIZING: Handle both tabs
-            console.log('Checking activeSection.id:', activeSection.id);
             
             // Reset shop to standard size for Items tab
             if (activeSection.id === 'itemsSection') {
@@ -944,26 +939,26 @@ export class Game {
                     shopContentContainer.style.setProperty('min-height', '150px', 'important');
                     shopContentContainer.style.setProperty('max-height', 'none', 'important');
                     shopContentContainer.style.setProperty('overflow-y', 'visible', 'important');
-                    console.log('RESET: Shop resized for Items tab');
+
                 }
                 
                 if (shopMenu) {
                     shopMenu.style.setProperty('height', 'auto', 'important');
                     shopMenu.style.setProperty('max-height', 'none', 'important');
-                    console.log('RESET: Shop menu height reset for Items tab');
+
                 }
                 
                 // Ensure rings section is hidden
                 const ringsSection = document.querySelector('#ringsSection');
                 if (ringsSection) {
                     ringsSection.style.setProperty('display', 'none', 'important');
-                    console.log('RESET: Rings section explicitly hidden');
+
                 }
             }
             
             // EMERGENCY FIX: If this is the rings section, force it to be visible
             if (activeSection.id === 'ringsSection') {
-                console.log('RINGS SECTION ACTIVATED - Applying emergency fix');
+
                 activeSection.style.setProperty('display', 'block', 'important');
                 activeSection.style.setProperty('visibility', 'visible', 'important');
                 activeSection.style.setProperty('height', 'auto', 'important');
@@ -979,7 +974,7 @@ export class Game {
                     shopItems.style.setProperty('height', 'auto', 'important');
                     shopItems.style.setProperty('background', 'transparent', 'important');
                     shopItems.style.setProperty('min-height', 'auto', 'important');
-                    console.log('Applied clean styles to shop-items container');
+
                 }
                 
                 // DYNAMIC SIZING: Calculate needed height based on content
@@ -998,7 +993,7 @@ export class Game {
                     const spacing = 15; // Margin between items
                     const dynamicHeight = baseHeight + (ringCount * (itemHeight + spacing)) + 40; // Extra padding
                     
-                    console.log(`DYNAMIC SIZING: ${ringCount} rings detected, content height: ${dynamicHeight}px`);
+
                     
                     // Make content scrollable instead of expanding the entire shop
                     shopContentContainer.style.setProperty('height', `${Math.min(dynamicHeight, 400)}px`, 'important');
@@ -1006,16 +1001,16 @@ export class Game {
                     shopContentContainer.style.setProperty('max-height', '400px', 'important');
                     shopContentContainer.style.setProperty('overflow-y', 'auto', 'important');
                     shopContentContainer.style.setProperty('overflow-x', 'hidden', 'important');
-                    console.log('FIXED: Using scrollable content area instead of expanding shop');
+
                     
                     // Keep shop menu at reasonable height, let content scroll
                     if (shopMenu) {
                         shopMenu.style.setProperty('height', 'auto', 'important');
                         shopMenu.style.setProperty('max-height', '90vh', 'important');
-                        console.log('FIXED: Shop menu uses auto height, content scrolls');
+
                     }
                     
-                    console.log('DYNAMIC SIZING: Applied responsive height for rings section');
+
                 }
                 
                 // CLEAN STYLING: Use normal layout now that DOM is fixed
@@ -1030,29 +1025,18 @@ export class Game {
                 activeSection.style.setProperty('padding', '0', 'important');
                 activeSection.style.setProperty('top', 'auto', 'important');
                 activeSection.style.setProperty('left', 'auto', 'important');
-                console.log('CLEAN STYLING: Reset to normal layout');
+
                 
                 // ULTIMATE DEBUG: Check what's actually happening
                 const computedStyle = window.getComputedStyle(activeSection);
-                console.log('AFTER NUCLEAR - activeSection computed styles:', {
-                    display: computedStyle.display,
-                    visibility: computedStyle.visibility,
-                    position: computedStyle.position,
-                    top: computedStyle.top,
-                    left: computedStyle.left,
-                    width: computedStyle.width,
-                    height: computedStyle.height,
-                    minHeight: computedStyle.minHeight,
-                    zIndex: computedStyle.zIndex,
-                    overflow: computedStyle.overflow
-                });
+
                 
                 // RUNTIME DOM DEBUG: Check actual live DOM structure
-                console.log('LIVE DOM CHECK - ringsSection parent chain:');
+
                 let domParent = activeSection.parentElement;
                 let level = 0;
                 while (domParent && level < 5) {
-                    console.log(`  DOM Level ${level}: ${domParent.tagName}#${domParent.id}.${domParent.className}`);
+
                     domParent = domParent.parentElement;
                     level++;
                 }
@@ -1060,25 +1044,24 @@ export class Game {
                 // Check if ringsSection is where it should be
                 const shopContent = document.querySelector('.shop-content');
                 const ringsInShopContent = shopContent ? shopContent.contains(activeSection) : false;
-                console.log('CRITICAL: Is ringsSection inside shop-content?', ringsInShopContent);
+
                 
                 // Check siblings
                 const siblings = Array.from(activeSection.parentElement.children);
-                console.log('ringsSection siblings:', siblings.map(s => `${s.tagName}#${s.id}`));
+
                 
                 // PHYSICAL DOM FIX: If ringsSection is wrongly nested, move it to shop-content
                 if (activeSection.parentElement.id === 'itemsSection') {
-                    console.log('🚨 DETECTED: ringsSection wrongly nested in itemsSection - FIXING NOW!');
+
                     const shopContentDiv = document.querySelector('.shop-content');
                     if (shopContentDiv) {
                         // Remove from wrong parent and add to correct parent
                         activeSection.remove();
                         shopContentDiv.appendChild(activeSection);
-                        console.log('✅ FIXED: Moved ringsSection to shop-content');
+
                         
                         // Verify the fix
-                        console.log('New parent:', activeSection.parentElement.className);
-                        console.log('New siblings:', Array.from(activeSection.parentElement.children).map(s => `${s.tagName}#${s.id}`));
+
                     }
                 }
                 
@@ -1088,57 +1071,28 @@ export class Game {
                 
                 // Check all child elements
                 const allChildren = activeSection.querySelectorAll('*');
-                console.log('Ring section children count:', allChildren.length);
+
                 allChildren.forEach((child, index) => {
                     if (index < 5) { // Only log first 5 to avoid spam
                         const childStyle = window.getComputedStyle(child);
-                        console.log(`Child ${index} (${child.tagName}):`, {
-                            display: childStyle.display,
-                            visibility: childStyle.visibility,
-                            height: childStyle.height
-                        });
+
                     }
                 });
                 
-                console.log('Emergency rings fix applied - dimensions:', {
-                    offsetHeight: activeSection.offsetHeight,
-                    scrollHeight: activeSection.scrollHeight,
-                    boundingRect: activeSection.getBoundingClientRect()
-                });
+
                 
                 // ULTRA DEBUG: Check parent chain visibility
                 let parent = activeSection.parentElement;
                 level = 0;
                 while (parent && level < 5) {
                     const computedStyle = window.getComputedStyle(parent);
-                    console.log(`Parent level ${level} (${parent.tagName}#${parent.id}.${parent.className}):`, {
-                        display: computedStyle.display,
-                        visibility: computedStyle.visibility,
-                        height: computedStyle.height,
-                        overflow: computedStyle.overflow,
-                        position: computedStyle.position
-                    });
+
                     parent = parent.parentElement;
                     level++;
                 }
                 
                 // Check our own computed styles vs inline styles
-                console.log('activeSection computed vs inline styles:', {
-                    computed: {
-                        display: computedStyle.display,
-                        visibility: computedStyle.visibility,
-                        height: computedStyle.height,
-                        minHeight: computedStyle.minHeight,
-                        width: computedStyle.width
-                    },
-                    inline: {
-                        display: activeSection.style.display,
-                        visibility: activeSection.style.visibility,
-                        height: activeSection.style.height,
-                        minHeight: activeSection.style.minHeight,
-                        width: activeSection.style.width
-                    }
-                });
+
             }
             
             // Debug: Log the final state
@@ -1204,11 +1158,7 @@ export class Game {
             }));
             
             // Debug: Check rings section content details
-            console.log('Rings section detailed content:', {
-                innerHTML: ringsSection.innerHTML,
-                firstChild: ringsSection.firstElementChild?.tagName || 'none',
-                childElementCount: ringsSection.childElementCount
-            });
+
             
             // Debug: Check all parent containers
             const shopContent = document.querySelector('.shop-content');
@@ -1259,7 +1209,7 @@ export class Game {
                     shopContent.style.height = 'auto !important';
                     shopContent.style.minHeight = '400px !important';
                     shopContent.style.overflow = 'visible !important';
-                    console.log('Forced shop-content container dimensions');
+
                 }
                 
                 // ULTRA FIX: Force the shop-content parent to have height
@@ -1269,7 +1219,7 @@ export class Game {
                     shopContentParent.style.minHeight = '400px !important';
                     shopContentParent.style.maxHeight = 'none !important';
                     shopContentParent.style.overflow = 'visible !important';
-                    console.log('ULTRA FIX: Forced shop-content parent height');
+
                 }
                 
                 // Force the rings section with absolute positioning as last resort
@@ -1278,12 +1228,8 @@ export class Game {
                 ringsSection.style.left = '0px';
                 ringsSection.style.zIndex = '9999';
                 
-                console.log('Applied AGGRESSIVE emergency visibility styles to rings section');
-                console.log('Rings section dimensions after fix:', {
-                    offsetHeight: ringsSection.offsetHeight,
-                    scrollHeight: ringsSection.scrollHeight,
-                    boundingRect: ringsSection.getBoundingClientRect()
-                });
+    
+                
             }
             
             console.log('Shop tabs initialized successfully');
