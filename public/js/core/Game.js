@@ -1212,15 +1212,7 @@ export class Game {
 
                 }
                 
-                // ULTRA FIX: Force the shop-content parent to have height
-                const shopContentParent = activeSection.parentElement;
-                if (shopContentParent && shopContentParent.classList.contains('shop-content')) {
-                    shopContentParent.style.height = 'auto !important';
-                    shopContentParent.style.minHeight = '400px !important';
-                    shopContentParent.style.maxHeight = 'none !important';
-                    shopContentParent.style.overflow = 'visible !important';
 
-                }
                 
                 // Force the rings section with absolute positioning as last resort
                 ringsSection.style.position = 'relative !important';
@@ -1232,14 +1224,9 @@ export class Game {
                 
             }
             
-            console.log('Shop tabs initialized successfully');
+            // Shop tabs initialized successfully
         } else {
-            console.log('Shop tab elements not found:', {
-                itemsTab: !!itemsTab,
-                ringsTab: !!ringsTab,
-                itemsSection: !!itemsSection,
-                ringsSection: !!ringsSection
-            });
+            console.error('Shop tab elements not found - check HTML structure');
         }
     }
     

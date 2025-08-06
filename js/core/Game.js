@@ -1207,14 +1207,9 @@ export class Game {
                 
             }
             
-            console.log('Shop tabs initialized successfully');
+            // Shop tabs initialized successfully
         } else {
-            console.log('Shop tab elements not found:', {
-                itemsTab: !!itemsTab,
-                ringsTab: !!ringsTab,
-                itemsSection: !!itemsSection,
-                ringsSection: !!ringsSection
-            });
+            console.error('Shop tab elements not found - check HTML structure');
         }
     }
     
