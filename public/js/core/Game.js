@@ -881,14 +881,14 @@ export class Game {
     
     // Enter shop mode
     enterShop() {
-        console.log('enterShop() called - starting shop initialization');
+
         this.previousGameState = this.gameState; // Remember where we came from
         this.gameState = 'shop';
         document.getElementById('shopMenu').style.display = 'block';
         this.updateShopDisplay();
-        console.log('About to call initializeShopTabs()');
+
         this.initializeShopTabs();
-        console.log('enterShop() completed');
+
     }
     
     // Exit shop mode
@@ -905,12 +905,7 @@ export class Game {
         const ringsSection = document.getElementById('ringsSection');
         
         function switchTab(activeTab, activeSection, inactiveTab, inactiveSection) {
-            console.log('switchTab called:', {
-                activeTab: activeTab.id,
-                activeSection: activeSection.id,
-                inactiveTab: inactiveTab.id,
-                inactiveSection: inactiveSection.id
-            });
+            
             
             // Update tab appearance
             activeTab.classList.add('active');
@@ -1096,91 +1091,31 @@ export class Game {
             }
             
             // Debug: Log the final state
-            console.log('Section states after switch:', {
-                [activeSection.id]: {
-                    hasActive: activeSection.classList.contains('active'),
-                    display: window.getComputedStyle(activeSection).display
-                },
-                [inactiveSection.id]: {
-                    hasActive: inactiveSection.classList.contains('active'),
-                    display: window.getComputedStyle(inactiveSection).display
-                }
-            });
+            
         }
         
         if (itemsTab && ringsTab && itemsSection && ringsSection) {
-            console.log('Setting up tab event listeners directly (no cloning)');
+
             
             // Don't clone - just add listeners directly
             const newItemsTab = itemsTab;
             const newRingsTab = ringsTab;
             
             newItemsTab.addEventListener('click', function() {
-                console.log('Items tab clicked');
+
                 switchTab(newItemsTab, itemsSection, newRingsTab, ringsSection);
             });
             
             newRingsTab.addEventListener('click', function() {
-                console.log('Rings tab clicked');
+
                 switchTab(newRingsTab, ringsSection, newItemsTab, itemsSection);
             });
             
-            // Debug: Check initial state and content
-            console.log('Initial section states:', {
-                itemsSection: {
-                    hasActive: itemsSection.classList.contains('active'),
-                    display: window.getComputedStyle(itemsSection).display,
-                    classList: Array.from(itemsSection.classList),
-                    childCount: itemsSection.children.length,
-                    innerHTML: itemsSection.innerHTML.substring(0, 200) + '...'
-                },
-                ringsSection: {
-                    hasActive: ringsSection.classList.contains('active'),
-                    display: window.getComputedStyle(ringsSection).display,
-                    classList: Array.from(ringsSection.classList),
-                    childCount: ringsSection.children.length,
-                    innerHTML: ringsSection.innerHTML.substring(0, 200) + '...'
-                }
-            });
-            
-            // Debug: Check if ring items exist
-            const ringItems = ['fireRingItem', 'waterRingItem', 'earthRingItem', 'airRingItem', 'lightningRingItem'];
-            console.log('Ring item elements:', ringItems.map(id => {
-                const element = document.getElementById(id);
-                return {
-                    id,
-                    exists: !!element,
-                    parent: element?.parentElement?.id || 'none',
-                    grandParent: element?.parentElement?.parentElement?.id || 'none',
-                    display: element ? window.getComputedStyle(element).display : 'n/a',
-                    visibility: element ? window.getComputedStyle(element).visibility : 'n/a'
-                };
-            }));
-            
-            // Debug: Check rings section content details
 
             
-            // Debug: Check all parent containers
-            const shopContent = document.querySelector('.shop-content');
-            const shopMenu = document.getElementById('shopMenu');
-            console.log('Parent container states:', {
-                shopMenu: {
-                    display: shopMenu ? window.getComputedStyle(shopMenu).display : 'not found',
-                    visibility: shopMenu ? window.getComputedStyle(shopMenu).visibility : 'not found'
-                },
-                shopContent: {
-                    display: shopContent ? window.getComputedStyle(shopContent).display : 'not found',
-                    visibility: shopContent ? window.getComputedStyle(shopContent).visibility : 'not found',
-                    height: shopContent ? window.getComputedStyle(shopContent).height : 'not found',
-                    overflow: shopContent ? window.getComputedStyle(shopContent).overflow : 'not found'
-                },
-                ringsSection: {
-                    offsetHeight: ringsSection.offsetHeight,
-                    scrollHeight: ringsSection.scrollHeight,
-                    clientHeight: ringsSection.clientHeight,
-                    boundingRect: ringsSection.getBoundingClientRect()
-                }
-            });
+
+            
+
             
             // Temporary fix: Force rings section to be visible with inline styles
             if (ringsSection) {

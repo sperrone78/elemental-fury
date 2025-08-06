@@ -4360,7 +4360,7 @@ class UpgradeSystem {
         const fusionName = fusionNames[fusionAbility] || fusionAbility;
         
         // Create a visual notification (could be expanded)
-        console.log(`FUSION ULTIMATE UNLOCKED! ${element1.toUpperCase()} + ${element2.toUpperCase()} = ${fusionName}`);
+        // Fusion ultimate unlocked
         
         // TODO: Add visual notification system for fusion unlocks
     }
