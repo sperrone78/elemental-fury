@@ -16,6 +16,12 @@ export const PLAYER_CONFIG = {
 
 export const WEAPON_CONFIG = {
     BASIC: {
+        // Base stats - never modified directly
+        BASE_DAMAGE: 20,
+        BASE_RANGE: 200,
+        BASE_COOLDOWN: 0.5,
+        BASE_RADIUS: 3,
+        // Legacy values for compatibility
         DAMAGE: 20,
         RANGE: 200,
         COOLDOWN: 0.5,
@@ -67,31 +73,49 @@ export const ENEMY_CONFIG = {
 export const ELEMENT_CONFIG = {
     FIRE: {
         FIREBALL: {
+            BASE_COOLDOWN: 2.0,
+            BASE_DAMAGE_MULTIPLIER: 1.5,
+            BASE_RADIUS: 25,
+            BASE_SPEED: 5,
+            // Legacy values
             COOLDOWN: 2.0,
             DAMAGE_MULTIPLIER: 1.5,
             RADIUS: 25,
             SPEED: 5
         },
         INFERNO_WAVE: {
+            BASE_RADIUS: 200,
+            BASE_DAMAGE_MULTIPLIER: 0.6,
+            // Legacy values
             RADIUS: 200,
             DAMAGE_MULTIPLIER: 0.6
         }
     },
     WATER: {
         GLOBE: {
+            BASE_RADIUS: 5,
+            BASE_ORBIT_RADIUS: 45,
+            BASE_DAMAGE: 15,
+            BASE_ROTATION_SPEED: 0.02,
+            // Legacy values
             RADIUS: 5,
             ORBIT_RADIUS: 45,
             DAMAGE: 15,
             ROTATION_SPEED: 0.02
         },
-        HEALTH_BONUS_PER_LEVEL: 0.1
+        HEALTH_BONUS_PER_LEVEL: 0.1,
+        HEALTH_REGEN_PER_LEVEL: 1.0
     },
     EARTH: {
         ARMOR_PER_LEVEL: [0, 5, 5, 5, 3, 3, 3], // levels 0-6
         TREMOR: {
             BASE_DAMAGE: 18,
-            PULSE_INTERVAL: 0.5,
+            BASE_PULSE_INTERVAL: 0.5,
             BASE_RANGE: 80,
+            BASE_RANGE_PER_LEVEL: 20,
+            BASE_DAMAGE_PER_LEVEL: 2,
+            // Legacy values
+            PULSE_INTERVAL: 0.5,
             RANGE_PER_LEVEL: 20,
             DAMAGE_PER_LEVEL: 2
         },

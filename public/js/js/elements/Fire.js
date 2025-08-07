@@ -7,10 +7,19 @@ import { DOTEffect } from '../entities/effects/DOTEffect.js';
 import { ExplosionParticle } from '../entities/effects/ExplosionParticle.js';
 
 export class FireballProjectile extends Projectile {
-    constructor(x, y, dirX, dirY, damage, range) {
+    constructor(x, y, dirX, dirY, damage, range, player = null) {
         super(x, y, dirX, dirY, damage, range);
         this.radius = 6;
-        this.explosionRadius = ELEMENT_CONFIG.FIRE.FIREBALL.RADIUS;
+        this.baseExplosionRadius = ELEMENT_CONFIG.FIRE.FIREBALL.BASE_RADIUS;
+        this.player = player;
+        
+        // Calculate modified explosion radius with earth bonus
+        if (player && player.elementalModifiers) {
+            const modifiers = player.elementalModifiers.getModifiers();
+            this.explosionRadius = this.baseExplosionRadius * modifiers.radiusMultiplier;
+        } else {
+            this.explosionRadius = this.baseExplosionRadius;
+        }
     }
     
     render(ctx) {

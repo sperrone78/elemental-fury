@@ -73,11 +73,162 @@ export class Player {
         this.fireballCooldown = 0;
         this.lastFireballTime = 0;
         
+        // Elemental Aura System variables
+        this.auraTime = 0;
+        this.lastX = x;
+        this.lastY = y;
+        this.trailParticles = [];
+        this.auraParticles = [];
+        
         // Debug method for testing modifiers
         this.debugModifiers = () => {
             console.log('🔧 Current Elemental Modifiers:');
             this.elementalModifiers.logModifiers();
         };
+    }
+    
+    // Elemental Aura System Methods
+    getDominantElementColor() {
+        const elements = {
+            fire: { core: '#ff6b6b', glow: '#ff9999', aura: 'rgba(255, 107, 107, 0.3)' },
+            water: { core: '#4ecdc4', glow: '#7dd3d8', aura: 'rgba(78, 205, 196, 0.3)' },
+            earth: { core: '#8b5a2b', glow: '#a67c52', aura: 'rgba(139, 90, 43, 0.3)' },
+            air: { core: '#95e1d3', glow: '#b8eee2', aura: 'rgba(149, 225, 211, 0.3)' },
+            lightning: { core: '#fce38a', glow: '#fdeba4', aura: 'rgba(252, 227, 138, 0.3)' }
+        };
+        
+        // Find element with highest level
+        let dominantElement = 'fire';
+        let highestLevel = 0;
+        
+        Object.keys(this.upgradeCount).forEach(element => {
+            if (this.upgradeCount[element] > highestLevel) {
+                highestLevel = this.upgradeCount[element];
+                dominantElement = element;
+            }
+        });
+        
+        // If no elements leveled, default to a neutral blue-green
+        if (highestLevel === 0) {
+            return { core: '#4a7c59', glow: '#6bb77b', aura: 'rgba(74, 124, 89, 0.3)' };
+        }
+        
+        return elements[dominantElement] || elements.fire;
+    }
+    
+    updateAura() {
+        this.auraTime += 0.016; // Roughly 60fps timing
+        
+        // Add movement trail particles
+        const moved = Math.abs(this.x - this.lastX) > 1 || Math.abs(this.y - this.lastY) > 1;
+        if (moved && this.trailParticles.length < 15) {
+            const dominantColor = this.getDominantElementColor();
+            this.trailParticles.push({
+                x: this.lastX + (Math.random() - 0.5) * 4,
+                y: this.lastY + (Math.random() - 0.5) * 4,
+                life: 0.8,
+                maxLife: 0.8,
+                color: dominantColor.core
+            });
+        }
+        
+        // Update trail particles
+        this.trailParticles = this.trailParticles.filter(particle => {
+            particle.life -= 0.016;
+            return particle.life > 0;
+        });
+        
+        // Generate floating aura particles
+        if (this.auraParticles.length < 8) {
+            const angle = Math.random() * Math.PI * 2;
+            const distance = 30 + Math.random() * 20;
+            const dominantColor = this.getDominantElementColor();
+            
+            this.auraParticles.push({
+                x: this.x + Math.cos(angle) * distance,
+                y: this.y + Math.sin(angle) * distance,
+                angle: angle,
+                baseDistance: distance,
+                orbitSpeed: 0.5 + Math.random() * 0.5,
+                life: 2 + Math.random() * 2,
+                maxLife: 2 + Math.random() * 2,
+                size: 2 + Math.random() * 2,
+                color: dominantColor.core
+            });
+        }
+        
+        // Update floating particles
+        this.auraParticles = this.auraParticles.filter(particle => {
+            particle.life -= 0.016;
+            particle.angle += particle.orbitSpeed * 0.016;
+            const oscillation = Math.sin(this.auraTime + particle.angle) * 5;
+            particle.x = this.x + Math.cos(particle.angle) * (particle.baseDistance + oscillation);
+            particle.y = this.y + Math.sin(particle.angle) * (particle.baseDistance + oscillation);
+            return particle.life > 0;
+        });
+        
+        this.lastX = this.x;
+        this.lastY = this.y;
+    }
+    
+    renderElementalAura(ctx) {
+        const dominantColor = this.getDominantElementColor();
+        const totalLevels = Object.values(this.upgradeCount).reduce((sum, level) => sum + level, 0);
+        const intensity = Math.min(totalLevels / 15, 1); // Scale intensity based on total mastery
+        
+        // Outer aura ring
+        const auraRadius = 50 + Math.sin(this.auraTime * 2) * 5;
+        const gradient = ctx.createRadialGradient(
+            this.x, this.y, 20, 
+            this.x, this.y, auraRadius
+        );
+        gradient.addColorStop(0, dominantColor.aura);
+        gradient.addColorStop(0.5, dominantColor.aura.replace('0.3', '0.1'));
+        gradient.addColorStop(1, 'rgba(0,0,0,0)');
+        
+        ctx.fillStyle = gradient;
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, auraRadius, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // Pulsing energy rings based on mastery level
+        if (intensity > 0.3) {
+            for (let i = 0; i < 3; i++) {
+                const ringTime = this.auraTime * 3 + i * 1.2;
+                const ringRadius = 25 + i * 8 + Math.sin(ringTime) * 3;
+                const ringAlpha = (intensity * 0.2) * (Math.sin(ringTime * 0.5) * 0.3 + 0.4);
+                
+                ctx.strokeStyle = dominantColor.core.replace(')', `, ${ringAlpha})`);
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, ringRadius, 0, Math.PI * 2);
+                ctx.stroke();
+            }
+        }
+    }
+    
+    renderTrailParticles(ctx) {
+        this.trailParticles.forEach(particle => {
+            const alpha = particle.life / particle.maxLife;
+            const size = 3 * alpha;
+            
+            ctx.fillStyle = particle.color.replace(')', `, ${alpha * 0.6})`);
+            ctx.beginPath();
+            ctx.arc(particle.x, particle.y, size, 0, Math.PI * 2);
+            ctx.fill();
+        });
+    }
+    
+    renderAuraParticles(ctx) {
+        this.auraParticles.forEach(particle => {
+            const alpha = (particle.life / particle.maxLife) * 0.8;
+            const pulseSize = particle.size + Math.sin(this.auraTime * 4 + particle.angle) * 1;
+            
+            ctx.fillStyle = particle.color.replace(')', `, ${alpha})`);
+            ctx.beginPath();
+            ctx.arc(particle.x, particle.y, pulseSize, 0, Math.PI * 2);
+            ctx.fill();
+        });
     }
     
     update(keys, mousePos, deltaTime) {
@@ -146,9 +297,17 @@ export class Player {
                 this.lastRegenTick = this.game.gameTime;
             }
         }
+        
+        // Update elemental aura system
+        this.updateAura();
     }
     
     render(ctx) {
+        // Render elemental aura effects first (behind player)
+        this.renderElementalAura(ctx);
+        this.renderTrailParticles(ctx);
+        this.renderAuraParticles(ctx);
+        
         if (this.specialAbilities.radiusAttack) {
             // Use new modifier system for tremor range display
             const baseTremorStats = {
@@ -201,7 +360,9 @@ export class Player {
             ctx.arc(this.x, this.y, this.radius + 5, 0, Math.PI * 2);
             ctx.stroke();
         } else {
-            ctx.fillStyle = '#4a9eff';
+            // Use dynamic color based on dominant element
+            const dominantColor = this.getDominantElementColor();
+            ctx.fillStyle = dominantColor.core;
         }
         
         ctx.beginPath();

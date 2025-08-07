@@ -58,7 +58,8 @@ firebase hosting:sites:get default --open
 │   ├── elements/          # Elemental magic system
 │   │   ├── Fire.js        # Fire mastery abilities
 │   │   ├── Water.js       # Water mastery abilities  
-│   │   └── Air.js         # Air mastery abilities
+│   │   ├── Air.js         # Air mastery abilities
+│   │   └── index.js       # Element exports
 │   ├── entities/          # Game objects
 │   │   ├── enemies/       # Enemy types and AI
 │   │   ├── weapons/       # Projectiles and weapon systems
@@ -83,6 +84,13 @@ firebase hosting:sites:get default --open
 - Component-like systems for upgrades, waves, and effects
 - Delta-time based physics for consistent frame rates across devices
 
+#### Elemental Modifier System (NEW)
+- **ElementalModifiers class** (`js/systems/ElementalModifiers.js`) provides centralized stat calculation
+- **Base stats preserved** - weapons store original values that never change directly
+- **Dynamic calculation** - all bonuses applied through modifier system on-demand
+- **Global impact** - each element affects ALL compatible abilities and weapons
+- **Per-level scaling** - consistent +10% bonuses per elemental level
+
 #### Game State Management
 ```javascript
 gameState: 'waiting' | 'playing' | 'gameOver' | 'shop'
@@ -98,11 +106,26 @@ gameState: 'waiting' | 'playing' | 'gameOver' | 'shop'
 #### Elemental Mastery System
 - 5 elements: Fire, Water, Earth, Air, Lightning
 - **NEW PROGRESSION**: 3 elements to Level 5, then choose 2 for Ultimate Mastery
-- **Levels 1-5**: Up to 3 elements, special abilities unlock at Level 3
+- **Levels 1-5**: Up to 3 elements, special abilities unlock at Level 1
 - **Level 6**: Ultimate Mastery choice - only 2 elements can reach Level 6+ (requires Mastery Ring)  
 - **Levels 7-10**: Only chosen ultimate elements can progress
 - **Level 10**: Fusion ultimates unlock when both elements reach max level
-- Level progression affects: damage, health, armor, speed, range, attack speed
+
+#### Global Elemental Bonuses (NEW SYSTEM)
+Each elemental level provides consistent +10% bonuses that affect ALL compatible abilities:
+
+- **🔥 Fire**: +10% Damage per level to all attacks (weapons, abilities, projectiles)
+- **🌍 Earth**: +10% Radius per level to all area effects (explosions, tremors, storms, globes)
+- **🌪️ Air**: +10% Range per level to all projectiles and abilities
+- **⚡ Lightning**: +10% Attack Speed per level to all weapons and abilities (reduces cooldowns)
+- **💧 Water**: +10% Max Health + 1 HP/sec Regeneration per level (player only)
+
+#### Element Synergies
+- **Fire + Earth**: High-damage explosions with massive radius
+- **Lightning + Air**: Fast-firing, long-range projectiles  
+- **Fire + Lightning**: High-damage, fast-firing weapons
+- **Earth + Water**: Large defensive globes with high survivability
+- All combinations create meaningful strategic choices
 
 #### Player Profile & Shop System
 - Persistent save data using localStorage
@@ -121,6 +144,7 @@ gameState: 'waiting' | 'playing' | 'gameOver' | 'shop'
 - Screen shake effects
 - Modern UI rendered directly on canvas
 - Status effects: Frozen, Stunned, Burning
+- **Elemental Aura Player System**: Dynamic player appearance based on elemental masteries
 
 ## Important Implementation Notes
 
@@ -185,7 +209,11 @@ gameState: 'waiting' | 'playing' | 'gameOver' | 'shop'
 - **Diamond Test Button**: Located in left sidebar, adds 100 diamonds for shop testing
 - **Browser Console**: Use `window.game` for runtime debugging
 - **Ultimate Choice UI**: Special shimmer effects for Level 6 choices
+- **Elemental Modifier Debugging**: `window.game.player.debugModifiers()` shows detailed breakdown of all current bonuses and their impact on each weapon/ability
+- **Real-time Stat Analysis**: Debug utility calculates exact DPS, ranges, cooldowns for all active abilities
 - **Ring Icons**: 💍 Visual indicators in left sidebar show equipped mastery rings with shimmer animation
+- **Test Files**: `test-imports.html` and `test-modifiers.html` for isolated testing of specific systems
+- **Design Proposals**: `design-proposals.html` contains interactive Canvas demonstrations of visual concepts
 
 #### Debugging Common Issues
 - **Import/Export Errors**: Check browser console for ES6 module import failures
@@ -222,7 +250,15 @@ gameState: 'waiting' | 'playing' | 'gameOver' | 'shop'
 - **Canvas Rendering**: All UI elements (health, XP, etc.) rendered directly on game canvas
 - **Mobile Support**: Device Orientation API for tilt controls, touch events for interaction
 - **Save System**: localStorage-based with PlayerProfile class managing persistence
+- **Elemental Modifier System**: Centralized calculation system in `ElementalModifiers.js` provides global stat bonuses
+- **Base Stat Preservation**: All weapons/abilities store base values with `BASE_*` properties in Constants.js
 - **Live Site**: Game deployed at https://elemental-fury.web.app
+
+### New Architecture Components
+- **ElementalModifiers Class**: `js/systems/ElementalModifiers.js` - calculates all elemental bonuses
+- **Base Statistics**: Constants.js contains `BASE_*` values that never change
+- **Dynamic Stat Calculation**: All weapons call `getModifiedStats()` for current values
+- **Cross-Element Synergies**: Elements affect abilities from other elements (e.g., Earth radius affects Fire explosions)
 
 ### Performance Considerations
 - Delta-time based physics for consistent gameplay across framerates
@@ -234,7 +270,20 @@ This is a complete, self-contained game with no external build tools required - 
 
 ## Recent Updates
 
-### v2.9.2 (Latest)
+### v2.9.3 (Latest)
+- **Elemental Aura Player System**: Completely redesigned player visual appearance
+  - Dynamic aura colors that change based on highest elemental mastery
+  - Animated pulsing energy rings around player (intensity scales with total mastery levels)
+  - Particle trail system that follows player movement
+  - Floating orbital particles with elemental colors
+  - Player core color dynamically reflects dominant element
+- **Design Proposals**: Added comprehensive interactive Canvas demonstrations for future visual concepts
+  - Player character designs (3 concepts with live animations)
+  - Enemy visual concepts (4 enemy types with progression demos)
+  - HUD/UI design proposals (3 interface styles)
+  - Game map concepts (6 different map designs with interactive elements)
+
+### v2.9.2
 - **Ring Icon System**: Added 💍 visual indicators in left sidebar showing equipped mastery rings
 - **SummonRing Fix**: Resolved import error for Elite Boss summoning effects (`js/entities/effects/SummonRing.js`)
 - **UI Enhancement**: Ring icons have subtle shimmer animation and update dynamically with shop purchases

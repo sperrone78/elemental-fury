@@ -23,9 +23,26 @@ export class WaterGlobe {
         const baseOrbitRadius = ELEMENT_CONFIG.WATER.GLOBE.BASE_ORBIT_RADIUS;
         this.orbitRadius = baseOrbitRadius + (waterLevel * 5); // +5px per water level
         
-        this.damage = ELEMENT_CONFIG.WATER.GLOBE.BASE_DAMAGE;
+        // Apply Fire modifier to damage
+        const baseDamage = ELEMENT_CONFIG.WATER.GLOBE.BASE_DAMAGE;
+        if (player && player.elementalModifiers) {
+            const modifiers = player.elementalModifiers.getModifiers();
+            this.damage = Math.floor(baseDamage * modifiers.damageMultiplier);
+        } else {
+            this.damage = baseDamage;
+        }
+        
         this.angle = (index * Math.PI * 2) / Math.max(1, this.getGlobeCount()); // Evenly distribute globes
-        this.rotationSpeed = ELEMENT_CONFIG.WATER.GLOBE.BASE_ROTATION_SPEED;
+        
+        // Apply Lightning modifier to rotation speed
+        const baseRotationSpeed = ELEMENT_CONFIG.WATER.GLOBE.BASE_ROTATION_SPEED;
+        if (player && player.elementalModifiers) {
+            const modifiers = player.elementalModifiers.getModifiers();
+            // Faster rotation = divide by attackSpeedMultiplier (same as reducing cooldowns)
+            this.rotationSpeed = baseRotationSpeed / modifiers.attackSpeedMultiplier;
+        } else {
+            this.rotationSpeed = baseRotationSpeed;
+        }
     }
     
     getGlobeCount() {

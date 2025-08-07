@@ -1,0 +1,1898 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Elemental Fury - Art & Design Proposals</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            color: #ffffff;
+            margin: 0;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            text-align: center;
+            color: #4a7c59;
+            text-shadow: 0 0 10px rgba(74, 124, 89, 0.5);
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            text-align: center;
+            color: #888;
+            margin-bottom: 40px;
+            font-size: 1.1em;
+        }
+        
+        .section {
+            background: rgba(42, 42, 42, 0.8);
+            border-radius: 15px;
+            padding: 30px;
+            margin: 30px 0;
+            border: 2px solid #333;
+            backdrop-filter: blur(10px);
+        }
+        
+        .section h2 {
+            color: #4a7c59;
+            border-bottom: 2px solid #4a7c59;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+        }
+        
+        .canvas-demo {
+            background: #000;
+            border: 2px solid #333;
+            border-radius: 10px;
+            margin: 20px 0;
+            display: block;
+        }
+        
+        .design-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+        
+        .design-option {
+            background: rgba(60, 60, 60, 0.5);
+            border-radius: 10px;
+            padding: 20px;
+            border: 1px solid #555;
+            transition: all 0.3s ease;
+        }
+        
+        .design-option:hover {
+            background: rgba(74, 124, 89, 0.2);
+            border-color: #4a7c59;
+            transform: translateY(-5px);
+        }
+        
+        .design-option h3 {
+            color: #4a7c59;
+            margin-top: 0;
+            font-size: 1.3em;
+        }
+        
+        .color-palette {
+            display: flex;
+            gap: 10px;
+            margin: 10px 0;
+        }
+        
+        .color-swatch {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            border: 2px solid #fff;
+            display: inline-block;
+            position: relative;
+        }
+        
+        .color-swatch::after {
+            content: attr(data-color);
+            position: absolute;
+            bottom: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 10px;
+            color: #ccc;
+        }
+        
+        .feature-list {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .feature-list li {
+            padding: 5px 0;
+            padding-left: 20px;
+            position: relative;
+        }
+        
+        .feature-list li::before {
+            content: "⚡";
+            position: absolute;
+            left: 0;
+            color: #4a7c59;
+        }
+        
+        .controls {
+            background: rgba(30, 30, 30, 0.8);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        
+        .controls button {
+            background: #4a7c59;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin: 5px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .controls button:hover {
+            background: #5a8b69;
+            transform: scale(1.05);
+        }
+        
+        .controls button.active {
+            background: #6bb77b;
+            box-shadow: 0 0 10px rgba(107, 183, 123, 0.5);
+        }
+        
+        .note {
+            background: rgba(74, 124, 89, 0.1);
+            border-left: 4px solid #4a7c59;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 0 8px 8px 0;
+        }
+        
+        .implementation {
+            background: rgba(30, 50, 70, 0.3);
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎨 Elemental Fury - Art & Design Proposals</h1>
+        <div class="subtitle">Visual design concepts for enhanced player experience</div>
+        
+        <!-- Player Character Design -->
+        <div class="section">
+            <h2>👤 Player Character Design</h2>
+            
+            <div class="design-grid">
+                <div class="design-option">
+                    <h3>🌟 Elemental Aura Player</h3>
+                    <canvas id="playerAura" class="canvas-demo" width="250" height="200"></canvas>
+                    <ul class="feature-list">
+                        <li>Dynamic aura that changes color based on highest elemental mastery</li>
+                        <li>Pulsing energy rings around the player</li>
+                        <li>Particle trail that follows movement</li>
+                        <li>Mastery level affects aura intensity</li>
+                    </ul>
+                    <div class="color-palette">
+                        <div class="color-swatch" style="background: #ff6b6b" data-color="Fire"></div>
+                        <div class="color-swatch" style="background: #4ecdc4" data-color="Water"></div>
+                        <div class="color-swatch" style="background: #8b5a2b" data-color="Earth"></div>
+                        <div class="color-swatch" style="background: #95e1d3" data-color="Air"></div>
+                        <div class="color-swatch" style="background: #fce38a" data-color="Lightning"></div>
+                    </div>
+                </div>
+                
+                <div class="design-option">
+                    <h3>⚔️ Armored Mage</h3>
+                    <canvas id="playerArmored" class="canvas-demo" width="250" height="200"></canvas>
+                    <ul class="feature-list">
+                        <li>Detailed armor pieces that appear as elements level up</li>
+                        <li>Weapon effects hover around the player</li>
+                        <li>Shield indicator as a visible energy barrier</li>
+                        <li>Mastery rings visible as floating runes</li>
+                    </ul>
+                </div>
+                
+                <div class="design-option">
+                    <h3>🔮 Pure Energy Being</h3>
+                    <canvas id="playerEnergy" class="canvas-demo" width="250" height="200"></canvas>
+                    <ul class="feature-list">
+                        <li>Ethereal, semi-transparent form</li>
+                        <li>Core that shifts between elemental colors</li>
+                        <li>Energy tendrils that react to nearby enemies</li>
+                        <li>Grows more defined with higher masteries</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="controls">
+                <button onclick="animatePlayer('aura')" class="active">Show Aura Animation</button>
+                <button onclick="animatePlayer('armored')">Show Armored Version</button>
+                <button onclick="animatePlayer('energy')">Show Energy Being</button>
+            </div>
+        </div>
+        
+        <!-- Enemy Design -->
+        <div class="section">
+            <h2>👹 Enemy Design Concepts</h2>
+            
+            <div class="design-grid">
+                <div class="design-option">
+                    <h3>⚪ Basic Enemy - Shadow Wraith</h3>
+                    <canvas id="enemyBasic" class="canvas-demo" width="250" height="150"></canvas>
+                    <ul class="feature-list">
+                        <li>Dark, smoky appearance with glowing red eyes</li>
+                        <li>Subtle floating animation</li>
+                        <li>Wispy particle trails</li>
+                        <li>Size indicates health level</li>
+                    </ul>
+                </div>
+                
+                <div class="design-option">
+                    <h3>🛡️ Veteran Enemy - Armored Shade</h3>
+                    <canvas id="enemyVeteran" class="canvas-demo" width="250" height="150"></canvas>
+                    <ul class="feature-list">
+                        <li>Metallic armor plating over shadow form</li>
+                        <li>Orange/bronze glow to indicate veteran status</li>
+                        <li>Heavier, more intimidating silhouette</li>
+                        <li>Spark effects from armor</li>
+                    </ul>
+                </div>
+                
+                <div class="design-option">
+                    <h3>💀 Elite Enemy - Crystal Stalker</h3>
+                    <canvas id="enemyElite" class="canvas-demo" width="250" height="150"></canvas>
+                    <ul class="feature-list">
+                        <li>Crystalline structure with internal energy</li>
+                        <li>Purple energy cores throughout the body</li>
+                        <li>Angular, predatory design</li>
+                        <li>Refracting light effects</li>
+                    </ul>
+                </div>
+                
+                <div class="design-option">
+                    <h3>👑 Boss Enemy - Elemental Titan</h3>
+                    <canvas id="enemyBoss" class="canvas-demo" width="250" height="180"></canvas>
+                    <ul class="feature-list">
+                        <li>Massive size with multiple elemental aspects</li>
+                        <li>Rotating elemental cores in chest/head</li>
+                        <li>Ground-shaking presence with debris</li>
+                        <li>Dynamic element switching during combat</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="controls">
+                <button onclick="animateEnemies()">Animate All Enemies</button>
+                <button onclick="showEnemyProgression()">Show Progression</button>
+            </div>
+        </div>
+        
+        <!-- UI/HUD Design -->
+        <div class="section">
+            <h2>🎛️ Player Board & HUD Design</h2>
+            
+            <div class="design-grid">
+                <div class="design-option">
+                    <h3>🌈 Elemental Status Board</h3>
+                    <canvas id="hudElemental" class="canvas-demo" width="350" height="200"></canvas>
+                    <ul class="feature-list">
+                        <li>Circular elemental progress indicators</li>
+                        <li>Active abilities shown as glowing orbs</li>
+                        <li>Health bar with elemental color scheme</li>
+                        <li>XP vortex range visualization</li>
+                    </ul>
+                </div>
+                
+                <div class="design-option">
+                    <h3>⚡ Minimalist Energy HUD</h3>
+                    <canvas id="hudMinimal" class="canvas-demo" width="350" height="200"></canvas>
+                    <ul class="feature-list">
+                        <li>Clean, geometric design</li>
+                        <li>Edge-of-screen element indicators</li>
+                        <li>Subtle animations and transitions</li>
+                        <li>Focus on game action, not UI</li>
+                    </ul>
+                </div>
+                
+                <div class="design-option">
+                    <h3>🔮 Mystical Grimoire Style</h3>
+                    <canvas id="hudGrimoire" class="canvas-demo" width="350" height="200"></canvas>
+                    <ul class="feature-list">
+                        <li>Ancient tome/spellbook aesthetic</li>
+                        <li>Runic symbols for each element</li>
+                        <li>Parchment-like backgrounds</li>
+                        <li>Spell slot indicators for abilities</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="controls">
+                <button onclick="previewHUD('elemental')" class="active">Elemental HUD</button>
+                <button onclick="previewHUD('minimal')">Minimal HUD</button>
+                <button onclick="previewHUD('grimoire')">Grimoire HUD</button>
+            </div>
+        </div>
+        
+        <!-- Map/Board Design -->
+        <div class="section">
+            <h2>🗺️ Game Board & Map Concepts</h2>
+            
+            <div class="design-grid">
+                <div class="design-option">
+                    <h3>🌋 Elemental Battleground</h3>
+                    <canvas id="mapElemental" class="canvas-demo" width="400" height="250"></canvas>
+                    <ul class="feature-list">
+                        <li>Different zones for each element (fire pools, water streams, etc.)</li>
+                        <li>Environmental effects that boost corresponding elements</li>
+                        <li>Dynamic weather that changes element effectiveness</li>
+                        <li>Destructible terrain that creates new tactical opportunities</li>
+                    </ul>
+                    <div class="color-palette">
+                        <div class="color-swatch" style="background: #8B0000" data-color="Lava"></div>
+                        <div class="color-swatch" style="background: #4169E1" data-color="Water"></div>
+                        <div class="color-swatch" style="background: #228B22" data-color="Forest"></div>
+                        <div class="color-swatch" style="background: #87CEEB" data-color="Sky"></div>
+                        <div class="color-swatch" style="background: #FFD700" data-color="Storm"></div>
+                    </div>
+                </div>
+                
+                <div class="design-option">
+                    <h3>🏛️ Ancient Arena</h3>
+                    <canvas id="mapArena" class="canvas-demo" width="400" height="250"></canvas>
+                    <ul class="feature-list">
+                        <li>Circular colosseum with tiered stone platforms</li>
+                        <li>Crumbling pillars that provide cover and tactical positioning</li>
+                        <li>Central summoning circles that spawn elite enemies</li>
+                        <li>Spectral audience that reacts to player performance</li>
+                    </ul>
+                </div>
+                
+                <div class="design-option">
+                    <h3>🌲 Mystical Forest</h3>
+                    <canvas id="mapForest" class="canvas-demo" width="400" height="250"></canvas>
+                    <ul class="feature-list">
+                        <li>Dense trees that block projectiles but can be destroyed</li>
+                        <li>Glowing mushroom rings that provide XP bonuses</li>
+                        <li>Wandering paths that enemies follow predictably</li>
+                        <li>Seasonal changes that affect enemy spawn patterns</li>
+                    </ul>
+                </div>
+                
+                <div class="design-option">
+                    <h3>🏜️ Elemental Nexus</h3>
+                    <canvas id="mapNexus" class="canvas-demo" width="400" height="250"></canvas>
+                    <ul class="feature-list">
+                        <li>Five elemental towers at pentagon points</li>
+                        <li>Energy bridges connecting towers that boost movement</li>
+                        <li>Central void that spawns increasingly powerful enemies</li>
+                        <li>Tower activation based on player's elemental masteries</li>
+                    </ul>
+                </div>
+                
+                <div class="design-option">
+                    <h3>❄️ Dynamic Shifting Realm</h3>
+                    <canvas id="mapDynamic" class="canvas-demo" width="400" height="250"></canvas>
+                    <ul class="feature-list">
+                        <li>Map changes theme every 2 minutes (fire → ice → storm → etc.)</li>
+                        <li>Hazards and bonuses shift with the theme</li>
+                        <li>Enemies adapt to current theme with new abilities</li>
+                        <li>Player must adapt strategy to changing conditions</li>
+                    </ul>
+                </div>
+                
+                <div class="design-option">
+                    <h3>🌀 Infinite Spiral</h3>
+                    <canvas id="mapSpiral" class="canvas-demo" width="400" height="250"></canvas>
+                    <ul class="feature-list">
+                        <li>Spiral-shaped map that expands outward over time</li>
+                        <li>Inner spiral = early game, outer = late game difficulty</li>
+                        <li>Elemental shrines at spiral intersections</li>
+                        <li>Player can move between spiral arms for tactical advantage</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="controls">
+                <button onclick="animateMap('elemental')" class="active">Elemental Battleground</button>
+                <button onclick="animateMap('arena')">Ancient Arena</button>
+                <button onclick="animateMap('forest')">Mystical Forest</button>
+                <button onclick="animateMap('nexus')">Elemental Nexus</button>
+                <button onclick="animateMap('dynamic')">Shifting Realm</button>
+                <button onclick="animateMap('spiral')">Infinite Spiral</button>
+            </div>
+            
+            <div class="note">
+                <strong>🎮 Gameplay Impact:</strong> Each map design offers different strategic opportunities - from elemental zone bonuses to destructible cover to dynamic environmental changes. Maps can be unlocked as players reach certain mastery milestones.
+            </div>
+        </div>
+
+        <!-- Interactive Map Features -->
+        <div class="section">
+            <h2>🎯 Interactive Map Elements</h2>
+            
+            <div class="design-grid">
+                <div class="design-option">
+                    <h3>⚡ Elemental Shrines</h3>
+                    <canvas id="shrineDemo" class="canvas-demo" width="200" height="150"></canvas>
+                    <ul class="feature-list">
+                        <li>Temporary +50% elemental damage boost</li>
+                        <li>30-second cooldown after activation</li>
+                        <li>Visual indicator shows which element is boosted</li>
+                        <li>Strategic positioning near enemy spawn areas</li>
+                    </ul>
+                </div>
+                
+                <div class="design-option">
+                    <h3>🌀 XP Vortex Zones</h3>
+                    <canvas id="vortexDemo" class="canvas-demo" width="200" height="150"></canvas>
+                    <ul class="feature-list">
+                        <li>Enhanced XP pickup radius in certain areas</li>
+                        <li>Visual swirling effect draws in XP orbs</li>
+                        <li>Risk/reward: higher enemy spawns nearby</li>
+                        <li>Synergizes with XP Vortex shop upgrade</li>
+                    </ul>
+                </div>
+                
+                <div class="design-option">
+                    <h3>🛡️ Cover & Obstacles</h3>
+                    <canvas id="coverDemo" class="canvas-demo" width="200" height="150"></canvas>
+                    <ul class="feature-list">
+                        <li>Destructible pillars/trees block enemy projectiles</li>
+                        <li>Strategic positioning for tactical gameplay</li>
+                        <li>Some abilities can destroy cover for area denial</li>
+                        <li>Cover regenerates slowly over time</li>
+                    </ul>
+                </div>
+                
+                <div class="design-option">
+                    <h3>⭐ Portal Spawns</h3>
+                    <canvas id="portalDemo" class="canvas-demo" width="200" height="150"></canvas>
+                    <ul class="feature-list">
+                        <li>Enemy spawn points visible as glowing portals</li>
+                        <li>Intensity increases with wave difficulty</li>
+                        <li>Players can target portals to temporarily disable</li>
+                        <li>Boss portals are larger and more dramatic</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Implementation Notes -->
+        <div class="section">
+            <h2>⚙️ Implementation Considerations</h2>
+            
+            <div class="note">
+                <strong>🎯 Performance Impact:</strong> All designs are created with performance in mind, using efficient Canvas drawing operations and minimal particle effects to maintain 60fps gameplay.
+            </div>
+            
+            <div class="implementation">
+                <strong>Canvas Rendering Approach:</strong><br>
+                • Use requestAnimationFrame for smooth animations<br>
+                • Implement sprite batching for multiple enemies<br>
+                • Cache frequently drawn elements as ImageData<br>
+                • Use CSS transforms for UI animations where possible
+            </div>
+            
+            <div class="design-grid">
+                <div class="design-option">
+                    <h3>📱 Mobile Considerations</h3>
+                    <ul class="feature-list">
+                        <li>Larger touch targets for abilities</li>
+                        <li>Simplified particle effects for performance</li>
+                        <li>Adaptive UI scaling based on screen size</li>
+                        <li>Battery-efficient animation strategies</li>
+                    </ul>
+                </div>
+                
+                <div class="design-option">
+                    <h3>♿ Accessibility Features</h3>
+                    <ul class="feature-list">
+                        <li>High contrast mode options</li>
+                        <li>Colorblind-friendly palettes</li>
+                        <li>Audio cues for important events</li>
+                        <li>Scalable UI elements</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Next Steps -->
+        <div class="section">
+            <h2>🚀 Implementation Roadmap</h2>
+            
+            <div class="design-grid">
+                <div class="design-option">
+                    <h3>Phase 1: Player Character</h3>
+                    <ul class="feature-list">
+                        <li>Implement elemental aura system</li>
+                        <li>Add mastery level visual indicators</li>
+                        <li>Create particle trail effects</li>
+                        <li>Design shield visualization</li>
+                    </ul>
+                </div>
+                
+                <div class="design-option">
+                    <h3>Phase 2: Enemy Visuals</h3>
+                    <ul class="feature-list">
+                        <li>Redesign basic enemy sprites</li>
+                        <li>Add veteran/elite visual distinctions</li>
+                        <li>Create boss enemy animations</li>
+                        <li>Implement health-based visual changes</li>
+                    </ul>
+                </div>
+                
+                <div class="design-option">
+                    <h3>Phase 3: UI/HUD Overhaul</h3>
+                    <ul class="feature-list">
+                        <li>Redesign elemental progress indicators</li>
+                        <li>Add ability cooldown visualizations</li>
+                        <li>Create animated health/XP bars</li>
+                        <li>Implement status effect indicators</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Animation and demonstration scripts
+        let animationFrames = {};
+        
+        // Initialize all canvases when page loads
+        window.addEventListener('load', function() {
+            initializeAllDemos();
+        });
+        
+        function initializeAllDemos() {
+            drawPlayerAura();
+            drawPlayerArmored();
+            drawPlayerEnergy();
+            drawEnemyBasic();
+            drawEnemyVeteran();
+            drawEnemyElite();
+            drawEnemyBoss();
+            drawHUDElemental();
+            drawHUDMinimal();
+            drawHUDGrimoire();
+            drawMapElemental();
+            drawMapArena();
+            drawMapForest();
+            drawMapNexus();
+            drawMapDynamic();
+            drawMapSpiral();
+            drawShrineDemo();
+            drawVortexDemo();
+            drawCoverDemo();
+            drawPortalDemo();
+        }
+        
+        // Player Character Drawings
+        function drawPlayerAura() {
+            const canvas = document.getElementById('playerAura');
+            const ctx = canvas.getContext('2d');
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Animated aura rings
+            const time = Date.now() * 0.003;
+            
+            // Outer aura
+            const gradient = ctx.createRadialGradient(centerX, centerY, 20, centerX, centerY, 60);
+            gradient.addColorStop(0, 'rgba(255, 107, 107, 0.3)');
+            gradient.addColorStop(0.5, 'rgba(255, 107, 107, 0.1)');
+            gradient.addColorStop(1, 'rgba(255, 107, 107, 0)');
+            
+            ctx.fillStyle = gradient;
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, 50 + Math.sin(time) * 5, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Player core
+            ctx.fillStyle = '#4a7c59';
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, 15, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Inner glow
+            ctx.fillStyle = '#6bb77b';
+            ctx.beginPath();
+            ctx.arc(centerX - 3, centerY - 3, 8, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Floating particles
+            for(let i = 0; i < 5; i++) {
+                const angle = (time + i * 1.2) * 0.5;
+                const radius = 30 + Math.sin(time + i) * 10;
+                const x = centerX + Math.cos(angle) * radius;
+                const y = centerY + Math.sin(angle) * radius;
+                
+                ctx.fillStyle = `rgba(255, 107, 107, ${0.6 + Math.sin(time + i) * 0.4})`;
+                ctx.beginPath();
+                ctx.arc(x, y, 3, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            
+            // Continue animation
+            animationFrames.playerAura = requestAnimationFrame(drawPlayerAura);
+        }
+        
+        function drawPlayerArmored() {
+            const canvas = document.getElementById('playerArmored');
+            const ctx = canvas.getContext('2d');
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Armor base
+            ctx.fillStyle = '#666';
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, 18, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Armor details
+            ctx.strokeStyle = '#999';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, 18, 0, Math.PI * 2);
+            ctx.stroke();
+            
+            // Core
+            ctx.fillStyle = '#4a7c59';
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, 12, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Shield indicator
+            const time = Date.now() * 0.002;
+            const shieldAlpha = 0.3 + Math.sin(time) * 0.2;
+            ctx.strokeStyle = `rgba(0, 255, 255, ${shieldAlpha})`;
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, 25, 0, Math.PI * 2);
+            ctx.stroke();
+            
+            // Floating runes (mastery rings)
+            for(let i = 0; i < 3; i++) {
+                const angle = (time + i * 2) * 0.3;
+                const radius = 40;
+                const x = centerX + Math.cos(angle) * radius;
+                const y = centerY + Math.sin(angle) * radius;
+                
+                ctx.fillStyle = `rgba(74, 124, 89, ${0.7 + Math.sin(time + i) * 0.3})`;
+                ctx.font = '12px Arial';
+                ctx.fillText(['🔥', '💧', '🌍'][i], x - 6, y + 4);
+            }
+            
+            animationFrames.playerArmored = requestAnimationFrame(drawPlayerArmored);
+        }
+        
+        function drawPlayerEnergy() {
+            const canvas = document.getElementById('playerEnergy');
+            const ctx = canvas.getContext('2d');
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            const time = Date.now() * 0.004;
+            
+            // Energy tendrils
+            ctx.strokeStyle = 'rgba(74, 124, 89, 0.6)';
+            ctx.lineWidth = 2;
+            
+            for(let i = 0; i < 8; i++) {
+                const angle = (i / 8) * Math.PI * 2 + time * 0.5;
+                const length = 30 + Math.sin(time + i) * 15;
+                
+                ctx.beginPath();
+                ctx.moveTo(centerX, centerY);
+                ctx.lineTo(
+                    centerX + Math.cos(angle) * length,
+                    centerY + Math.sin(angle) * length
+                );
+                ctx.stroke();
+            }
+            
+            // Core energy
+            const coreGradient = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, 20);
+            coreGradient.addColorStop(0, 'rgba(107, 183, 123, 0.9)');
+            coreGradient.addColorStop(1, 'rgba(107, 183, 123, 0.1)');
+            
+            ctx.fillStyle = coreGradient;
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, 15 + Math.sin(time * 2) * 3, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Energy particles
+            for(let i = 0; i < 10; i++) {
+                const angle = (time + i * 0.3) * 2;
+                const radius = 25 + Math.sin(time * 1.5 + i) * 20;
+                const x = centerX + Math.cos(angle) * radius;
+                const y = centerY + Math.sin(angle) * radius;
+                const alpha = 0.4 + Math.sin(time * 3 + i) * 0.3;
+                
+                ctx.fillStyle = `rgba(107, 183, 123, ${alpha})`;
+                ctx.beginPath();
+                ctx.arc(x, y, 2, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            
+            animationFrames.playerEnergy = requestAnimationFrame(drawPlayerEnergy);
+        }
+        
+        // Enemy Drawings
+        function drawEnemyBasic() {
+            const canvas = document.getElementById('enemyBasic');
+            const ctx = canvas.getContext('2d');
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            const time = Date.now() * 0.003;
+            
+            // Shadow body
+            const shadowGradient = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, 20);
+            shadowGradient.addColorStop(0, 'rgba(50, 50, 50, 0.8)');
+            shadowGradient.addColorStop(1, 'rgba(20, 20, 20, 0.3)');
+            
+            ctx.fillStyle = shadowGradient;
+            ctx.beginPath();
+            ctx.arc(centerX, centerY + Math.sin(time * 2) * 2, 15, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Glowing red eyes
+            ctx.fillStyle = '#ff3333';
+            ctx.beginPath();
+            ctx.arc(centerX - 5, centerY - 3, 2, 0, Math.PI * 2);
+            ctx.arc(centerX + 5, centerY - 3, 2, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Wispy trails
+            for(let i = 0; i < 3; i++) {
+                const trailAlpha = 0.3 + Math.sin(time + i) * 0.2;
+                ctx.fillStyle = `rgba(60, 60, 60, ${trailAlpha})`;
+                ctx.beginPath();
+                ctx.arc(
+                    centerX - 20 + i * 5, 
+                    centerY + 10 + Math.sin(time + i) * 3, 
+                    3 - i, 
+                    0, Math.PI * 2
+                );
+                ctx.fill();
+            }
+            
+            animationFrames.enemyBasic = requestAnimationFrame(drawEnemyBasic);
+        }
+        
+        function drawEnemyVeteran() {
+            const canvas = document.getElementById('enemyVeteran');
+            const ctx = canvas.getContext('2d');
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            const time = Date.now() * 0.002;
+            
+            // Armored body
+            ctx.fillStyle = '#8B4513';
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, 18, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Armor plating
+            ctx.strokeStyle = '#CD853F';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, 18, 0, Math.PI * 2);
+            ctx.stroke();
+            
+            // Orange glow
+            const glowGradient = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, 25);
+            glowGradient.addColorStop(0, 'rgba(255, 140, 0, 0.3)');
+            glowGradient.addColorStop(1, 'rgba(255, 140, 0, 0)');
+            
+            ctx.fillStyle = glowGradient;
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, 22, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Spark effects
+            for(let i = 0; i < 4; i++) {
+                const angle = time * 3 + i * 1.5;
+                const sparkX = centerX + Math.cos(angle) * 25;
+                const sparkY = centerY + Math.sin(angle) * 25;
+                
+                ctx.fillStyle = `rgba(255, 140, 0, ${0.7 + Math.sin(time * 4 + i) * 0.3})`;
+                ctx.beginPath();
+                ctx.arc(sparkX, sparkY, 1, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            
+            animationFrames.enemyVeteran = requestAnimationFrame(drawEnemyVeteran);
+        }
+        
+        function drawEnemyElite() {
+            const canvas = document.getElementById('enemyElite');
+            const ctx = canvas.getContext('2d');
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            const time = Date.now() * 0.003;
+            
+            // Crystal structure
+            ctx.fillStyle = '#4B0082';
+            ctx.beginPath();
+            // Create angular crystal shape
+            const points = 6;
+            for(let i = 0; i < points; i++) {
+                const angle = (i / points) * Math.PI * 2;
+                const radius = 16 + (i % 2) * 4;
+                const x = centerX + Math.cos(angle) * radius;
+                const y = centerY + Math.sin(angle) * radius;
+                
+                if(i === 0) ctx.moveTo(x, y);
+                else ctx.lineTo(x, y);
+            }
+            ctx.closePath();
+            ctx.fill();
+            
+            // Energy cores
+            for(let i = 0; i < 3; i++) {
+                const angle = (i / 3) * Math.PI * 2 + time;
+                const radius = 8;
+                const x = centerX + Math.cos(angle) * radius;
+                const y = centerY + Math.sin(angle) * radius;
+                
+                ctx.fillStyle = `rgba(147, 112, 219, ${0.8 + Math.sin(time * 2 + i) * 0.2})`;
+                ctx.beginPath();
+                ctx.arc(x, y, 3, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            
+            // Refracting light effects
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.6)';
+            ctx.lineWidth = 1;
+            for(let i = 0; i < 4; i++) {
+                const angle = time * 2 + i * 0.8;
+                const length = 30;
+                
+                ctx.beginPath();
+                ctx.moveTo(centerX, centerY);
+                ctx.lineTo(
+                    centerX + Math.cos(angle) * length,
+                    centerY + Math.sin(angle) * length
+                );
+                ctx.stroke();
+            }
+            
+            animationFrames.enemyElite = requestAnimationFrame(drawEnemyElite);
+        }
+        
+        function drawEnemyBoss() {
+            const canvas = document.getElementById('enemyBoss');
+            const ctx = canvas.getContext('2d');
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            const time = Date.now() * 0.002;
+            
+            // Massive body
+            const bodyGradient = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, 35);
+            bodyGradient.addColorStop(0, '#666');
+            bodyGradient.addColorStop(1, '#333');
+            
+            ctx.fillStyle = bodyGradient;
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, 30, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Rotating elemental cores
+            const elements = [
+                { color: '#ff3333', angle: 0 },
+                { color: '#3333ff', angle: Math.PI * 2/3 },
+                { color: '#33ff33', angle: Math.PI * 4/3 }
+            ];
+            
+            elements.forEach((elem, i) => {
+                const angle = elem.angle + time;
+                const radius = 20;
+                const x = centerX + Math.cos(angle) * radius;
+                const y = centerY + Math.sin(angle) * radius;
+                
+                const coreGradient = ctx.createRadialGradient(x, y, 0, x, y, 8);
+                coreGradient.addColorStop(0, elem.color);
+                coreGradient.addColorStop(1, 'rgba(0,0,0,0.5)');
+                
+                ctx.fillStyle = coreGradient;
+                ctx.beginPath();
+                ctx.arc(x, y, 6, 0, Math.PI * 2);
+                ctx.fill();
+            });
+            
+            // Ground debris
+            for(let i = 0; i < 6; i++) {
+                const debrisX = centerX + (Math.random() - 0.5) * 100;
+                const debrisY = centerY + 35 + Math.sin(time + i) * 5;
+                
+                ctx.fillStyle = 'rgba(139, 69, 19, 0.6)';
+                ctx.beginPath();
+                ctx.arc(debrisX, debrisY, 2, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            
+            animationFrames.enemyBoss = requestAnimationFrame(drawEnemyBoss);
+        }
+        
+        // HUD Drawings
+        function drawHUDElemental() {
+            const canvas = document.getElementById('hudElemental');
+            const ctx = canvas.getContext('2d');
+            
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            const time = Date.now() * 0.003;
+            
+            // Health bar
+            drawHealthBar(ctx, 20, 20, 150, 20, 0.7, '#4a7c59');
+            
+            // Elemental progress circles
+            const elements = [
+                { name: 'Fire', color: '#ff6b6b', level: 3, x: 50, y: 70 },
+                { name: 'Water', color: '#4ecdc4', level: 2, x: 100, y: 70 },
+                { name: 'Earth', color: '#8b5a2b', level: 5, x: 150, y: 70 },
+                { name: 'Air', color: '#95e1d3', level: 1, x: 200, y: 70 },
+                { name: 'Lightning', color: '#fce38a', level: 4, x: 250, y: 70 }
+            ];
+            
+            elements.forEach((elem, i) => {
+                drawElementalProgress(ctx, elem.x, elem.y, 15, elem.level / 5, elem.color, time + i);
+                
+                // Element label
+                ctx.fillStyle = '#fff';
+                ctx.font = '10px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText(elem.name, elem.x, elem.y + 25);
+            });
+            
+            // Active abilities
+            ctx.fillStyle = '#333';
+            ctx.fillRect(20, 120, 200, 40);
+            ctx.strokeStyle = '#555';
+            ctx.lineWidth = 1;
+            ctx.strokeRect(20, 120, 200, 40);
+            
+            ctx.fillStyle = '#fff';
+            ctx.font = '12px Arial';
+            ctx.textAlign = 'left';
+            ctx.fillText('Active: Fireball, Tremors, Wind Blades', 25, 140);
+        }
+        
+        function drawHUDMinimal() {
+            const canvas = document.getElementById('hudMinimal');
+            const ctx = canvas.getContext('2d');
+            
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Minimalist edge indicators
+            const elements = ['🔥', '💧', '🌍', '🌪️', '⚡'];
+            elements.forEach((elem, i) => {
+                const y = 30 + i * 30;
+                const alpha = 0.6 + Math.sin(Date.now() * 0.003 + i) * 0.3;
+                
+                ctx.fillStyle = `rgba(74, 124, 89, ${alpha})`;
+                ctx.font = '16px Arial';
+                ctx.fillText(elem, 10, y);
+                
+                // Progress bar
+                ctx.fillStyle = 'rgba(74, 124, 89, 0.3)';
+                ctx.fillRect(35, y - 10, 50, 4);
+                ctx.fillStyle = '#4a7c59';
+                ctx.fillRect(35, y - 10, (30 + i * 5), 4);
+            });
+            
+            // Clean health indicator
+            drawHealthBar(ctx, canvas.width - 170, 20, 150, 8, 0.75, '#4a7c59');
+        }
+        
+        function drawHUDGrimoire() {
+            const canvas = document.getElementById('hudGrimoire');
+            const ctx = canvas.getContext('2d');
+            
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Parchment background
+            const parchmentGradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+            parchmentGradient.addColorStop(0, 'rgba(101, 67, 33, 0.8)');
+            parchmentGradient.addColorStop(1, 'rgba(139, 90, 43, 0.6)');
+            
+            ctx.fillStyle = parchmentGradient;
+            ctx.fillRect(10, 10, 200, 180);
+            
+            // Decorative border
+            ctx.strokeStyle = '#8B4513';
+            ctx.lineWidth = 3;
+            ctx.strokeRect(10, 10, 200, 180);
+            
+            // Runic symbols
+            ctx.fillStyle = '#2F1B14';
+            ctx.font = '20px serif';
+            ctx.textAlign = 'center';
+            
+            const runes = ['ᚠ', 'ᚢ', 'ᚦ', 'ᚨ', 'ᚱ']; // Elder Futhark runes
+            runes.forEach((rune, i) => {
+                const x = 50 + (i % 3) * 50;
+                const y = 50 + Math.floor(i / 3) * 40;
+                ctx.fillText(rune, x, y);
+            });
+            
+            // Spell slots
+            for(let i = 0; i < 3; i++) {
+                const x = 30 + i * 60;
+                const y = 120;
+                
+                ctx.strokeStyle = '#8B4513';
+                ctx.lineWidth = 2;
+                ctx.strokeRect(x, y, 30, 30);
+                
+                if(i < 2) { // Active spells
+                    ctx.fillStyle = `rgba(255, ${100 + i * 50}, 100, 0.7)`;
+                    ctx.fillRect(x + 2, y + 2, 26, 26);
+                }
+            }
+        }
+        
+        // Helper functions
+        function drawHealthBar(ctx, x, y, width, height, percentage, color) {
+            // Background
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+            ctx.fillRect(x, y, width, height);
+            
+            // Health fill
+            const fillWidth = width * percentage;
+            const healthGradient = ctx.createLinearGradient(x, y, x + fillWidth, y);
+            healthGradient.addColorStop(0, color);
+            healthGradient.addColorStop(1, color + '88');
+            
+            ctx.fillStyle = healthGradient;
+            ctx.fillRect(x, y, fillWidth, height);
+            
+            // Border
+            ctx.strokeStyle = '#fff';
+            ctx.lineWidth = 1;
+            ctx.strokeRect(x, y, width, height);
+        }
+        
+        function drawElementalProgress(ctx, centerX, centerY, radius, progress, color, timeOffset) {
+            // Background circle
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+            ctx.stroke();
+            
+            // Progress arc
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, radius, -Math.PI / 2, -Math.PI / 2 + (Math.PI * 2 * progress));
+            ctx.stroke();
+            
+            // Pulsing center
+            const pulseAlpha = 0.5 + Math.sin(timeOffset * 2) * 0.3;
+            ctx.fillStyle = color + Math.floor(pulseAlpha * 255).toString(16).padStart(2, '0');
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, radius * 0.6, 0, Math.PI * 2);
+            ctx.fill();
+        }
+        
+        // Control functions
+        function animatePlayer(type) {
+            // Reset all player animations
+            if(animationFrames.playerAura) cancelAnimationFrame(animationFrames.playerAura);
+            if(animationFrames.playerArmored) cancelAnimationFrame(animationFrames.playerArmored);
+            if(animationFrames.playerEnergy) cancelAnimationFrame(animationFrames.playerEnergy);
+            
+            // Update button states
+            document.querySelectorAll('.controls button').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            // Start selected animation
+            switch(type) {
+                case 'aura':
+                    drawPlayerAura();
+                    break;
+                case 'armored':
+                    drawPlayerArmored();
+                    break;
+                case 'energy':
+                    drawPlayerEnergy();
+                    break;
+            }
+        }
+        
+        function animateEnemies() {
+            drawEnemyBasic();
+            drawEnemyVeteran();
+            drawEnemyElite();
+            drawEnemyBoss();
+        }
+        
+        function showEnemyProgression() {
+            // Stop current animations
+            Object.keys(animationFrames).forEach(key => {
+                if(key.includes('enemy')) {
+                    cancelAnimationFrame(animationFrames[key]);
+                }
+            });
+            
+            // Show progression sequence
+            setTimeout(() => drawEnemyBasic(), 0);
+            setTimeout(() => drawEnemyVeteran(), 1000);
+            setTimeout(() => drawEnemyElite(), 2000);
+            setTimeout(() => drawEnemyBoss(), 3000);
+        }
+        
+        function previewHUD(type) {
+            // Update button states
+            document.querySelectorAll('.controls button').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            switch(type) {
+                case 'elemental':
+                    drawHUDElemental();
+                    break;
+                case 'minimal':
+                    drawHUDMinimal();
+                    break;
+                case 'grimoire':
+                    drawHUDGrimoire();
+                    break;
+            }
+        }
+        
+        // Map Drawing Functions
+        function drawMapElemental() {
+            const canvas = document.getElementById('mapElemental');
+            const ctx = canvas.getContext('2d');
+            
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            const time = Date.now() * 0.002;
+            
+            // Elemental zones
+            const zones = [
+                { x: 50, y: 50, element: 'fire', color: '#8B0000', emoji: '🔥' },
+                { x: 350, y: 50, element: 'water', color: '#4169E1', emoji: '💧' },
+                { x: 50, y: 200, element: 'earth', color: '#228B22', emoji: '🌍' },
+                { x: 350, y: 200, element: 'air', color: '#87CEEB', emoji: '🌪️' },
+                { x: 200, y: 125, element: 'lightning', color: '#FFD700', emoji: '⚡' }
+            ];
+            
+            zones.forEach((zone, i) => {
+                // Zone background
+                const intensity = 0.3 + Math.sin(time + i) * 0.1;
+                const gradient = ctx.createRadialGradient(zone.x, zone.y, 0, zone.x, zone.y, 40);
+                gradient.addColorStop(0, zone.color + Math.floor(intensity * 255).toString(16).padStart(2, '0'));
+                gradient.addColorStop(1, 'transparent');
+                
+                ctx.fillStyle = gradient;
+                ctx.beginPath();
+                ctx.arc(zone.x, zone.y, 35, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Zone indicator
+                ctx.font = '20px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText(zone.emoji, zone.x, zone.y + 7);
+            });
+            
+            // Environmental effects
+            for(let i = 0; i < 8; i++) {
+                const x = Math.random() * canvas.width;
+                const y = Math.random() * canvas.height;
+                const alpha = 0.2 + Math.sin(time * 2 + i) * 0.1;
+                
+                ctx.fillStyle = `rgba(255, 255, 255, ${alpha})`;
+                ctx.beginPath();
+                ctx.arc(x, y, 1, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            
+            animationFrames.mapElemental = requestAnimationFrame(drawMapElemental);
+        }
+        
+        function drawMapArena() {
+            const canvas = document.getElementById('mapArena');
+            const ctx = canvas.getContext('2d');
+            
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            const time = Date.now() * 0.001;
+            
+            // Arena floor
+            const floorGradient = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, 150);
+            floorGradient.addColorStop(0, '#8B7355');
+            floorGradient.addColorStop(1, '#5D4E37');
+            
+            ctx.fillStyle = floorGradient;
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, 120, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Stone pillars
+            for(let i = 0; i < 6; i++) {
+                const angle = (i / 6) * Math.PI * 2;
+                const radius = 80;
+                const x = centerX + Math.cos(angle) * radius;
+                const y = centerY + Math.sin(angle) * radius;
+                
+                // Pillar shadow
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+                ctx.fillRect(x - 8, y - 3, 16, 30);
+                
+                // Pillar body
+                ctx.fillStyle = '#A9A9A9';
+                ctx.fillRect(x - 6, y - 5, 12, 25);
+                
+                // Pillar highlights
+                ctx.fillStyle = '#D3D3D3';
+                ctx.fillRect(x - 6, y - 5, 3, 25);
+            }
+            
+            // Central summoning circle
+            ctx.strokeStyle = '#FFD700';
+            ctx.lineWidth = 2;
+            for(let r = 10; r <= 30; r += 10) {
+                const alpha = 0.5 + Math.sin(time * 3 + r) * 0.3;
+                ctx.globalAlpha = alpha;
+                ctx.beginPath();
+                ctx.arc(centerX, centerY, r, 0, Math.PI * 2);
+                ctx.stroke();
+            }
+            ctx.globalAlpha = 1;
+            
+            // Spectral audience
+            for(let i = 0; i < 12; i++) {
+                const angle = (i / 12) * Math.PI * 2;
+                const radius = 140;
+                const x = centerX + Math.cos(angle) * radius;
+                const y = centerY + Math.sin(angle) * radius;
+                const alpha = 0.2 + Math.sin(time + i) * 0.1;
+                
+                ctx.fillStyle = `rgba(135, 206, 235, ${alpha})`;
+                ctx.beginPath();
+                ctx.arc(x, y, 4, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            
+            animationFrames.mapArena = requestAnimationFrame(drawMapArena);
+        }
+        
+        function drawMapForest() {
+            const canvas = document.getElementById('mapForest');
+            const ctx = canvas.getContext('2d');
+            
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            const time = Date.now() * 0.001;
+            
+            // Forest floor
+            ctx.fillStyle = '#2F4F2F';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Trees
+            for(let i = 0; i < 15; i++) {
+                const x = 50 + (i % 5) * 80 + Math.sin(time + i) * 5;
+                const y = 50 + Math.floor(i / 5) * 60;
+                
+                // Tree trunk
+                ctx.fillStyle = '#8B4513';
+                ctx.fillRect(x - 3, y + 10, 6, 15);
+                
+                // Tree canopy
+                const treeGradient = ctx.createRadialGradient(x, y, 0, x, y, 15);
+                treeGradient.addColorStop(0, '#228B22');
+                treeGradient.addColorStop(1, '#006400');
+                
+                ctx.fillStyle = treeGradient;
+                ctx.beginPath();
+                ctx.arc(x, y, 12, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            
+            // Glowing mushroom rings
+            for(let ring = 0; ring < 3; ring++) {
+                const centerX = 100 + ring * 100;
+                const centerY = 125;
+                
+                for(let i = 0; i < 8; i++) {
+                    const angle = (i / 8) * Math.PI * 2;
+                    const radius = 30;
+                    const x = centerX + Math.cos(angle) * radius;
+                    const y = centerY + Math.sin(angle) * radius;
+                    const glow = 0.5 + Math.sin(time * 2 + i + ring) * 0.3;
+                    
+                    // Mushroom glow
+                    ctx.fillStyle = `rgba(255, 105, 180, ${glow * 0.5})`;
+                    ctx.beginPath();
+                    ctx.arc(x, y, 6, 0, Math.PI * 2);
+                    ctx.fill();
+                    
+                    // Mushroom
+                    ctx.fillStyle = '#FF69B4';
+                    ctx.beginPath();
+                    ctx.arc(x, y, 3, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            }
+            
+            // Wandering paths
+            ctx.strokeStyle = 'rgba(139, 69, 19, 0.6)';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.moveTo(0, 125);
+            for(let x = 0; x < canvas.width; x += 20) {
+                const y = 125 + Math.sin((x + time * 50) * 0.01) * 10;
+                ctx.lineTo(x, y);
+            }
+            ctx.stroke();
+            
+            animationFrames.mapForest = requestAnimationFrame(drawMapForest);
+        }
+        
+        function drawMapNexus() {
+            const canvas = document.getElementById('mapNexus');
+            const ctx = canvas.getContext('2d');
+            
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            const time = Date.now() * 0.002;
+            
+            // Central void
+            const voidGradient = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, 40);
+            voidGradient.addColorStop(0, '#000');
+            voidGradient.addColorStop(0.7, '#4B0082');
+            voidGradient.addColorStop(1, 'transparent');
+            
+            ctx.fillStyle = voidGradient;
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, 35, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Elemental towers at pentagon points
+            const towers = [
+                { element: '🔥', color: '#FF0000', angle: 0 },
+                { element: '💧', color: '#0000FF', angle: Math.PI * 2/5 },
+                { element: '🌍', color: '#008000', angle: Math.PI * 4/5 },
+                { element: '⚡', color: '#FFFF00', angle: Math.PI * 6/5 },
+                { element: '🌪️', color: '#87CEEB', angle: Math.PI * 8/5 }
+            ];
+            
+            towers.forEach((tower, i) => {
+                const radius = 80;
+                const x = centerX + Math.cos(tower.angle) * radius;
+                const y = centerY + Math.sin(tower.angle) * radius;
+                
+                // Tower base
+                ctx.fillStyle = '#696969';
+                ctx.fillRect(x - 10, y - 5, 20, 25);
+                
+                // Tower energy
+                const energy = 0.5 + Math.sin(time * 2 + i) * 0.3;
+                ctx.fillStyle = tower.color + Math.floor(energy * 127 + 128).toString(16).padStart(2, '0');
+                ctx.fillRect(x - 8, y - 3, 16, 20);
+                
+                // Element symbol
+                ctx.font = '16px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText(tower.element, x, y + 10);
+                
+                // Energy bridge to center (if active)
+                if(Math.sin(time + i) > 0) {
+                    ctx.strokeStyle = tower.color + '66';
+                    ctx.lineWidth = 2;
+                    ctx.beginPath();
+                    ctx.moveTo(x, y);
+                    ctx.lineTo(centerX, centerY);
+                    ctx.stroke();
+                }
+            });
+            
+            // Swirling energy in center
+            for(let i = 0; i < 8; i++) {
+                const angle = time * 2 + (i / 8) * Math.PI * 2;
+                const radius = 15 + Math.sin(time * 3 + i) * 5;
+                const x = centerX + Math.cos(angle) * radius;
+                const y = centerY + Math.sin(angle) * radius;
+                
+                ctx.fillStyle = `rgba(255, 255, 255, ${0.6 + Math.sin(time * 4 + i) * 0.4})`;
+                ctx.beginPath();
+                ctx.arc(x, y, 2, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            
+            animationFrames.mapNexus = requestAnimationFrame(drawMapNexus);
+        }
+        
+        function drawMapDynamic() {
+            const canvas = document.getElementById('mapDynamic');
+            const ctx = canvas.getContext('2d');
+            
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            const time = Date.now() * 0.001;
+            const phase = Math.floor(time / 3) % 4; // Change theme every 3 seconds
+            
+            const themes = [
+                { name: 'Fire', color: '#8B0000', particle: '🔥', bg: '#4A0000' },
+                { name: 'Ice', color: '#00CED1', particle: '❄️', bg: '#001A2E' },
+                { name: 'Storm', color: '#FFD700', particle: '⚡', bg: '#2F2F4F' },
+                { name: 'Nature', color: '#228B22', particle: '🍃', bg: '#0F2A0F' }
+            ];
+            
+            const currentTheme = themes[phase];
+            
+            // Background gradient
+            const bgGradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+            bgGradient.addColorStop(0, currentTheme.bg);
+            bgGradient.addColorStop(1, currentTheme.color + '33');
+            
+            ctx.fillStyle = bgGradient;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Theme transition effect
+            const transition = (time % 3) / 3;
+            if(transition < 0.2) {
+                const intensity = Math.sin(transition * Math.PI * 5) * 0.5;
+                ctx.fillStyle = `rgba(255, 255, 255, ${intensity})`;
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+            }
+            
+            // Hazards/bonuses based on theme
+            for(let i = 0; i < 6; i++) {
+                const x = 60 + (i % 3) * 140;
+                const y = 80 + Math.floor(i / 3) * 90;
+                const pulseIntensity = 0.5 + Math.sin(time * 3 + i) * 0.3;
+                
+                // Hazard/bonus area
+                ctx.fillStyle = currentTheme.color + Math.floor(pulseIntensity * 127).toString(16).padStart(2, '0');
+                ctx.beginPath();
+                ctx.arc(x, y, 20, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Theme particle
+                ctx.font = '16px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText(currentTheme.particle, x, y + 5);
+            }
+            
+            // Theme indicator
+            ctx.fillStyle = '#FFF';
+            ctx.font = '14px Arial';
+            ctx.textAlign = 'left';
+            ctx.fillText(`Current Theme: ${currentTheme.name}`, 10, 20);
+            
+            // Next theme countdown
+            const countdown = 3 - (time % 3);
+            ctx.fillText(`Next: ${countdown.toFixed(1)}s`, 10, 40);
+            
+            animationFrames.mapDynamic = requestAnimationFrame(drawMapDynamic);
+        }
+        
+        function drawMapSpiral() {
+            const canvas = document.getElementById('mapSpiral');
+            const ctx = canvas.getContext('2d');
+            
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            const time = Date.now() * 0.001;
+            
+            // Draw spiral path
+            ctx.strokeStyle = 'rgba(74, 124, 89, 0.6)';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            
+            for(let t = 0; t < Math.PI * 6; t += 0.1) {
+                const radius = t * 8;
+                const x = centerX + Math.cos(t) * radius;
+                const y = centerY + Math.sin(t) * radius;
+                
+                if(t === 0) ctx.moveTo(x, y);
+                else ctx.lineTo(x, y);
+            }
+            ctx.stroke();
+            
+            // Elemental shrines at spiral intersections
+            const shrines = ['🔥', '💧', '🌍', '⚡', '🌪️'];
+            shrines.forEach((shrine, i) => {
+                const t = (i + 1) * Math.PI * 1.2;
+                const radius = t * 8;
+                const x = centerX + Math.cos(t) * radius;
+                const y = centerY + Math.sin(t) * radius;
+                
+                if(x >= 0 && x <= canvas.width && y >= 0 && y <= canvas.height) {
+                    // Shrine glow
+                    const glow = 0.6 + Math.sin(time * 2 + i) * 0.4;
+                    ctx.fillStyle = `rgba(74, 124, 89, ${glow})`;
+                    ctx.beginPath();
+                    ctx.arc(x, y, 15, 0, Math.PI * 2);
+                    ctx.fill();
+                    
+                    // Shrine symbol
+                    ctx.font = '14px Arial';
+                    ctx.textAlign = 'center';
+                    ctx.fillStyle = '#FFF';
+                    ctx.fillText(shrine, x, y + 5);
+                }
+            });
+            
+            // Difficulty indicators along spiral
+            for(let i = 1; i <= 5; i++) {
+                const t = i * Math.PI;
+                const radius = t * 8;
+                const x = centerX + Math.cos(t) * radius;
+                const y = centerY + Math.sin(t) * radius;
+                
+                if(x >= 0 && x <= canvas.width && y >= 0 && y <= canvas.height) {
+                    ctx.fillStyle = `rgba(255, ${255 - i * 40}, 0, 0.7)`;
+                    ctx.beginPath();
+                    ctx.arc(x, y, 5, 0, Math.PI * 2);
+                    ctx.fill();
+                    
+                    ctx.fillStyle = '#FFF';
+                    ctx.font = '10px Arial';
+                    ctx.textAlign = 'center';
+                    ctx.fillText(i.toString(), x, y + 3);
+                }
+            }
+            
+            // Player position indicator (moving along spiral)
+            const playerT = (time * 0.5) % (Math.PI * 6);
+            const playerRadius = playerT * 8;
+            const playerX = centerX + Math.cos(playerT) * playerRadius;
+            const playerY = centerY + Math.sin(playerT) * playerRadius;
+            
+            if(playerX >= 0 && playerX <= canvas.width && playerY >= 0 && playerY <= canvas.height) {
+                ctx.fillStyle = '#4a7c59';
+                ctx.beginPath();
+                ctx.arc(playerX, playerY, 6, 0, Math.PI * 2);
+                ctx.fill();
+                
+                ctx.fillStyle = '#6bb77b';
+                ctx.beginPath();
+                ctx.arc(playerX - 1, playerY - 1, 3, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            
+            animationFrames.mapSpiral = requestAnimationFrame(drawMapSpiral);
+        }
+        
+        // Interactive Map Element Demos
+        function drawShrineDemo() {
+            const canvas = document.getElementById('shrineDemo');
+            const ctx = canvas.getContext('2d');
+            
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            const time = Date.now() * 0.003;
+            
+            // Shrine base
+            ctx.fillStyle = '#696969';
+            ctx.beginPath();
+            ctx.arc(centerX, centerY + 10, 20, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Energy pillar
+            const energy = 0.7 + Math.sin(time * 2) * 0.3;
+            const gradient = ctx.createLinearGradient(centerX - 10, centerY - 20, centerX + 10, centerY + 20);
+            gradient.addColorStop(0, `rgba(255, 100, 100, ${energy})`);
+            gradient.addColorStop(1, 'rgba(255, 100, 100, 0.2)');
+            
+            ctx.fillStyle = gradient;
+            ctx.fillRect(centerX - 8, centerY - 20, 16, 40);
+            
+            // Element symbol
+            ctx.font = '20px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillStyle = '#FFF';
+            ctx.fillText('🔥', centerX, centerY + 5);
+            
+            // Activation particles
+            for(let i = 0; i < 6; i++) {
+                const angle = (time + i) * 0.8;
+                const radius = 25 + Math.sin(time * 2 + i) * 5;
+                const x = centerX + Math.cos(angle) * radius;
+                const y = centerY + Math.sin(angle) * radius;
+                
+                ctx.fillStyle = `rgba(255, 100, 100, ${0.6 + Math.sin(time * 3 + i) * 0.4})`;
+                ctx.beginPath();
+                ctx.arc(x, y, 2, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            
+            animationFrames.shrineDemo = requestAnimationFrame(drawShrineDemo);
+        }
+        
+        function drawVortexDemo() {
+            const canvas = document.getElementById('vortexDemo');
+            const ctx = canvas.getContext('2d');
+            
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            const time = Date.now() * 0.004;
+            
+            // Vortex swirl
+            for(let i = 0; i < 20; i++) {
+                const angle = time * 2 + (i / 20) * Math.PI * 2;
+                const radius = (i / 20) * 60;
+                const x = centerX + Math.cos(angle) * radius;
+                const y = centerY + Math.sin(angle) * radius;
+                const alpha = 1 - (i / 20);
+                
+                ctx.fillStyle = `rgba(0, 255, 255, ${alpha * 0.6})`;
+                ctx.beginPath();
+                ctx.arc(x, y, 3 - (i / 10), 0, Math.PI * 2);
+                ctx.fill();
+            }
+            
+            // XP orbs being drawn in
+            for(let i = 0; i < 8; i++) {
+                const angle = (time + i) * 1.5;
+                const radius = 40 + Math.sin(time + i) * 10;
+                const x = centerX + Math.cos(angle) * radius;
+                const y = centerY + Math.sin(angle) * radius;
+                
+                ctx.fillStyle = '#FFD700';
+                ctx.beginPath();
+                ctx.arc(x, y, 3, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // XP trail
+                ctx.strokeStyle = 'rgba(255, 215, 0, 0.5)';
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.moveTo(x, y);
+                ctx.lineTo(centerX, centerY);
+                ctx.stroke();
+            }
+            
+            // Center indicator
+            ctx.fillStyle = 'rgba(0, 255, 255, 0.8)';
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, 8, 0, Math.PI * 2);
+            ctx.fill();
+            
+            animationFrames.vortexDemo = requestAnimationFrame(drawVortexDemo);
+        }
+        
+        function drawCoverDemo() {
+            const canvas = document.getElementById('coverDemo');
+            const ctx = canvas.getContext('2d');
+            
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            const time = Date.now() * 0.002;
+            
+            // Destructible pillars
+            for(let i = 0; i < 3; i++) {
+                const x = 40 + i * 60;
+                const y = 75;
+                const health = 0.3 + Math.sin(time + i) * 0.3; // Simulated damage
+                
+                // Pillar shadow
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+                ctx.fillRect(x - 8, y + 15, 16, 10);
+                
+                // Pillar body (damaged state)
+                const pillarHeight = 40 * health;
+                ctx.fillStyle = health > 0.5 ? '#A9A9A9' : '#696969';
+                ctx.fillRect(x - 6, y - pillarHeight/2, 12, pillarHeight);
+                
+                // Cracks when damaged
+                if(health < 0.8) {
+                    ctx.strokeStyle = '#333';
+                    ctx.lineWidth = 1;
+                    ctx.beginPath();
+                    ctx.moveTo(x - 6, y - 10);
+                    ctx.lineTo(x + 2, y + 5);
+                    ctx.moveTo(x + 6, y - 15);
+                    ctx.lineTo(x - 1, y);
+                    ctx.stroke();
+                }
+                
+                // Debris particles for heavily damaged pillars
+                if(health < 0.5) {
+                    for(let j = 0; j < 4; j++) {
+                        const debrisX = x + (Math.random() - 0.5) * 20;
+                        const debrisY = y + 20 + Math.random() * 10;
+                        
+                        ctx.fillStyle = 'rgba(169, 169, 169, 0.6)';
+                        ctx.beginPath();
+                        ctx.arc(debrisX, debrisY, 1, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                }
+            }
+            
+            // Enemy projectile being blocked
+            const projectileX = 20 + (time * 30) % 160;
+            const projectileY = 50;
+            
+            ctx.fillStyle = '#FF4500';
+            ctx.beginPath();
+            ctx.arc(projectileX, projectileY, 3, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Impact effect when projectile hits pillar
+            if(projectileX > 35 && projectileX < 45) {
+                for(let i = 0; i < 5; i++) {
+                    const angle = Math.random() * Math.PI * 2;
+                    const distance = Math.random() * 10;
+                    const impactX = 40 + Math.cos(angle) * distance;
+                    const impactY = 50 + Math.sin(angle) * distance;
+                    
+                    ctx.fillStyle = `rgba(255, 255, 0, ${Math.random()})`;
+                    ctx.beginPath();
+                    ctx.arc(impactX, impactY, 1, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            }
+            
+            animationFrames.coverDemo = requestAnimationFrame(drawCoverDemo);
+        }
+        
+        function drawPortalDemo() {
+            const canvas = document.getElementById('portalDemo');
+            const ctx = canvas.getContext('2d');
+            
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            const time = Date.now() * 0.003;
+            
+            // Portal rings
+            for(let ring = 0; ring < 4; ring++) {
+                const radius = 15 + ring * 8;
+                const rotation = time * (1 + ring * 0.3);
+                const alpha = 0.8 - ring * 0.15;
+                
+                ctx.strokeStyle = `rgba(147, 0, 211, ${alpha})`;
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.arc(centerX, centerY, radius, rotation, rotation + Math.PI * 1.5);
+                ctx.stroke();
+            }
+            
+            // Portal core
+            const coreGradient = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, 15);
+            coreGradient.addColorStop(0, 'rgba(75, 0, 130, 0.9)');
+            coreGradient.addColorStop(1, 'rgba(147, 0, 211, 0.3)');
+            
+            ctx.fillStyle = coreGradient;
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, 12 + Math.sin(time * 2) * 2, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Spawning enemies
+            const spawnTime = (time * 2) % (Math.PI * 2);
+            if(spawnTime < Math.PI) {
+                const enemyDistance = spawnTime * 20;
+                const enemyAlpha = Math.sin(spawnTime);
+                
+                for(let i = 0; i < 3; i++) {
+                    const angle = (i / 3) * Math.PI * 2 + time;
+                    const x = centerX + Math.cos(angle) * enemyDistance;
+                    const y = centerY + Math.sin(angle) * enemyDistance;
+                    
+                    ctx.fillStyle = `rgba(50, 50, 50, ${enemyAlpha * 0.8})`;
+                    ctx.beginPath();
+                    ctx.arc(x, y, 4, 0, Math.PI * 2);
+                    ctx.fill();
+                    
+                    // Enemy eyes
+                    ctx.fillStyle = `rgba(255, 0, 0, ${enemyAlpha})`;
+                    ctx.beginPath();
+                    ctx.arc(x - 1, y - 1, 1, 0, Math.PI * 2);
+                    ctx.arc(x + 1, y - 1, 1, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            }
+            
+            // Portal intensity indicator
+            const intensity = 0.5 + Math.sin(time) * 0.3;
+            ctx.fillStyle = '#FFF';
+            ctx.font = '10px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText(`Intensity: ${Math.floor(intensity * 100)}%`, centerX, canvas.height - 10);
+            
+            animationFrames.portalDemo = requestAnimationFrame(drawPortalDemo);
+        }
+        
+        // Map control function
+        function animateMap(mapType) {
+            // Stop all map animations
+            Object.keys(animationFrames).forEach(key => {
+                if(key.startsWith('map')) {
+                    cancelAnimationFrame(animationFrames[key]);
+                }
+            });
+            
+            // Update button states
+            document.querySelectorAll('.controls button').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            // Start selected map animation
+            switch(mapType) {
+                case 'elemental':
+                    drawMapElemental();
+                    break;
+                case 'arena':
+                    drawMapArena();
+                    break;
+                case 'forest':
+                    drawMapForest();
+                    break;
+                case 'nexus':
+                    drawMapNexus();
+                    break;
+                case 'dynamic':
+                    drawMapDynamic();
+                    break;
+                case 'spiral':
+                    drawMapSpiral();
+                    break;
+            }
+        }
+        
+        // Clean up animations when leaving page
+        window.addEventListener('beforeunload', function() {
+            Object.keys(animationFrames).forEach(key => {
+                cancelAnimationFrame(animationFrames[key]);
+            });
+        });
+    </script>
+</body>
+</html>

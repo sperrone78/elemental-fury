@@ -14,6 +14,7 @@ Elemental Fury is a top-down survival game where players master 5 elemental powe
 - **Progressive Difficulty**: Enemy spawns increase with player level
 - **Multiple Enemy Types**: Basic, Veteran, Elite, and Boss enemies
 - **Experience System**: Gain XP to level up and choose upgrades
+- **🌟 Elemental Aura System**: Dynamic player appearance that changes with your elemental masteries
 
 ### Controls
 
@@ -45,31 +46,31 @@ Elemental Fury is a top-down survival game where players master 5 elemental powe
 
 ### Fire Mastery 🔥 - **DAMAGE**
 - **Global Effect**: +10% damage per level to **ALL attacks** (weapons, abilities, projectiles)
-- **Level 3 Ability**: **Fireball** - Explosive projectiles with area damage & DOT
+- **Level 1 Ability**: **Fireball** - Explosive projectiles with area damage & DOT
 - **Level 6 Ultimate**: **🌋 Inferno Wave** - Chain explosions from fireballs
 - **Synergy**: Works with all damage-dealing abilities across elements
 
 ### Water Mastery 💧 - **HEALTH & REGENERATION**
 - **Global Effect**: +10% max health + 1 HP/sec regeneration per level
-- **Level 3 Ability**: **Water Globes** - Orbiting protective spheres (size affected by Earth)
+- **Level 1 Ability**: **Water Globes** - Orbiting protective spheres (size affected by Earth)
 - **Level 6 Ultimate**: **❄️ Freezing Touch** - Freeze nearby enemies when taking damage
 - **Unique**: Only element that doesn't affect other elements' abilities
 
 ### Earth Mastery 🌍 - **RADIUS**
 - **Global Effect**: +10% radius per level to **ALL area effects** (explosions, tremors, storms, globes)
-- **Level 3 Ability**: **Tremors** - Pulsing AOE damage field around player
+- **Level 1 Ability**: **Tremors** - Pulsing AOE damage field around player
 - **Level 6 Ultimate**: **🌍 Earthquake Stomp** - Massive earthquake every 8 seconds
 - **Synergy**: Makes Fire explosions, Lightning storms, and Water globes bigger
 
 ### Air Mastery 🌪️ - **RANGE**
 - **Global Effect**: +10% range per level to **ALL projectiles and abilities**
-- **Level 3 Ability**: **Wind Blades** - Seeking projectiles that curve toward enemies
+- **Level 1 Ability**: **Wind Blades** - Seeking projectiles that curve toward enemies
 - **Level 6 Ultimate**: **🌪️ Tornado Vortex** - Moving tornadoes spawn every 2.5 seconds
 - **Synergy**: Extends range of all weapons, fireballs, chain lightning, etc.
 
 ### Lightning Mastery ⚡ - **ATTACK SPEED**
 - **Global Effect**: +10% attack speed per level to **ALL weapons and abilities** (reduces cooldowns)
-- **Level 3 Ability**: **Chain Lightning** - 1 base target + 1 per Lightning level
+- **Level 1 Ability**: **Chain Lightning** - 1 base target + 1 per Lightning level
 - **Level 6 Ultimate**: **⛈️ Thunder Storm** - 8 targeted lightning strikes every 6 seconds
 - **Synergy**: Makes everything fire/activate faster - weapons, fireballs, storms, etc.
 
@@ -165,6 +166,18 @@ Elemental Fury is a top-down survival game where players master 5 elemental powe
 - **Storm Clouds**: Thunder storm atmospheric effects
 - **Tornadoes**: Moving vortexes with debris
 
+### 🌟 Elemental Aura Player System
+- **Dynamic Colors**: Player appearance changes based on your highest elemental mastery
+  - 🔥 Fire: Red/orange tones
+  - 💧 Water: Cyan/teal tones
+  - 🌍 Earth: Brown/earth tones
+  - 🌪️ Air: Light blue/green tones
+  - ⚡ Lightning: Yellow/gold tones
+- **Animated Aura**: Pulsing energy rings that scale with total mastery levels
+- **Particle Trail**: Movement leaves elemental-colored particle trail
+- **Floating Particles**: 8 orbital particles that orbit and pulse around the player
+- **Performance Optimized**: Efficient particle management with automatic cleanup
+
 ### UI Elements
 - **Modern Health Bar**: Canvas-rendered compact bar with gradient colors (green→yellow→red)
 - **Modern XP Bar**: Canvas-rendered progress bar with blue gradient
@@ -253,13 +266,13 @@ Elemental Fury is a top-down survival game where players master 5 elemental powe
 - **Choice System**: 3 random upgrades per level (filtered for available elements)
 
 ### Mastery Milestones
-- **Level 3**: Unlock special ability
+- **Level 1**: Unlock special ability
 - **Level 6**: Unlock ultimate ability
 - **Maxed Elements**: Show completion status in upgrade menu
 
 ## 🏆 Achievements (Visual Indicators)
 
-- **⚡ Symbol**: Special ability unlocked (level 3)
+- **⚡ Symbol**: Special ability unlocked (level 1)
 - **🌟 Symbol**: Ultimate ability unlocked (level 6)
 - **Green Highlight**: Unlocked abilities in UI
 - **Progress Bars**: Visual mastery progression

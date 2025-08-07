@@ -1,4 +1,4 @@
-import { ELEMENT_CONFIG } from '../utils/Constants.js';
+import { ELEMENT_CONFIG, PLAYER_CONFIG } from '../utils/Constants.js';
 import { WaterGlobe } from '../elements/Water.js';
 
 export class UpgradeSystem {
@@ -222,12 +222,9 @@ export class UpgradeSystem {
     applyFireUpgrade(level) {
         const player = this.game.player;
         
-        // Levels 1-5: +1 fireball, +10% DPS to all attacks
-        if (level <= 5) {
-            player.weapons.forEach(w => w.damage = Math.floor(w.damage * 1.1));
-            if (level === 1) {
-                player.specialAbilities.fireball = true;
-            }
+        // Level 1: Unlock fireball ability
+        if (level === 1) {
+            player.specialAbilities.fireball = true;
         }
         
         // Level 6: Inferno Wave
@@ -235,44 +232,36 @@ export class UpgradeSystem {
             player.specialAbilities.infernoWave = true;
         }
         
-        // Levels 7-10: +10% DPS + 10% Range on Inferno Wave  
-        if (level >= 7) {
-            player.weapons.forEach(w => w.damage = Math.floor(w.damage * 1.1));
-            // Inferno Wave range/damage boost handled in ability code
-        }
-        
         // Level 10: Check for fusion ultimates
         if (level === 10) {
             this.checkForFusionUltimates();
         }
+        
+        // Note: +10% damage per level is now handled by ElementalModifiers system
     }
     
     applyWaterUpgrade(level) {
         const player = this.game.player;
         
-        // Levels 1-5: +1 globe, +10% Health
-        if (level <= 5) {
-            player.maxHealth = Math.floor(player.maxHealth * (1 + ELEMENT_CONFIG.WATER.HEALTH_BONUS_PER_LEVEL));
-            player.health = Math.floor(Math.min(player.health * (1 + ELEMENT_CONFIG.WATER.HEALTH_BONUS_PER_LEVEL), player.maxHealth));
-            this.updateWaterGlobes(player, level);
-        }
+        // Update max health based on new water level (handled by ElementalModifiers)
+        const baseHealth = PLAYER_CONFIG.BASE_HEALTH;
+        player.maxHealth = player.elementalModifiers.getModifiedMaxHealth(baseHealth);
+        player.health = Math.min(player.health, player.maxHealth);
+        
+        // Update water globes
+        this.updateWaterGlobes(player, level);
         
         // Level 6: Freezing Touch
         if (level === 6) {
             player.specialAbilities.freezingTouch = true;
         }
         
-        // Levels 7-10: +10% Health +10% Extra damage taken by frozen enemies
-        if (level >= 7) {
-            player.maxHealth = Math.floor(player.maxHealth * (1 + ELEMENT_CONFIG.WATER.HEALTH_BONUS_PER_LEVEL));
-            player.health = Math.floor(Math.min(player.health * (1 + ELEMENT_CONFIG.WATER.HEALTH_BONUS_PER_LEVEL), player.maxHealth));
-            // Frozen damage bonus handled in damage calculation
-        }
-        
         // Level 10: Check for fusion ultimates
         if (level === 10) {
             this.checkForFusionUltimates();
         }
+        
+        // Note: +10% health and +1 HP/sec per level now handled by ElementalModifiers system
     }
     
     updateWaterGlobes(player, level) {
@@ -289,40 +278,39 @@ export class UpgradeSystem {
     applyEarthUpgrade(level) {
         const player = this.game.player;
         
-        // Levels 1-5: +25% more frequent tremors, +3 Armor
-        if (level <= 5) {
-            player.armor += ELEMENT_CONFIG.EARTH.ARMOR_PER_LEVEL[level] || 3;
-            if (level === 1) {
-                player.specialAbilities.radiusAttack = true;
-            }
+        // Add armor based on level (still handled directly since it's not a modifier)
+        player.armor += ELEMENT_CONFIG.EARTH.ARMOR_PER_LEVEL[level] || 3;
+        
+        // Level 1: Unlock tremor ability
+        if (level === 1) {
+            player.specialAbilities.radiusAttack = true;
         }
         
-        // Level 6: Earthquake (10% chance per tremor + stuns)
+        // Level 6: Earthquake Stomp
         if (level === 6) {
             player.specialAbilities.earthquakeStormp = true;
-        }
-        
-        // Levels 7-10: +3 armor +10% chance to start earthquake + 10% frequency to tremor
-        if (level >= 7) {
-            player.armor += ELEMENT_CONFIG.EARTH.ARMOR_PER_LEVEL[level] || 3;
-            // Earthquake chance and tremor frequency handled in ability code
         }
         
         // Level 10: Check for fusion ultimates
         if (level === 10) {
             this.checkForFusionUltimates();
         }
+        
+        // Update water globes to apply new Earth radius modifier
+        if (player.waterGlobes.length > 0) {
+            const waterLevel = player.upgradeCount.water || 0;
+            this.updateWaterGlobes(player, waterLevel);
+        }
+        
+        // Note: +10% radius per level is now handled by ElementalModifiers system
     }
     
     applyLightningUpgrade(level) {
         const player = this.game.player;
         
-        // Levels 1-5: +1 chain, +10% attack speed all attacks
-        if (level <= 5) {
-            player.weapons.forEach(w => w.cooldown = Math.floor(w.cooldown * 0.9 * 100) / 100);
-            if (level === 1) {
-                player.specialAbilities.lightning = true;
-            }
+        // Level 1: Unlock lightning ability
+        if (level === 1) {
+            player.specialAbilities.lightning = true;
         }
         
         // Level 6: Thunder Storm
@@ -330,27 +318,20 @@ export class UpgradeSystem {
             player.specialAbilities.thunderStorm = true;
         }
         
-        // Levels 7-10: +10% radius of storm clouds +10% duration of storm
-        if (level >= 7) {
-            player.weapons.forEach(w => w.cooldown = Math.floor(w.cooldown * 0.9 * 100) / 100);
-            // Storm radius/duration handled in ability code
-        }
-        
         // Level 10: Check for fusion ultimates
         if (level === 10) {
             this.checkForFusionUltimates();
         }
+        
+        // Note: +10% attack speed per level is now handled by ElementalModifiers system
     }
     
     applyAirUpgrade(level) {
         const player = this.game.player;
         
-        // Levels 1-5: +1 wind blade, +10% attack range all attacks
-        if (level <= 5) {
-            player.weapons.forEach(w => w.range = Math.floor(w.range * (1 + ELEMENT_CONFIG.AIR.RANGE_BONUS_PER_LEVEL)));
-            if (level === 1) {
-                player.specialAbilities.windBlades = true;
-            }
+        // Level 1: Unlock wind blades ability
+        if (level === 1) {
+            player.specialAbilities.windBlades = true;
         }
         
         // Level 6: Tornado Vortex
@@ -358,16 +339,12 @@ export class UpgradeSystem {
             player.specialAbilities.tornadoVortex = true;
         }
         
-        // Levels 7-10: +1 extra tornado per spawn
-        if (level >= 7) {
-            player.weapons.forEach(w => w.range = Math.floor(w.range * (1 + ELEMENT_CONFIG.AIR.RANGE_BONUS_PER_LEVEL)));
-            // Extra tornado count handled in ability code
-        }
-        
         // Level 10: Check for fusion ultimates
         if (level === 10) {
             this.checkForFusionUltimates();
         }
+        
+        // Note: +10% range per level is now handled by ElementalModifiers system
     }
     
     // Check and unlock fusion ultimates when both ultimate elements reach level 10

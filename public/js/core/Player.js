@@ -5,6 +5,7 @@ import { TremorParticle } from '../entities/effects/TremorParticle.js';
 import { DebrisParticle } from '../entities/effects/DebrisParticle.js';
 import { LightningBolt, DelayedLightningChain, IceRing, EarthquakeWave, ShockwaveRing, StormClouds, ThunderBolt, LightningImpact, ElectricSpark } from '../entities/effects/LightningEffects.js';
 import { Tornado } from '../elements/Air.js';
+import { ElementalModifiers } from '../systems/ElementalModifiers.js';
 
 export class Player {
     constructor(x, y) {
@@ -21,6 +22,9 @@ export class Player {
         this.weapons = [];
         this.game = null;
         this.weaponCooldowns = {};
+        
+        // Elemental modifier system
+        this.elementalModifiers = new ElementalModifiers(this);
         
         this.upgradeCount = {
             water: 0,    // was health
@@ -68,6 +72,163 @@ export class Player {
         // Fireball system
         this.fireballCooldown = 0;
         this.lastFireballTime = 0;
+        
+        // Elemental Aura System variables
+        this.auraTime = 0;
+        this.lastX = x;
+        this.lastY = y;
+        this.trailParticles = [];
+        this.auraParticles = [];
+        
+        // Debug method for testing modifiers
+        this.debugModifiers = () => {
+            console.log('🔧 Current Elemental Modifiers:');
+            this.elementalModifiers.logModifiers();
+        };
+    }
+    
+    // Elemental Aura System Methods
+    getDominantElementColor() {
+        const elements = {
+            fire: { core: '#ff6b6b', glow: '#ff9999', aura: 'rgba(255, 107, 107, 0.3)' },
+            water: { core: '#4ecdc4', glow: '#7dd3d8', aura: 'rgba(78, 205, 196, 0.3)' },
+            earth: { core: '#8b5a2b', glow: '#a67c52', aura: 'rgba(139, 90, 43, 0.3)' },
+            air: { core: '#95e1d3', glow: '#b8eee2', aura: 'rgba(149, 225, 211, 0.3)' },
+            lightning: { core: '#fce38a', glow: '#fdeba4', aura: 'rgba(252, 227, 138, 0.3)' }
+        };
+        
+        // Find element with highest level
+        let dominantElement = 'fire';
+        let highestLevel = 0;
+        
+        Object.keys(this.upgradeCount).forEach(element => {
+            if (this.upgradeCount[element] > highestLevel) {
+                highestLevel = this.upgradeCount[element];
+                dominantElement = element;
+            }
+        });
+        
+        // If no elements leveled, default to a neutral blue-green
+        if (highestLevel === 0) {
+            return { core: '#4a7c59', glow: '#6bb77b', aura: 'rgba(74, 124, 89, 0.3)' };
+        }
+        
+        return elements[dominantElement] || elements.fire;
+    }
+    
+    updateAura() {
+        this.auraTime += 0.016; // Roughly 60fps timing
+        
+        // Add movement trail particles
+        const moved = Math.abs(this.x - this.lastX) > 1 || Math.abs(this.y - this.lastY) > 1;
+        if (moved && this.trailParticles.length < 15) {
+            const dominantColor = this.getDominantElementColor();
+            this.trailParticles.push({
+                x: this.lastX + (Math.random() - 0.5) * 4,
+                y: this.lastY + (Math.random() - 0.5) * 4,
+                life: 0.8,
+                maxLife: 0.8,
+                color: dominantColor.core
+            });
+        }
+        
+        // Update trail particles
+        this.trailParticles = this.trailParticles.filter(particle => {
+            particle.life -= 0.016;
+            return particle.life > 0;
+        });
+        
+        // Generate floating aura particles
+        if (this.auraParticles.length < 8) {
+            const angle = Math.random() * Math.PI * 2;
+            const distance = 30 + Math.random() * 20;
+            const dominantColor = this.getDominantElementColor();
+            
+            this.auraParticles.push({
+                x: this.x + Math.cos(angle) * distance,
+                y: this.y + Math.sin(angle) * distance,
+                angle: angle,
+                baseDistance: distance,
+                orbitSpeed: 0.5 + Math.random() * 0.5,
+                life: 2 + Math.random() * 2,
+                maxLife: 2 + Math.random() * 2,
+                size: 2 + Math.random() * 2,
+                color: dominantColor.core
+            });
+        }
+        
+        // Update floating particles
+        this.auraParticles = this.auraParticles.filter(particle => {
+            particle.life -= 0.016;
+            particle.angle += particle.orbitSpeed * 0.016;
+            const oscillation = Math.sin(this.auraTime + particle.angle) * 5;
+            particle.x = this.x + Math.cos(particle.angle) * (particle.baseDistance + oscillation);
+            particle.y = this.y + Math.sin(particle.angle) * (particle.baseDistance + oscillation);
+            return particle.life > 0;
+        });
+        
+        this.lastX = this.x;
+        this.lastY = this.y;
+    }
+    
+    renderElementalAura(ctx) {
+        const dominantColor = this.getDominantElementColor();
+        const totalLevels = Object.values(this.upgradeCount).reduce((sum, level) => sum + level, 0);
+        const intensity = Math.min(totalLevels / 15, 1); // Scale intensity based on total mastery
+        
+        // Outer aura ring
+        const auraRadius = 50 + Math.sin(this.auraTime * 2) * 5;
+        const gradient = ctx.createRadialGradient(
+            this.x, this.y, 20, 
+            this.x, this.y, auraRadius
+        );
+        gradient.addColorStop(0, dominantColor.aura);
+        gradient.addColorStop(0.5, dominantColor.aura.replace('0.3', '0.1'));
+        gradient.addColorStop(1, 'rgba(0,0,0,0)');
+        
+        ctx.fillStyle = gradient;
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, auraRadius, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // Pulsing energy rings based on mastery level
+        if (intensity > 0.3) {
+            for (let i = 0; i < 3; i++) {
+                const ringTime = this.auraTime * 3 + i * 1.2;
+                const ringRadius = 25 + i * 8 + Math.sin(ringTime) * 3;
+                const ringAlpha = (intensity * 0.2) * (Math.sin(ringTime * 0.5) * 0.3 + 0.4);
+                
+                ctx.strokeStyle = dominantColor.core.replace(')', `, ${ringAlpha})`);
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, ringRadius, 0, Math.PI * 2);
+                ctx.stroke();
+            }
+        }
+    }
+    
+    renderTrailParticles(ctx) {
+        this.trailParticles.forEach(particle => {
+            const alpha = particle.life / particle.maxLife;
+            const size = 3 * alpha;
+            
+            ctx.fillStyle = particle.color.replace(')', `, ${alpha * 0.6})`);
+            ctx.beginPath();
+            ctx.arc(particle.x, particle.y, size, 0, Math.PI * 2);
+            ctx.fill();
+        });
+    }
+    
+    renderAuraParticles(ctx) {
+        this.auraParticles.forEach(particle => {
+            const alpha = (particle.life / particle.maxLife) * 0.8;
+            const pulseSize = particle.size + Math.sin(this.auraTime * 4 + particle.angle) * 1;
+            
+            ctx.fillStyle = particle.color.replace(')', `, ${alpha})`);
+            ctx.beginPath();
+            ctx.arc(particle.x, particle.y, pulseSize, 0, Math.PI * 2);
+            ctx.fill();
+        });
     }
     
     update(keys, mousePos, deltaTime) {
@@ -127,25 +288,33 @@ export class Player {
         // Update water globes
         this.waterGlobes.forEach(globe => globe.update(deltaTime));
         
-        // Health regeneration
-        if (this.healthRegen > 0) {
+        // Health regeneration (including elemental water regen)
+        const totalRegen = this.healthRegen + this.elementalModifiers.getHealthRegenRate();
+        if (totalRegen > 0) {
             if (!this.lastRegenTick) this.lastRegenTick = this.game.gameTime;
             if (this.game.gameTime - this.lastRegenTick >= 1) {
-                this.health = Math.floor(Math.min(this.maxHealth, this.health + this.healthRegen));
+                this.health = Math.floor(Math.min(this.maxHealth, this.health + totalRegen));
                 this.lastRegenTick = this.game.gameTime;
             }
         }
+        
+        // Update elemental aura system
+        this.updateAura();
     }
     
     render(ctx) {
+        // Render elemental aura effects first (behind player)
+        this.renderElementalAura(ctx);
+        this.renderTrailParticles(ctx);
+        this.renderAuraParticles(ctx);
+        
         if (this.specialAbilities.radiusAttack) {
-            const earthLevel = this.upgradeCount.earth || 0;
-            
-            // Calculate current tremor range (same logic as in updateRadiusAttack)
-            let tremorRange = 80; // Base range
-            if (earthLevel >= 2) {
-                tremorRange = 80 + (earthLevel - 1) * 20; // +20px per level: 100, 120, 140, 160
-            }
+            // Use new modifier system for tremor range display
+            const baseTremorStats = {
+                radius: 80 // Base tremor range
+            };
+            const modifiedStats = this.elementalModifiers.getModifiedAbilityStats(baseTremorStats);
+            const tremorRange = modifiedStats.radius;
             
             // Show faint outline of tremor range
             ctx.strokeStyle = `rgba(139, 69, 19, 0.2)`;
@@ -191,7 +360,9 @@ export class Player {
             ctx.arc(this.x, this.y, this.radius + 5, 0, Math.PI * 2);
             ctx.stroke();
         } else {
-            ctx.fillStyle = '#4a9eff';
+            // Use dynamic color based on dominant element
+            const dominantColor = this.getDominantElementColor();
+            ctx.fillStyle = dominantColor.core;
         }
         
         ctx.beginPath();
@@ -268,10 +439,19 @@ export class Player {
                 // Fire fireball at closest enemy
                 const direction = MathUtils.normalize(closestEnemy.x - this.x, closestEnemy.y - this.y);
                 
-                const damage = this.weapons[0] ? this.weapons[0].damage : 20; // Use base weapon damage
-                const range = 200; // Fireball range
+                const baseStats = {
+                    damage: this.weapons[0] ? this.weapons[0].baseDamage || 20 : 20,
+                    range: 200
+                };
+                const modifiedStats = this.elementalModifiers.getModifiedWeaponStats(baseStats);
                 
-                const fireball = new FireballProjectile(this.x, this.y, direction.x, direction.y, damage, range);
+                const fireball = new FireballProjectile(
+                    this.x, this.y, 
+                    direction.x, direction.y, 
+                    modifiedStats.damage, 
+                    modifiedStats.range,
+                    this // Pass player reference for radius calculation
+                );
                 this.game.projectiles.push(fireball);
                 
                 this.lastFireballTime = this.game.gameTime;
@@ -282,21 +462,19 @@ export class Player {
     updateRadiusAttack() {
         if (!this.tremorCooldown) this.tremorCooldown = 0;
         
-        const earthLevel = this.upgradeCount.earth || 0;
+        // Use new modifier system for tremor stats
+        const baseTremorStats = {
+            damage: 7, // Base tremor damage
+            radius: 80 // Base tremor range
+        };
         
-        // Ongoing AOE damage every 0.5 seconds
-        const pulseInterval = 0.5;
+        const modifiedStats = this.elementalModifiers.getModifiedAbilityStats(baseTremorStats);
+        const pulseInterval = 0.5; // Keep base interval - don't modify frequency
         
         if (this.game.gameTime - this.tremorCooldown >= pulseInterval) {
-            // Calculate range based on earth level (levels 2-5 increase range)
-            let tremorRange = 80; // Base range
-            if (earthLevel >= 2) {
-                tremorRange = 80 + (earthLevel - 1) * 20; // +20px per level: 100, 120, 140, 160
-            }
-            
-            // Calculate damage with level scaling  
-            const baseDamage = 7; // Significantly reduced for better balance (2.5x nerf)
-            const damage = baseDamage + (earthLevel >= 2 ? (earthLevel - 1) * 1 : 0); // +1 damage per level
+            // Use modified damage and radius
+            const tremorRange = modifiedStats.radius;
+            const damage = modifiedStats.damage;
             
             let enemiesHit = 0;
             this.game.enemies.forEach(enemy => {
@@ -338,25 +516,34 @@ export class Player {
     updateLightningStrike() {
         if (!this.lightningCooldown) this.lightningCooldown = 0;
         
-        if (this.game.gameTime - this.lightningCooldown >= 2) {
+        // Use modifier system for lightning cooldown
+        const baseLightningStats = {
+            cooldown: 2.0,
+            damage: 30,
+            range: 150
+        };
+        
+        const modifiedStats = this.elementalModifiers.getModifiedAbilityStats(baseLightningStats);
+        
+        if (this.game.gameTime - this.lightningCooldown >= modifiedStats.cooldown) {
             const enemiesInRange = this.game.enemies.filter(enemy => {
                 const distance = MathUtils.distance(enemy.x, enemy.y, this.x, this.y);
-                return distance <= 150;
+                return distance <= modifiedStats.range;
             });
             
             if (enemiesInRange.length > 0) {
-                const baseChains = 4; // Increased from 3 to 4 for better chaining
-                const bonusChains = Math.max(0, this.upgradeCount.lightning - 1); // +1 chain per level
-                const totalChains = baseChains + Math.max(0, bonusChains);
+                // NEW SYSTEM: 1 base target + 1 per Lightning level
+                const lightningLevel = this.upgradeCount.lightning || 0;
+                const totalTargets = 1 + lightningLevel; // Level 1 = 2 targets, Level 2 = 3 targets, etc.
                 
-                this.performLightningChain(enemiesInRange[0], enemiesInRange, totalChains, 30);
+                this.performLightningChain(enemiesInRange[0], enemiesInRange, totalTargets, modifiedStats.damage);
                 this.lightningCooldown = this.game.gameTime;
             }
         }
     }
     
-    performLightningChain(startEnemy, availableEnemies, bouncesLeft, damage) {
-        if (bouncesLeft <= 0 || !startEnemy) return;
+    performLightningChain(startEnemy, availableEnemies, totalTargets, damage, currentTarget = 1) {
+        if (currentTarget > totalTargets || !startEnemy) return;
         
         startEnemy.takeDamage(damage);
         this.game.recordDamage('chainLightning', damage);
@@ -364,7 +551,8 @@ export class Player {
         let fromX = this.x;
         let fromY = this.y;
         
-        if (bouncesLeft < 4) {
+        // If not the first target, chain from previous enemy
+        if (currentTarget > 1) {
             const previousTarget = availableEnemies.find(e => e.wasLastLightningTarget);
             if (previousTarget) {
                 fromX = previousTarget.x;
@@ -376,16 +564,25 @@ export class Player {
         this.game.particles.push(new LightningBolt(fromX, fromY, startEnemy.x, startEnemy.y));
         startEnemy.wasLastLightningTarget = true;
         
-        if (bouncesLeft > 1) {
+        // Continue chaining if we haven't hit all targets yet
+        if (currentTarget < totalTargets) {
             const nearbyEnemies = availableEnemies.filter(enemy => {
                 if (enemy === startEnemy) return false;
                 const distance = MathUtils.distance(enemy.x, enemy.y, startEnemy.x, startEnemy.y);
-                return distance <= 300; // Increased to 3/8 of map width for better chaining
+                return distance <= 300; // Chain range
             });
             
             if (nearbyEnemies.length > 0) {
                 const nextTarget = MathUtils.randomChoice(nearbyEnemies);
-                this.game.particles.push(new DelayedLightningChain(this, nextTarget, availableEnemies, bouncesLeft - 1, damage * 0.8, 0.1));
+                this.game.particles.push(new DelayedLightningChain(
+                    this, 
+                    nextTarget, 
+                    availableEnemies, 
+                    totalTargets, 
+                    damage * 0.8, // Damage reduction per chain
+                    0.1, // Chain delay
+                    currentTarget + 1 // Next target number
+                ));
             }
         }
     }
@@ -521,16 +718,26 @@ export class Player {
     updateThunderStorm() {
         if (!this.thunderStormCooldown) this.thunderStormCooldown = 0;
         
-        if (this.game.gameTime - this.thunderStormCooldown >= 6) { // Thunder storm every 6 seconds
-            this.createThunderStorm();
+        // Use modifier system for thunder storm
+        const baseThunderStormStats = {
+            cooldown: 6.0,
+            damage: 60,
+            radius: 200,
+            strikeRadius: 40
+        };
+        
+        const modifiedStats = this.elementalModifiers.getModifiedAbilityStats(baseThunderStormStats);
+        
+        if (this.game.gameTime - this.thunderStormCooldown >= modifiedStats.cooldown) {
+            this.createThunderStorm(modifiedStats);
             this.thunderStormCooldown = this.game.gameTime;
         }
     }
     
-    createThunderStorm() {
+    createThunderStorm(modifiedStats) {
         const strikesCount = 8; // Number of lightning strikes
-        const stormRadius = 200; // Area where strikes can occur
-        const baseDamage = 60;
+        const stormRadius = modifiedStats.radius; // Modified storm area
+        const baseDamage = modifiedStats.damage; // Modified damage
         
         // Create multiple lightning strikes across the battlefield
         for (let i = 0; i < strikesCount; i++) {
@@ -557,7 +764,7 @@ export class Player {
                 targetX = MathUtils.clamp(targetX, 20, GAME_CONFIG.CANVAS_WIDTH - 20);
                 targetY = MathUtils.clamp(targetY, 20, GAME_CONFIG.CANVAS_HEIGHT - 20);
                 
-                this.createLightningStrike(targetX, targetY, baseDamage);
+                this.createLightningStrike(targetX, targetY, baseDamage, modifiedStats.strikeRadius);
             }, i * 150); // Stagger strikes by 150ms
         }
         
@@ -565,8 +772,7 @@ export class Player {
         this.game.particles.push(new StormClouds(this.x, this.y, stormRadius));
     }
     
-    createLightningStrike(x, y, damage) {
-        const strikeRadius = 40;
+    createLightningStrike(x, y, damage, strikeRadius = 40) {
         
         // Damage enemies in strike area
         this.game.enemies.forEach(enemy => {
