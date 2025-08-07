@@ -264,6 +264,7 @@ Elemental Fury is a top-down survival game where players master 5 elemental powe
 - **Green Highlight**: Unlocked abilities in UI
 - **Progress Bars**: Visual mastery progression
 - **Gold Border Shimmer**: Level 6 ultimate choices get special visual treatment
+- **💍 Ring Icons**: Animated ring indicators in left sidebar show equipped mastery rings
 
 ## 🛠️ Development & Testing Tools
 
@@ -271,6 +272,7 @@ Elemental Fury is a top-down survival game where players master 5 elemental powe
 - **Diamond Testing Button**: Located in left sidebar, adds +100 diamonds for shop testing
 - **Console Debugging**: Use `window.game` for runtime debugging and inspection
 - **Element Progress Tracking**: Monitor `game.player.chosenElements` and `game.player.ultimateElements`
+- **Ring Icon System**: Visual feedback for equipped mastery rings with shimmer animation
 
 ### New Debugging Utilities
 - **`window.game.player.debugModifiers()`**: Shows detailed breakdown of all current elemental bonuses

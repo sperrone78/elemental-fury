@@ -209,11 +209,14 @@ Each elemental level provides consistent +10% bonuses that affect ALL compatible
 - **Ultimate Choice UI**: Special shimmer effects for Level 6 choices
 - **Elemental Modifier Debugging**: `window.game.player.debugModifiers()` shows detailed breakdown of all current bonuses and their impact on each weapon/ability
 - **Real-time Stat Analysis**: Debug utility calculates exact DPS, ranges, cooldowns for all active abilities
+- **Ring Icons**: 💍 Visual indicators in left sidebar show equipped mastery rings with shimmer animation
 
 #### Debugging Common Issues
 - **Import/Export Errors**: Check browser console for ES6 module import failures
 - **File Path Issues**: Verify file paths are correct (case-sensitive on Linux/Firebase)
 - **Runtime Debugging**: Use `window.game` global variable for live debugging
+- **Missing Effects Classes**: SummonRing and other particle effects are in `js/entities/effects/`
+- **Ring Icon Visibility**: If ring icons don't appear, check `updateRingIcons()` is called in game constructor
 - **Firebase Deployment Issues**: 
   - Ensure `public/` directory is synced before deploying
   - Check Firebase console for deployment logs
@@ -260,3 +263,11 @@ Each elemental level provides consistent +10% bonuses that affect ALL compatible
 - Frame time capping prevents lag when browser tab loses focus
 
 This is a complete, self-contained game with no external build tools required - just browser and Firebase CLI for deployment.
+
+## Recent Updates
+
+### v2.9.2 (Latest)
+- **Ring Icon System**: Added 💍 visual indicators in left sidebar showing equipped mastery rings
+- **SummonRing Fix**: Resolved import error for Elite Boss summoning effects (`js/entities/effects/SummonRing.js`)
+- **UI Enhancement**: Ring icons have subtle shimmer animation and update dynamically with shop purchases
+- **File Structure**: Improved modular organization with proper effects imports
