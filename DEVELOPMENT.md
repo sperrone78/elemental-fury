@@ -4,6 +4,79 @@ This document outlines the technical implementation details and recent changes m
 
 ## 📋 Recent Updates
 
+### 🆕 Global Elemental Modifier System (v2.8.0)
+
+#### Architecture Overhaul
+- **NEW**: `ElementalModifiers` class (`js/systems/ElementalModifiers.js`) provides centralized stat calculation
+- **Base Stat Preservation**: All weapons/abilities now store `BASE_*` values that never change directly
+- **Dynamic Calculation**: Stats computed on-demand with all modifiers applied consistently
+- **Global Impact**: Each element affects ALL compatible abilities across the entire game
+
+#### Per-Level Scaling Implementation
+```javascript
+// Each element provides consistent +10% bonuses per level
+Fire:      +10% damage to ALL attacks
+Earth:     +10% radius to ALL area effects  
+Air:       +10% range to ALL projectiles
+Lightning: +10% attack speed to ALL weapons/abilities (reduces cooldowns)
+Water:     +10% max health + 1 HP/sec regeneration (player only)
+```
+
+#### Cross-Element Synergy System
+- **Fire + Earth**: High-damage explosions with massive radius (Fireball radius affected by Earth levels)
+- **Lightning + Air**: Fast-firing, long-range projectiles (Wind Blades fire rate + range scaling)
+- **Fire + Lightning**: Maximum DPS builds (damage multiplier + attack speed)
+- **Earth + Water**: Large defensive globes (Water Globe size affected by Earth levels)
+
+#### Implementation Details
+- **Weapon Updates**: `BasicWeapon.js` now uses `getModifiedStats()` for dynamic stat calculation
+- **Ability Updates**: All elemental abilities (Fireball, Chain Lightning, Thunder Storm, etc.) use modifier system
+- **Constants Refactor**: Added `BASE_*` properties to preserve original values
+- **Health Regeneration**: Water mastery provides passive HP regeneration integrated into player update loop
+
+#### Enhanced Debugging System
+**NEW**: `window.game.player.debugModifiers()` console command provides comprehensive stat analysis:
+
+```javascript
+// Example output:
+🔧 Current Elemental Modifiers:
+🔥 Fire 3: +30% Damage
+🌍 Earth 2: +20% Radius  
+🌪️ Air 1: +10% Range
+⚡ Lightning 2: +19% Attack Speed
+💧 Water 4: +40% Health, +4/sec Regen
+
+📊 WEAPON & ABILITY IMPACT:
+🎯 Basic Weapon Projectiles:
+   Damage: 26 (base: 20, +6)
+   Range: 220 (base: 200, +20)
+   Fire Rate: 0.41s (base: 0.5s, -0.09s faster)
+
+🔥 Fireball:
+   Damage: 39 (base: 30, +9)
+   Explosion Radius: 30.0px (base: 25px, +5.0px)
+   Range: 220 (base: 200, +20)
+   Cooldown: 1.64s (base: 2.0s)
+
+🌪️ Wind Blades (1 per shot):
+   Damage: 21 each (base: 16, +5)
+   Range: 220 (base: 200, +20)
+   Fire Rate: 0.41s (base: 0.5s, -0.09s faster)
+   Total DPS: 51 (1 blades × 21 dmg ÷ 0.41s)
+
+⚡ Chain Lightning:
+   Target Count: 3 (base: 1, +2 from Lightning levels)
+   Damage: 39 per hit (base: 30, +9)
+   Range: 165 (base: 150, +15)
+   Cooldown: 1.64s (base: 2.0s, -0.36s faster)
+```
+
+#### Technical Implementation
+- **Performance**: Modifier calculations cached per frame, no performance impact
+- **Backward Compatibility**: All existing code continues to work with legacy properties
+- **Extensibility**: Easy to add new elements or modify scaling factors
+- **Testing**: Comprehensive unit tests verify all modifier calculations
+
 ### Earth Element Balance & Visual Enhancement (v2.9.1)
 
 #### Tremor Damage Rebalance

@@ -8,11 +8,24 @@ export class WaterGlobe {
     constructor(player, index) {
         this.player = player;
         this.index = index;
-        this.radius = ELEMENT_CONFIG.WATER.GLOBE.RADIUS;
-        this.orbitRadius = ELEMENT_CONFIG.WATER.GLOBE.ORBIT_RADIUS;
-        this.damage = ELEMENT_CONFIG.WATER.GLOBE.DAMAGE;
+        
+        // Apply Earth radius modifier to water globe size
+        const baseRadius = ELEMENT_CONFIG.WATER.GLOBE.BASE_RADIUS;
+        if (player && player.elementalModifiers) {
+            const modifiers = player.elementalModifiers.getModifiers();
+            this.radius = baseRadius * modifiers.radiusMultiplier;
+        } else {
+            this.radius = baseRadius;
+        }
+        
+        // Increase orbital distance based on water level for better spacing
+        const waterLevel = player.upgradeCount.water || 0;
+        const baseOrbitRadius = ELEMENT_CONFIG.WATER.GLOBE.BASE_ORBIT_RADIUS;
+        this.orbitRadius = baseOrbitRadius + (waterLevel * 5); // +5px per water level
+        
+        this.damage = ELEMENT_CONFIG.WATER.GLOBE.BASE_DAMAGE;
         this.angle = (index * Math.PI * 2) / Math.max(1, this.getGlobeCount()); // Evenly distribute globes
-        this.rotationSpeed = ELEMENT_CONFIG.WATER.GLOBE.ROTATION_SPEED;
+        this.rotationSpeed = ELEMENT_CONFIG.WATER.GLOBE.BASE_ROTATION_SPEED;
     }
     
     getGlobeCount() {

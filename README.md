@@ -39,35 +39,60 @@ Elemental Fury is a top-down survival game where players master 5 elemental powe
 - **Levels 7-10**: Only your 2 chosen ultimate elements can progress  
 - **Level 10**: **Fusion Ultimates** unlock combining both ultimate elements
 
-### Fire Mastery 🔥
-- **Levels 1-5**: +10% weapon damage per level, faster fireball cooldown
+## 🌟 Global Elemental Bonuses
+
+**NEW SYSTEM**: Each elemental level provides consistent +10% bonuses that affect ALL compatible abilities:
+
+### Fire Mastery 🔥 - **DAMAGE**
+- **Global Effect**: +10% damage per level to **ALL attacks** (weapons, abilities, projectiles)
 - **Level 3 Ability**: **Fireball** - Explosive projectiles with area damage & DOT
 - **Level 6 Ultimate**: **🌋 Inferno Wave** - Chain explosions from fireballs
-- **Levels 7-10**: Enhanced damage, range, and inferno wave effects
+- **Synergy**: Works with all damage-dealing abilities across elements
 
-### Water Mastery 💧
-- **Levels 1-5**: +10% max health per level, +1 water globe per level
-- **Level 3 Ability**: **Water Globes** - Orbiting protective spheres that damage enemies
+### Water Mastery 💧 - **HEALTH & REGENERATION**
+- **Global Effect**: +10% max health + 1 HP/sec regeneration per level
+- **Level 3 Ability**: **Water Globes** - Orbiting protective spheres (size affected by Earth)
 - **Level 6 Ultimate**: **❄️ Freezing Touch** - Freeze nearby enemies when taking damage
-- **Levels 7-10**: Enhanced health bonuses and frozen enemy damage multipliers
+- **Unique**: Only element that doesn't affect other elements' abilities
 
-### Earth Mastery 🌍
-- **Levels 1-5**: +3 armor per level, increased tremor frequency and range
+### Earth Mastery 🌍 - **RADIUS**
+- **Global Effect**: +10% radius per level to **ALL area effects** (explosions, tremors, storms, globes)
 - **Level 3 Ability**: **Tremors** - Pulsing AOE damage field around player
-- **Level 6 Ultimate**: **🌍 Earthquake Stomp** - Massive 150-radius earthquake every 8 seconds
-- **Levels 7-10**: Enhanced armor and earthquake effects
+- **Level 6 Ultimate**: **🌍 Earthquake Stomp** - Massive earthquake every 8 seconds
+- **Synergy**: Makes Fire explosions, Lightning storms, and Water globes bigger
 
-### Air Mastery 🌪️
-- **Levels 1-5**: +10% weapon range per level, +1 wind blade per level
+### Air Mastery 🌪️ - **RANGE**
+- **Global Effect**: +10% range per level to **ALL projectiles and abilities**
 - **Level 3 Ability**: **Wind Blades** - Seeking projectiles that curve toward enemies
 - **Level 6 Ultimate**: **🌪️ Tornado Vortex** - Moving tornadoes spawn every 2.5 seconds
-- **Levels 7-10**: Enhanced range and additional tornado spawning
+- **Synergy**: Extends range of all weapons, fireballs, chain lightning, etc.
 
-### Lightning Mastery ⚡
-- **Levels 1-5**: +10% attack speed per level, +1 chain bounce per level
-- **Level 3 Ability**: **Chain Lightning** - Lightning that bounces between enemies
+### Lightning Mastery ⚡ - **ATTACK SPEED**
+- **Global Effect**: +10% attack speed per level to **ALL weapons and abilities** (reduces cooldowns)
+- **Level 3 Ability**: **Chain Lightning** - 1 base target + 1 per Lightning level
 - **Level 6 Ultimate**: **⛈️ Thunder Storm** - 8 targeted lightning strikes every 6 seconds
-- **Levels 7-10**: Enhanced storm radius, duration, and chain effects
+- **Synergy**: Makes everything fire/activate faster - weapons, fireballs, storms, etc.
+
+## 🔥⚡🌍 Element Synergy Examples
+
+### **Fire + Earth** = Massive Explosions
+- Fire provides damage, Earth provides explosion radius
+- Fireball with Earth 3: 25px → 32.5px explosion radius (+30%)
+- Inferno Wave with Earth 5: 200px → 300px chain radius (+50%)
+
+### **Lightning + Air** = Machine Gun Mode  
+- Lightning provides fire rate, Air provides range
+- Wind Blades with Lightning 3: 0.5s → 0.365s cooldown (+37% faster)
+- All projectiles with Air 4: 200px → 280px range (+40%)
+
+### **Fire + Lightning** = Glass Cannon
+- Highest DPS build: maximum damage at maximum speed
+- Basic weapon with Fire 5 + Lightning 5: 30 damage every 0.295s = 102 DPS
+
+### **Earth + Water** = Tank Build
+- Large defensive globes with high survivability  
+- Water globes with Earth 2: 5px → 6px radius, further orbit distance
+- Player with Water 5: 150 max HP + 5 HP/sec regeneration
 
 ## 👾 Enemy Types
 
@@ -246,6 +271,14 @@ Elemental Fury is a top-down survival game where players master 5 elemental powe
 - **Diamond Testing Button**: Located in left sidebar, adds +100 diamonds for shop testing
 - **Console Debugging**: Use `window.game` for runtime debugging and inspection
 - **Element Progress Tracking**: Monitor `game.player.chosenElements` and `game.player.ultimateElements`
+
+### New Debugging Utilities
+- **`window.game.player.debugModifiers()`**: Shows detailed breakdown of all current elemental bonuses
+  - **Global modifiers**: Current Fire/Water/Earth/Air/Lightning levels and their effects
+  - **Weapon impact**: Exact damage, range, cooldown, radius for basic weapons
+  - **Ability details**: Stats for all active abilities (Fireball, Wind Blades, Chain Lightning, etc.)
+  - **Synergy analysis**: Shows how different elements combine (e.g., Fire damage + Earth radius on explosions)
+  - **DPS calculations**: Real-time damage-per-second for complex abilities like Wind Blades
 
 ### Deployment Workflow
 1. Edit source files in root directory

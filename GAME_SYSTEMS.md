@@ -1,15 +1,113 @@
 # Elemental Fury - Game Systems & Variables
 
-*Last Updated: August 5, 2025 - Version 2.7.0*
+*Last Updated: August 7, 2025 - Version 2.8.0 - Global Elemental Modifier System*
 
 ## Table of Contents
-1. [Player Systems](#player-systems)
-2. [Combat Systems](#combat-systems)
-3. [Elemental Mastery](#elemental-mastery)
-4. [Enemy Systems](#enemy-systems)
-5. [Progression Systems](#progression-systems)
-6. [Shop & Economy](#shop--economy)
-7. [Performance & Balance](#performance--balance)
+1. [🆕 Elemental Modifier System](#-elemental-modifier-system)
+2. [Player Systems](#player-systems)
+3. [Combat Systems](#combat-systems)
+4. [Elemental Mastery](#elemental-mastery)
+5. [Enemy Systems](#enemy-systems)
+6. [Progression Systems](#progression-systems)
+7. [Shop & Economy](#shop--economy)
+8. [Performance & Balance](#performance--balance)
+
+---
+
+## 🆕 Elemental Modifier System
+
+### Architecture Overview
+**NEW CENTRALIZED SYSTEM**: All elemental bonuses are calculated through the `ElementalModifiers` class, providing consistent global scaling across all abilities and weapons.
+
+```javascript
+// Location: js/systems/ElementalModifiers.js
+class ElementalModifiers {
+    getModifiers() {
+        return {
+            damageMultiplier: 1.0 + (fireLevel * 0.10),      // +10% per Fire level
+            radiusMultiplier: 1.0 + (earthLevel * 0.10),     // +10% per Earth level  
+            rangeMultiplier: 1.0 + (airLevel * 0.10),        // +10% per Air level
+            attackSpeedMultiplier: Math.pow(0.9, lightningLevel), // 10% faster per Lightning level
+            healthMultiplier: 1.0 + (waterLevel * 0.10),     // +10% per Water level
+            healthRegenPerSecond: waterLevel * 1.0            // +1 HP/sec per Water level
+        };
+    }
+}
+```
+
+### Global Element Effects
+
+#### 🔥 Fire Mastery - DAMAGE
+- **Affects**: ALL damage-dealing abilities and weapons
+- **Bonus**: +10% damage per level
+- **Impact**: Basic weapons, Fireballs, Wind Blades, Chain Lightning, Thunder Storm, Tremors, etc.
+
+#### 🌍 Earth Mastery - RADIUS  
+- **Affects**: ALL area-of-effect abilities
+- **Bonus**: +10% radius per level
+- **Impact**: Fireball explosions, Water Globe size, Tremor range, Thunder Storm strike radius, Tornado damage radius, Earthquake range
+
+#### 🌪️ Air Mastery - RANGE
+- **Affects**: ALL projectiles and abilities with range
+- **Bonus**: +10% range per level
+- **Impact**: Basic projectiles, Fireballs, Wind Blades, Chain Lightning initial range, Thunder Storm area
+
+#### ⚡ Lightning Mastery - ATTACK SPEED
+- **Affects**: ALL weapons and abilities with cooldowns
+- **Bonus**: 10% faster per level (0.9^level multiplier)
+- **Impact**: Basic weapon fire rate, Fireball cooldown, Chain Lightning cooldown, Thunder Storm cooldown
+
+#### 💧 Water Mastery - HEALTH & REGENERATION
+- **Affects**: Player health and regeneration only
+- **Bonus**: +10% max health + 1 HP/sec regeneration per level
+- **Unique**: Only element that doesn't affect other elements' abilities
+
+### Base Stat Preservation
+```javascript
+// Constants.js - Base stats that never change
+WEAPON_CONFIG: {
+    BASIC: {
+        BASE_DAMAGE: 20,
+        BASE_RANGE: 200, 
+        BASE_COOLDOWN: 0.5,
+        BASE_RADIUS: 3
+    }
+}
+
+ELEMENT_CONFIG: {
+    FIRE: {
+        FIREBALL: {
+            BASE_DAMAGE_MULTIPLIER: 1.5,
+            BASE_RADIUS: 25,
+            BASE_COOLDOWN: 2.0
+        }
+    }
+}
+```
+
+### Dynamic Calculation Example
+```javascript
+// All weapons/abilities call getModifiedStats() for current values
+const modifiedStats = player.elementalModifiers.getModifiedWeaponStats({
+    damage: 20,    // Base damage
+    range: 200,    // Base range  
+    cooldown: 0.5, // Base cooldown
+    radius: 3      // Base radius
+});
+
+// Result with Fire 3, Earth 2, Air 1, Lightning 2:
+// damage: 26 (20 * 1.3)
+// range: 220 (200 * 1.1)  
+// cooldown: 0.405 (0.5 * 0.81)
+// radius: 3.6 (3 * 1.2)
+```
+
+### Cross-Element Synergies
+- **Fire + Earth**: High-damage explosions with massive radius
+- **Lightning + Air**: Fast-firing, long-range projectiles
+- **Earth + Water**: Large defensive globes with survivability
+- **Fire + Lightning**: Maximum DPS builds
+- **All combinations** create meaningful strategic choices
 
 ---
 

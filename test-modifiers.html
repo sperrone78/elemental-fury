@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Elemental Modifiers</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background-color: #1a1a1a;
+            color: #ffffff;
+        }
+        .test-section {
+            background-color: #2a2a2a;
+            padding: 20px;
+            margin: 10px 0;
+            border-radius: 10px;
+            border: 1px solid #444;
+        }
+        .test-result {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .test-pass {
+            background-color: #2d5a3d;
+            border: 1px solid #4a7c59;
+        }
+        .test-fail {
+            background-color: #5a2d2d;
+            border: 1px solid #7c4a4a;
+        }
+        button {
+            background-color: #4a7c59;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background-color: #5a8b69;
+        }
+        .stats-display {
+            background-color: #333;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 Elemental Modifiers Test Suite</h1>
+    <p>Testing the new elemental modifier system locally before deployment</p>
+    
+    <div class="test-section">
+        <h2>🔧 Setup Test Player</h2>
+        <button onclick="createTestPlayer()">Create Test Player</button>
+        <button onclick="levelUp('fire')">🔥 Level Fire</button>
+        <button onclick="levelUp('water')">💧 Level Water</button>
+        <button onclick="levelUp('earth')">🌍 Level Earth</button>
+        <button onclick="levelUp('lightning')">⚡ Level Lightning</button>
+        <button onclick="levelUp('air')">🌪️ Level Air</button>
+        <button onclick="resetPlayer()">🔄 Reset</button>
+    </div>
+    
+    <div class="test-section">
+        <h2>📊 Current Stats</h2>
+        <div id="currentStats" class="stats-display">
+            No player created yet
+        </div>
+    </div>
+    
+    <div class="test-section">
+        <h2>🧪 Test Results</h2>
+        <button onclick="runAllTests()">Run All Tests</button>
+        <div id="testResults"></div>
+    </div>
+
+    <script type="module">
+        import { PLAYER_CONFIG } from './js/utils/Constants.js';
+        import { ElementalModifiers } from './js/systems/ElementalModifiers.js';
+        
+        // Mock player for testing
+        let testPlayer = null;
+        
+        window.createTestPlayer = function() {
+            testPlayer = {
+                upgradeCount: {
+                    fire: 0,
+                    water: 0,
+                    earth: 0,
+                    lightning: 0,
+                    air: 0
+                },
+                elementalModifiers: null
+            };
+            testPlayer.elementalModifiers = new ElementalModifiers(testPlayer);
+            updateStatsDisplay();
+        };
+        
+        window.levelUp = function(element) {
+            if (!testPlayer) {
+                alert('Create test player first!');
+                return;
+            }
+            testPlayer.upgradeCount[element]++;
+            updateStatsDisplay();
+        };
+        
+        window.resetPlayer = function() {
+            if (!testPlayer) return;
+            testPlayer.upgradeCount = {
+                fire: 0, water: 0, earth: 0, lightning: 0, air: 0
+            };
+            updateStatsDisplay();
+        };
+        
+        function updateStatsDisplay() {
+            if (!testPlayer) return;
+            
+            const modifiers = testPlayer.elementalModifiers.getModifiers();
+            const levels = testPlayer.upgradeCount;
+            
+            document.getElementById('currentStats').innerHTML = `
+Current Levels: Fire ${levels.fire}, Water ${levels.water}, Earth ${levels.earth}, Lightning ${levels.lightning}, Air ${levels.air}
+
+Modifiers:
+• Damage: +${((modifiers.damageMultiplier - 1) * 100).toFixed(0)}% (Fire ${levels.fire})
+• Radius: +${((modifiers.radiusMultiplier - 1) * 100).toFixed(0)}% (Earth ${levels.earth})
+• Range: +${((modifiers.rangeMultiplier - 1) * 100).toFixed(0)}% (Air ${levels.air})
+• Attack Speed: +${((1/modifiers.attackSpeedMultiplier - 1) * 100).toFixed(0)}% (Lightning ${levels.lightning})
+• Health: +${((modifiers.healthMultiplier - 1) * 100).toFixed(0)}% (Water ${levels.water})
+• Health Regen: +${modifiers.healthRegenPerSecond}/sec (Water ${levels.water})
+
+Sample Weapon Stats (Base: 20 dmg, 200 range, 0.5 cooldown, 3 radius):
+• Damage: ${testPlayer.elementalModifiers.getModifiedWeaponStats({damage: 20, range: 200, cooldown: 0.5, radius: 3}).damage}
+• Range: ${testPlayer.elementalModifiers.getModifiedWeaponStats({damage: 20, range: 200, cooldown: 0.5, radius: 3}).range}
+• Cooldown: ${testPlayer.elementalModifiers.getModifiedWeaponStats({damage: 20, range: 200, cooldown: 0.5, radius: 3}).cooldown}s
+• Radius: ${testPlayer.elementalModifiers.getModifiedWeaponStats({damage: 20, range: 200, cooldown: 0.5, radius: 3}).radius.toFixed(1)}
+            `;
+        }
+        
+        window.runAllTests = function() {
+            if (!testPlayer) {
+                alert('Create test player first!');
+                return;
+            }
+            
+            let results = '';
+            let passCount = 0;
+            let totalTests = 0;
+            
+            function test(name, condition) {
+                totalTests++;
+                const pass = condition();
+                if (pass) passCount++;
+                results += `
+                    <div class="test-result ${pass ? 'test-pass' : 'test-fail'}">
+                        ${pass ? '✅' : '❌'} ${name}
+                    </div>
+                `;
+                return pass;
+            }
+            
+            // Reset for consistent testing
+            resetPlayer();
+            
+            // Test Fire (Damage)
+            testPlayer.upgradeCount.fire = 3;
+            const fireModifiers = testPlayer.elementalModifiers.getModifiers();
+            test('Fire Level 3 = +30% Damage', () => 
+                Math.abs(fireModifiers.damageMultiplier - 1.3) < 0.01
+            );
+            
+            // Test Earth (Radius)
+            testPlayer.upgradeCount.earth = 2;
+            const earthModifiers = testPlayer.elementalModifiers.getModifiers();
+            test('Earth Level 2 = +20% Radius', () => 
+                Math.abs(earthModifiers.radiusMultiplier - 1.2) < 0.01
+            );
+            
+            // Test Air (Range)
+            testPlayer.upgradeCount.air = 4;
+            const airModifiers = testPlayer.elementalModifiers.getModifiers();
+            test('Air Level 4 = +40% Range', () => 
+                Math.abs(airModifiers.rangeMultiplier - 1.4) < 0.01
+            );
+            
+            // Test Lightning (Attack Speed)
+            testPlayer.upgradeCount.lightning = 2;
+            const lightningModifiers = testPlayer.elementalModifiers.getModifiers();
+            test('Lightning Level 2 = 19% faster attack (0.81x cooldown)', () => 
+                Math.abs(lightningModifiers.attackSpeedMultiplier - 0.81) < 0.01
+            );
+            
+            // Test Water (Health + Regen)
+            testPlayer.upgradeCount.water = 5;
+            const waterModifiers = testPlayer.elementalModifiers.getModifiers();
+            test('Water Level 5 = +50% Health', () => 
+                Math.abs(waterModifiers.healthMultiplier - 1.5) < 0.01
+            );
+            test('Water Level 5 = +5 HP/sec Regen', () => 
+                waterModifiers.healthRegenPerSecond === 5
+            );
+            
+            // Test Combined Stats
+            const weaponStats = testPlayer.elementalModifiers.getModifiedWeaponStats({
+                damage: 20, range: 200, cooldown: 0.5, radius: 3
+            });
+            
+            test('Combined: 20 base damage becomes 26', () => 
+                weaponStats.damage === 26 // 20 * 1.3 = 26
+            );
+            test('Combined: 200 base range becomes 280', () => 
+                weaponStats.range === 280 // 200 * 1.4 = 280
+            );
+            test('Combined: 0.5 base cooldown becomes 0.405s', () => 
+                Math.abs(weaponStats.cooldown - 0.405) < 0.001 // 0.5 * 0.81
+            );
+            test('Combined: 3 base radius becomes 3.6', () => 
+                Math.abs(weaponStats.radius - 3.6) < 0.01 // 3 * 1.2
+            );
+            
+            results = `
+                <h3>Test Results: ${passCount}/${totalTests} passed</h3>
+                ${results}
+                ${passCount === totalTests ? 
+                    '<div class="test-result test-pass">🎉 All tests passed! System ready for deployment.</div>' :
+                    '<div class="test-result test-fail">⚠️ Some tests failed. Check implementation.</div>'
+                }
+            `;
+            
+            document.getElementById('testResults').innerHTML = results;
+            updateStatsDisplay();
+        };
+        
+        // Auto-create player on load
+        createTestPlayer();
+    </script>
+</body>
+</html>

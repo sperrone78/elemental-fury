@@ -65,13 +65,14 @@ export class LightningBolt {
 }
 
 export class DelayedLightningChain {
-    constructor(player, target, availableEnemies, bouncesLeft, damage, delay) {
+    constructor(player, target, availableEnemies, totalTargets, damage, delay, currentTarget = 1) {
         this.player = player;
         this.target = target;
         this.availableEnemies = availableEnemies;
-        this.bouncesLeft = bouncesLeft;
+        this.totalTargets = totalTargets;
         this.damage = damage;
         this.delay = delay;
+        this.currentTarget = currentTarget;
         this.timer = 0;
         this.shouldRemove = false;
     }
@@ -83,7 +84,7 @@ export class DelayedLightningChain {
             if (this.target && this.target.health > 0) {
                 // Use fresh enemy list to avoid stale references
                 const freshEnemies = this.player.game.enemies;
-                this.player.performLightningChain(this.target, freshEnemies, this.bouncesLeft, this.damage);
+                this.player.performLightningChain(this.target, freshEnemies, this.totalTargets, this.damage, this.currentTarget);
             } else {
                 // Target is dead, try to find another nearby enemy to continue the chain
                 const nearbyEnemies = this.player.game.enemies.filter(enemy => {
