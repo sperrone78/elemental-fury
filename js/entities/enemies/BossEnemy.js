@@ -35,9 +35,10 @@ export class BossEnemy extends Enemy {
             const dirX = dx / distance;
             const dirY = dy / distance;
             
-            this.game.enemyProjectiles.push(new EnemyProjectile(
-                this.x, this.y, dirX, dirY
-            ));
+            const proj = this.game.pools?.enemyProjectile
+                ? this.game.pools.enemyProjectile.acquire(this.x, this.y, dirX, dirY)
+                : new EnemyProjectile(this.x, this.y, dirX, dirY);
+            this.game.enemyProjectiles.push(proj);
         }
     }
     
@@ -114,9 +115,10 @@ export class VeteranBoss extends Enemy {
             const dirX = dx / distance;
             const dirY = dy / distance;
             
-            this.game.enemyProjectiles.push(new EnemyProjectile(
-                this.x, this.y, dirX, dirY
-            ));
+            const proj = this.game.pools?.enemyProjectile
+                ? this.game.pools.enemyProjectile.acquire(this.x, this.y, dirX, dirY)
+                : new EnemyProjectile(this.x, this.y, dirX, dirY);
+            this.game.enemyProjectiles.push(proj);
         }
     }
     
@@ -128,9 +130,10 @@ export class VeteranBoss extends Enemy {
             const dirY = Math.sin(angle);
             
             setTimeout(() => {
-                this.game.enemyProjectiles.push(new SpikeProjectile(
-                    this.x, this.y, dirX, dirY
-                ));
+                const proj = this.game.pools?.spikeProjectile
+                    ? this.game.pools.spikeProjectile.acquire(this.x, this.y, dirX, dirY)
+                    : new SpikeProjectile(this.x, this.y, dirX, dirY);
+                this.game.enemyProjectiles.push(proj);
             }, i * 50); // Stagger spike shots
         }
     }
