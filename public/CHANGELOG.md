@@ -2,6 +2,24 @@
 
 All notable changes to Elemental Fury are documented here.
 
+## [2.9.4] - 2025-08-07 - Aura Blending, Palette Tuner, Loot Drop Fix
+
+### 🎨 Changed - Elemental Aura & Colors
+- **Blended Core Color**: Player core now blends the top two elements by level with weighted mixing (e.g., Fire + Lightning → orange leaning toward dominant level)
+- **Simplified Aura**: Removed pulsing ring overlays; kept a soft radial aura + particle systems
+- **Palette Update**:
+  - Fire: `#ff0000`
+  - Water: `#1f1ffc`
+  - Earth: `#8b5a2b`
+  - Air: `#95e1d3`
+  - Lightning: `#ffff00`
+- **New Page**: Palette tuner at `/palette-tuner.html` to preview and generate palette requests
+
+### 🐛 Fixed - Boss Loot Drop Race
+- Resolved intermittent missing boss drops by centralizing enemy death handling
+- `WaterGlobe` no longer removes enemies or spawns XP directly; `Game.update()` handles death, score, and drops
+- Added missing `BASE_*` values for Water Globe in deployed constants
+
 ## [2.9.3] - 2025-08-07 - Elemental Aura Player System & Design Concepts
 
 ### 🌟 NEW - Elemental Aura Player Visual System

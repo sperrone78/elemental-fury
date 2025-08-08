@@ -270,14 +270,15 @@ This is a complete, self-contained game with no external build tools required - 
 
 ## Recent Updates
 
-### v2.9.3 (Latest)
-- **Elemental Aura Player System**: Completely redesigned player visual appearance
-  - Dynamic aura colors that change based on highest elemental mastery
-  - Animated pulsing energy rings around player (intensity scales with total mastery levels)
-  - Particle trail system that follows player movement
-  - Floating orbital particles with elemental colors
-  - Player core color dynamically reflects dominant element
-- **Design Proposals**: Added comprehensive interactive Canvas demonstrations for future visual concepts
+### v2.9.4 (Latest)
+- **Aura & Palette**: Blended core color from top two elements (weighted). Removed pulsing rings in favor of a softer radial aura. Default palette updated (Fire `#ff0000`, Water `#1f1ffc`, Earth `#8b5a2b`, Air `#95e1d3`, Lightning `#ffff00`). New tuner page at `/palette-tuner.html`.
+- **Boss Loot Reliability**: Centralized death handling; Water Globes no longer remove enemies or spawn XP directly.
+
+### v2.9.3
+- **Elemental Aura Player System**: Dynamic visuals based on elemental mastery
+  - Particle trail and floating orbital particles
+  - Player core color reflects dominant element
+- **Design Proposals**: Added interactive Canvas demonstrations for future visual concepts
   - Player character designs (3 concepts with live animations)
   - Enemy visual concepts (4 enemy types with progression demos)
   - HUD/UI design proposals (3 interface styles)

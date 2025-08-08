@@ -52,7 +52,7 @@ Elemental Fury is a top-down survival game where players master 5 elemental powe
 
 ### Water Mastery 💧 - **HEALTH & REGENERATION**
 - **Global Effect**: +10% max health + 1 HP/sec regeneration per level
-- **Level 1 Ability**: **Water Globes** - Orbiting protective spheres (size affected by Earth)
+- **Level 1 Ability**: **Water Globes** - Orbiting protective spheres (size affected by Earth). Death & drops handled centrally to ensure reliable boss loot
 - **Level 6 Ultimate**: **❄️ Freezing Touch** - Freeze nearby enemies when taking damage
 - **Unique**: Only element that doesn't affect other elements' abilities
 
@@ -167,16 +167,15 @@ Elemental Fury is a top-down survival game where players master 5 elemental powe
 - **Tornadoes**: Moving vortexes with debris
 
 ### 🌟 Elemental Aura Player System
-- **Dynamic Colors**: Player appearance changes based on your highest elemental mastery
-  - 🔥 Fire: Red/orange tones
-  - 💧 Water: Cyan/teal tones
-  - 🌍 Earth: Brown/earth tones
-  - 🌪️ Air: Light blue/green tones
-  - ⚡ Lightning: Yellow/gold tones
-- **Animated Aura**: Pulsing energy rings that scale with total mastery levels
-- **Particle Trail**: Movement leaves elemental-colored particle trail
-- **Floating Particles**: 8 orbital particles that orbit and pulse around the player
-- **Performance Optimized**: Efficient particle management with automatic cleanup
+- **Blended Core Color**: Player core blends the two highest elements by level (weighted). Example: Fire + Lightning → orange leaning toward the higher level
+- **Simplified Aura**: Soft radial aura with particle trail and floating particles (no pulsing ring overlays)
+- **Default Palette**:
+  - 🔥 Fire: `#ff0000`
+  - 💧 Water: `#1f1ffc`
+  - 🌍 Earth: `#8b5a2b`
+  - 🌪️ Air: `#95e1d3`
+  - ⚡ Lightning: `#ffff00`
+- **Tuner Page**: Adjust and preview palettes at `/palette-tuner.html` and generate copyable requests
 
 ### UI Elements
 - **Modern Health Bar**: Canvas-rendered compact bar with gradient colors (green→yellow→red)
