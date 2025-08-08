@@ -51,13 +51,22 @@ export class BasicWeapon {
                 for (let i = 0; i < bladeCount; i++) {
                     const randomAngle = Math.random() * Math.PI * 2; // Full 360 degrees
                     
-                    this.owner.game.projectiles.push(new WindBladeProjectile(
-                        this.owner.x, this.owner.y,
-                        Math.cos(randomAngle), Math.sin(randomAngle),
-                        this.damage * ELEMENT_CONFIG.AIR.WIND_BLADE.DAMAGE_MULTIPLIER, 
-                        this.range,
-                        this.owner.game
-                    ));
+                    const proj = this.owner.game.pools?.windBladeProjectile
+                        ? this.owner.game.pools.windBladeProjectile.acquire(
+                            this.owner.x, this.owner.y,
+                            Math.cos(randomAngle), Math.sin(randomAngle),
+                            this.damage * ELEMENT_CONFIG.AIR.WIND_BLADE.DAMAGE_MULTIPLIER,
+                            this.range,
+                            this.owner.game
+                          )
+                        : new WindBladeProjectile(
+                            this.owner.x, this.owner.y,
+                            Math.cos(randomAngle), Math.sin(randomAngle),
+                            this.damage * ELEMENT_CONFIG.AIR.WIND_BLADE.DAMAGE_MULTIPLIER,
+                            this.range,
+                            this.owner.game
+                          );
+                    this.owner.game.projectiles.push(proj);
                 }
             }
         }

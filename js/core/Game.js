@@ -1,4 +1,4 @@
-import { GAME_CONFIG, PLAYER_CONFIG, ENEMY_CONFIG, DIAMOND_CONFIG, WEAPON_CONFIG } from '../utils/Constants.js';
+import { GAME_CONFIG, PLAYER_CONFIG, ENEMY_CONFIG, DIAMOND_CONFIG, WEAPON_CONFIG, ELEMENT_CONFIG } from '../utils/Constants.js';
 import { MathUtils } from '../utils/MathUtils.js';
 import { SpatialGrid } from '../utils/SpatialGrid.js';
 import { Player } from './Player.js';
@@ -66,6 +66,24 @@ export class Game {
                 () => new Projectile(0, 0, 1, 0, 0, 0),
                 (p, x, y, dirX, dirY, damage, range) => {
                     p.x = x; p.y = y; p.dirX = dirX; p.dirY = dirY; p.damage = damage; p.range = range; p.traveled = 0; p.radius = WEAPON_CONFIG.BASIC.RADIUS; p.speed = WEAPON_CONFIG.BASIC.PROJECTILE_SPEED;
+                }
+            ),
+            windBladeProjectile: new ObjectPool(
+                () => new WindBladeProjectile(0, 0, 1, 0, 0, 0, this),
+                (p, x, y, dirX, dirY, damage, range, game) => {
+                    p.x = x; p.y = y; p.dirX = dirX; p.dirY = dirY; p.damage = damage; p.range = range; p.game = game;
+                    p.speed = ELEMENT_CONFIG.AIR.WIND_BLADE.SPEED;
+                    p.radius = 6; p.visualSize = 12;
+                    p.age = 0; p.seekRadius = ELEMENT_CONFIG.AIR.WIND_BLADE.SEEK_RADIUS; p.seekStrength = ELEMENT_CONFIG.AIR.WIND_BLADE.SEEK_STRENGTH; p.curveIntensity = ELEMENT_CONFIG.AIR.WIND_BLADE.CURVE_INTENSITY;
+                    p.maxFlightTime = range / (p.speed * 60);
+                    p.seekStartTime = p.maxFlightTime * 0.5;
+                    p.distanceTraveled = 0;
+                    p.curveDirection = Math.random() > 0.5 ? 1 : -1;
+                    p.initialDirection = { x: dirX, y: dirY };
+                    p.trail = [];
+                    p.maxTrailLength = 10;
+                    p.rotation = Math.atan2(dirY, dirX);
+                    p.rotationSpeed = 0.25;
                 }
             ),
             enemyProjectile: new ObjectPool(
@@ -342,7 +360,11 @@ export class Game {
         });
         this.projectiles = this.projectiles.filter(p => {
             if (p.shouldRemove) {
-                // Projectiles currently not returned to pool (stateless), allowed to GC or future pool
+                // Return common projectile types to pools when available
+                if (p instanceof Projectile && this.pools?.projectile) this.pools.projectile.release(p);
+                else if (p instanceof EnemyProjectile && this.pools?.enemyProjectile) this.pools.enemyProjectile.release(p);
+                else if (p instanceof SpikeProjectile && this.pools?.spikeProjectile) this.pools.spikeProjectile.release(p);
+                else if (p instanceof WindBladeProjectile && this.pools?.windBladeProjectile) this.pools.windBladeProjectile.release(p);
                 return false;
             }
             return true;
