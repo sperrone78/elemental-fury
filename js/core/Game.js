@@ -67,6 +67,14 @@ export class Game {
                 (p, x, y, dirX, dirY, damage, range) => {
                     p.x = x; p.y = y; p.dirX = dirX; p.dirY = dirY; p.damage = damage; p.range = range; p.traveled = 0; p.radius = WEAPON_CONFIG.BASIC.RADIUS; p.speed = WEAPON_CONFIG.BASIC.PROJECTILE_SPEED;
                 }
+            ),
+            enemyProjectile: new ObjectPool(
+                () => new EnemyProjectile(0, 0, 1, 0),
+                (p, x, y, dirX, dirY) => { p.x = x; p.y = y; p.dirX = dirX; p.dirY = dirY; p.traveled = 0; p.shouldRemove = false; }
+            ),
+            spikeProjectile: new ObjectPool(
+                () => new SpikeProjectile(0, 0, 1, 0),
+                (p, x, y, dirX, dirY) => { p.x = x; p.y = y; p.dirX = dirX; p.dirY = dirY; p.rotation = Math.atan2(dirY, dirX); p.traveled = 0; p.shouldRemove = false; }
             )
         };
         
