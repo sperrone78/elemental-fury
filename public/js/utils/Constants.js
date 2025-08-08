@@ -79,6 +79,12 @@ export const ELEMENT_CONFIG = {
     },
     WATER: {
         GLOBE: {
+            // Base stats (for new systems)
+            BASE_RADIUS: 5,
+            BASE_ORBIT_RADIUS: 45,
+            BASE_DAMAGE: 15,
+            BASE_ROTATION_SPEED: 0.02,
+            // Legacy values (backward compatibility)
             RADIUS: 5,
             ORBIT_RADIUS: 45,
             DAMAGE: 15,
