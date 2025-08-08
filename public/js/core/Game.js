@@ -1470,7 +1470,7 @@ export class Game {
     renderCanvasUI() {
         if (!this.player) return;
         
-        const ctx = this.ctx;
+        const ctx = this.uiCtx || this.ctx;
         ctx.save();
         
         // Fallback for roundRect if not supported
