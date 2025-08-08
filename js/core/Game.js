@@ -1,5 +1,6 @@
 import { GAME_CONFIG, PLAYER_CONFIG, ENEMY_CONFIG, DIAMOND_CONFIG } from '../utils/Constants.js';
 import { MathUtils } from '../utils/MathUtils.js';
+import { SpatialGrid } from '../utils/SpatialGrid.js';
 import { Player } from './Player.js';
 import { BasicWeapon } from '../entities/weapons/BasicWeapon.js';
 import { WaveManager } from '../systems/WaveManager.js';
@@ -42,6 +43,9 @@ export class Game {
         this.particles = [];
         this.pickups = [];
         this.dotEffects = [];
+        
+        // Broad-phase acceleration structure for collisions
+        this.enemyGrid = new SpatialGrid(64);
         
         this.gameTime = 0;
         this.score = 0;
@@ -281,8 +285,11 @@ export class Game {
         
         this.waveManager.update(this.gameTime, this, this.player.level, this.deltaTime);
         
+        // Rebuild spatial grid for enemies
+        this.enemyGrid.clear();
         this.enemies.forEach((enemy, index) => {
             enemy.update(this.player, this.deltaTime);
+            this.enemyGrid.insertEnemy(enemy);
             if (enemy.health <= 0 && !enemy.shouldRemove) {
                 this.processEnemyDeath(enemy);
             }
@@ -574,9 +581,11 @@ export class Game {
     
     handleCollisions() {
         this.projectiles.forEach(projectile => {
-            this.enemies.forEach(enemy => {
-                if (MathUtils.circleIntersect(projectile.x, projectile.y, projectile.radius, 
-                                             enemy.x, enemy.y, enemy.radius)) {
+            // Query nearby enemies using spatial grid
+            const nearby = this.enemyGrid.queryEnemiesInRadius(projectile.x, projectile.y, projectile.radius + 72);
+            nearby.forEach(enemy => {
+                if (MathUtils.circleIntersect(projectile.x, projectile.y, projectile.radius,
+                                              enemy.x, enemy.y, enemy.radius)) {
                     enemy.takeDamage(projectile.damage);
                     
                     // Track damage by projectile type
