@@ -88,32 +88,79 @@ export class Player {
     }
     
     // Elemental Aura System Methods
+    // Returns a blended color palette based on the two highest elemental levels
     getDominantElementColor() {
-        const elements = {
-            fire: { core: '#ff6b6b', glow: '#ff9999', aura: 'rgba(255, 107, 107, 0.3)' },
-            water: { core: '#4ecdc4', glow: '#7dd3d8', aura: 'rgba(78, 205, 196, 0.3)' },
-            earth: { core: '#8b5a2b', glow: '#a67c52', aura: 'rgba(139, 90, 43, 0.3)' },
-            air: { core: '#95e1d3', glow: '#b8eee2', aura: 'rgba(149, 225, 211, 0.3)' },
-            lightning: { core: '#fce38a', glow: '#fdeba4', aura: 'rgba(252, 227, 138, 0.3)' }
+        const palette = {
+            fire: { core: '#ff6b6b' },
+            water: { core: '#4ecdc4' },
+            earth: { core: '#8b5a2b' },
+            air: { core: '#95e1d3' },
+            lightning: { core: '#fce38a' }
         };
-        
-        // Find element with highest level
-        let dominantElement = 'fire';
-        let highestLevel = 0;
-        
-        Object.keys(this.upgradeCount).forEach(element => {
-            if (this.upgradeCount[element] > highestLevel) {
-                highestLevel = this.upgradeCount[element];
-                dominantElement = element;
-            }
-        });
-        
-        // If no elements leveled, default to a neutral blue-green
-        if (highestLevel === 0) {
-            return { core: '#4a7c59', glow: '#6bb77b', aura: 'rgba(74, 124, 89, 0.3)' };
+
+        // Helper functions kept local to this class for clarity
+        const hexToRgb = (hex) => {
+            const sanitized = hex.replace('#', '');
+            const bigint = parseInt(sanitized, 16);
+            return {
+                r: (bigint >> 16) & 255,
+                g: (bigint >> 8) & 255,
+                b: bigint & 255
+            };
+        };
+
+        const rgbToHex = (r, g, b) => {
+            const toHex = (v) => v.toString(16).padStart(2, '0');
+            return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
+        };
+
+        const rgbaString = (r, g, b, a) => `rgba(${r}, ${g}, ${b}, ${a})`;
+
+        // Sort elements by their levels descending
+        const sorted = Object.entries(this.upgradeCount)
+            .sort((a, b) => (b[1] || 0) - (a[1] || 0));
+
+        const [first, second] = [sorted[0], sorted[1] || ['fire', 0]];
+        const firstLevel = first ? first[1] : 0;
+        const secondLevel = second ? second[1] : 0;
+
+        // If no elements leveled, return neutral palette
+        if ((firstLevel || 0) === 0) {
+            const neutral = { r: 74, g: 124, b: 89 }; // #4a7c59
+            return {
+                core: '#4a7c59',
+                aura: rgbaString(neutral.r, neutral.g, neutral.b, 0.3)
+            };
         }
-        
-        return elements[dominantElement] || elements.fire;
+
+        // If only one element leveled, use its color directly
+        if ((secondLevel || 0) === 0) {
+            const base = palette[first[0]] || palette.fire;
+            const c = hexToRgb(base.core);
+            return {
+                core: base.core,
+                aura: rgbaString(c.r, c.g, c.b, 0.3)
+            };
+        }
+
+        // Blend two highest elements proportionally to their levels
+        const total = firstLevel + secondLevel;
+        const w1 = firstLevel / total;
+        const w2 = secondLevel / total;
+
+        const c1 = hexToRgb((palette[first[0]] || palette.fire).core);
+        const c2 = hexToRgb((palette[second[0]] || palette.fire).core);
+
+        const blended = {
+            r: Math.round(c1.r * w1 + c2.r * w2),
+            g: Math.round(c1.g * w1 + c2.g * w2),
+            b: Math.round(c1.b * w1 + c2.b * w2)
+        };
+
+        return {
+            core: rgbToHex(blended.r, blended.g, blended.b),
+            aura: rgbaString(blended.r, blended.g, blended.b, 0.3)
+        };
     }
     
     updateAura() {
@@ -172,39 +219,21 @@ export class Player {
     }
     
     renderElementalAura(ctx) {
-        const dominantColor = this.getDominantElementColor();
-        const totalLevels = Object.values(this.upgradeCount).reduce((sum, level) => sum + level, 0);
-        const intensity = Math.min(totalLevels / 15, 1); // Scale intensity based on total mastery
-        
-        // Outer aura ring
+        const blendedColor = this.getDominantElementColor();
         const auraRadius = 50 + Math.sin(this.auraTime * 2) * 5;
         const gradient = ctx.createRadialGradient(
-            this.x, this.y, 20, 
+            this.x, this.y, 20,
             this.x, this.y, auraRadius
         );
-        gradient.addColorStop(0, dominantColor.aura);
-        gradient.addColorStop(0.5, dominantColor.aura.replace('0.3', '0.1'));
+        // Use two alpha stops for a soft aura
+        gradient.addColorStop(0, blendedColor.aura);
+        gradient.addColorStop(0.5, blendedColor.aura.replace('0.3', '0.1'));
         gradient.addColorStop(1, 'rgba(0,0,0,0)');
-        
+
         ctx.fillStyle = gradient;
         ctx.beginPath();
         ctx.arc(this.x, this.y, auraRadius, 0, Math.PI * 2);
         ctx.fill();
-        
-        // Pulsing energy rings based on mastery level
-        if (intensity > 0.3) {
-            for (let i = 0; i < 3; i++) {
-                const ringTime = this.auraTime * 3 + i * 1.2;
-                const ringRadius = 25 + i * 8 + Math.sin(ringTime) * 3;
-                const ringAlpha = (intensity * 0.2) * (Math.sin(ringTime * 0.5) * 0.3 + 0.4);
-                
-                ctx.strokeStyle = dominantColor.core.replace(')', `, ${ringAlpha})`);
-                ctx.lineWidth = 2;
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, ringRadius, 0, Math.PI * 2);
-                ctx.stroke();
-            }
-        }
     }
     
     renderTrailParticles(ctx) {
@@ -360,9 +389,9 @@ export class Player {
             ctx.arc(this.x, this.y, this.radius + 5, 0, Math.PI * 2);
             ctx.stroke();
         } else {
-            // Use dynamic color based on dominant element
-            const dominantColor = this.getDominantElementColor();
-            ctx.fillStyle = dominantColor.core;
+            // Use dynamic blended color based on top two elements
+            const blendedColor = this.getDominantElementColor();
+            ctx.fillStyle = blendedColor.core;
         }
         
         ctx.beginPath();
