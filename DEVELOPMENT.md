@@ -408,12 +408,12 @@ firebase deploy
         fireball: boolean,
         shield: boolean,
         radiusAttack: boolean,
-        missiles: boolean,
+        windBlades: boolean,
         lightning: boolean,
         // Level 6 ultimates
         infernoWave: boolean,
         freezingTouch: boolean,
-        earthquakeStormp: boolean,
+        earthquakeStomp: boolean,
         tornadoVortex: boolean,
         thunderStorm: boolean
     }

@@ -19,9 +19,9 @@
 | --------- | --------------------- | ----------------------------------------- | --------------------- | ------------------------- |
 | Fire      | Fireball              | Faster fireball cooldown, +10% DPS to all attacks      | Inferno Wave   | +10% DPS + 10% Range on Inferno Wave |
 | Water     | Water Globes (orbit around player)  | +1 globe (max 5), +10% Health       | Freezing Touch | + 10% Health +10% Extra damage taken by frozen enemies (stacking) |
-| Earth     | Tremor (ongoing AOE field)                | Increased tremor range (+20px/level), +3 Armor       | Earthquake (10% chance per tremor + stuns)     | +3 armor +10% chance to start earthquake + 10% freqency to tremor |
+| Earth     | Tremor (ongoing AOE field)                | Increased tremor range (+20px/level), +3 Armor       | Earthquake (10% chance per tremor + stuns)     | +3 armor +10% chance to start earthquake + 10% frequency to tremor |
 | Lightning | Chain Lightning       | +1 chain (enhanced 200px hop range), +10% attack speed all attacks   | Thunder Storm    | +10% radius of storm clouds +10% duration of storm |
-| Air       | Missiles (directional firing) | +1 missile (max 5 at specific angles), +10% attack range all attacks | Tornado Vortex  | +1 extra tornado per spawn |
+| Air       | Wind Blades (seeking projectiles) | +1 wind blade per level (1-5), +10% attack range all attacks | Tornado Vortex  | +1 extra tornado per spawn |
 
 Combined Level 11 Ultimate to be added later
 
@@ -54,17 +54,17 @@ This ensures players experience the satisfaction of mastery once, then enjoy smo
   - Create blue splash particle effects on impact
   - Evenly distributed around player (360° / globe count)
 
-### 🚀 Air Missiles
-- **Level 1**: Fires 1 additional missile at 45° angle
-- **Level 2**: 2 missiles at 45° and 315° (northeast + southeast)
-- **Level 3**: 3 missiles add 180° (west)
-- **Level 4**: 4 missiles add 90° (north) 
-- **Level 5**: 5 missiles add 270° (south) - full 360° coverage
+### 🌪️ Wind Blades
+- **Level 1-5**: Fires 1 to 5 wind blades per shot (equal to Air level)
+- **Behavior**: Seeking, curved projectiles with gentle homing
+- **Damage**: Each blade deals 80% of base weapon damage
+- **Angles**: Randomized around the player per shot 
+- **Coverage**: Wide coverage at higher levels due to multiple blades
 - **Mechanics**:
-  - Missiles are directional with realistic rocket graphics
-  - Each deals 70% of base weapon damage
-  - Pointed nose, body, fins, and exhaust trail visuals
-  - Fixed angles provide strategic coverage patterns
+  - Curved wind blades with airy trails
+  - Each deals 80% of base weapon damage
+  - Gentle homing toward nearby enemies
+  - Randomized angles per shot create natural coverage
 
 ### 🌍 Tremor (Enhanced)
 - **Level 1**: Creates ongoing AOE damage field around player (80px range)
@@ -92,7 +92,7 @@ This ensures players experience the satisfaction of mastery once, then enjoy smo
 - **Cost:** 50 Diamonds
 - **Slots:** 2 rings max
 - **Effect:** Unlocks **Lv 6‑10** for its element.
-- **Unequip:** Can only equip and unequip between games, loose ability to go past level 5 if ring not equipped
+- **Unequip:** Can only equip and unequip between games, lose the ability to go past level 5 if ring not equipped
 
 ---
 

@@ -157,7 +157,7 @@ radius: 3
 ### Projectile Types
 1. **Basic Projectile**: Standard attack
 2. **Fireball**: Explosive with area damage
-3. **Missile**: Twin projectiles (Air mastery)
+3. **Wind Blades**: Seeking projectiles (Air mastery)
 
 ### Damage Tracking
 - All damage is tracked by type for statistics
@@ -223,18 +223,18 @@ Level 6: Earthquake Stomp Ultimate
 // Weapon Range Bonus
 Level 1-5: +10% weapon range per level
 
-// Directional Missiles - Progressive 360° Coverage
-Level 1: 1 missile at 45° (northeast)
-Level 2: 2 missiles at 45°, 315° (northeast, southeast)
-Level 3: 3 missiles add 180° (west)
-Level 4: 4 missiles add 90° (north)
-Level 5: 5 missiles add 270° (south) - full coverage
+// Wind Blades - Per-shot count scales with level
+Level 1-5: Fires 1 to 5 wind blades per shot (equal to Air level)
+behavior: Seeking, curved projectiles with gentle homing
+damage: 80% of base weapon damage each
+angles: Randomized angles around the player per shot
+visualDesign: Curved wind blades with airy trails; seeks nearby enemies
 
-// Missile Specs
-damage: 70% of base weapon damage
-speed: 10 units/frame
-visualDesign: Realistic rocket with nose, body, fins, exhaust
-rotationalRendering: Points in travel direction
+// Wind Blade Specs
+damage: 80% of base weapon damage
+speed: 7 units/frame
+visualDesign: Curved wind blades with airy trails
+homing: Seeks nearby enemies with gentle curvature
 
 // Tornado Vortex Ultimate - Level 6
 cooldown: 2.5 seconds
@@ -414,7 +414,7 @@ enemyArmorScaling: 0 → 5 → 5 → 10 (basic → veteran → elite → elite b
 // Session Stats (per game)
 survivalTime, score, level, xpGained
 enemiesKilled: { basic, veteran, elite, boss, total }
-damageDealt: { basicWeapon, fireball, waterGlobe, missiles, tremors, 
+damageDealt: { basicWeapon, fireball, waterGlobe, windBlades, tremors, 
                chainLightning, earthquakeStormp, thunderStorm, 
                tornadoVortex, infernoWave, total }
 elementLevels: { fire, water, earth, air, lightning }
@@ -481,7 +481,7 @@ gameState: 'waiting' | 'playing' | 'gameOver' | 'shop'
 - **Visual**: Blue orbs with splash particle effects on impact
 - **Stats**: Added to damage tracking across all UI sections
 
-### ✅ Air Missiles Redesign
+### ✅ Wind Blades Update
 - **NEW**: Progressive directional missile system
 - **Scaling**: 1-5 missiles at specific angles (45°, 315°, 180°, 90°, 270°)
 - **Visual**: Realistic rocket graphics with directional rendering
