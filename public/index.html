@@ -46,6 +46,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
+            position: relative;
         }
         
         #rightPanel {
@@ -58,8 +59,17 @@
         
         #gameCanvas {
             border: 2px solid #333;
-            background: #111;
+            background: transparent;
         }
+
+        /* Multi-canvas layering */
+        .layerCanvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+        }
+        #bgCanvas { background: #111; pointer-events: none; }
         
         .powerup-section {
             margin-bottom: 25px;
@@ -1001,7 +1011,9 @@
         </div>
         
         <div id="gameArea">
-            <canvas id="gameCanvas" width="800" height="600"></canvas>
+            <canvas id="bgCanvas" class="layerCanvas" width="800" height="600"></canvas>
+            <canvas id="gameCanvas" class="layerCanvas" width="800" height="600"></canvas>
+            <canvas id="uiCanvas" class="layerCanvas" width="800" height="600"></canvas>
             
 
             

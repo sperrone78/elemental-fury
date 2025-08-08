@@ -34,6 +34,10 @@ export class Game {
     constructor() {
         this.canvas = document.getElementById('gameCanvas');
         this.ctx = this.canvas.getContext('2d');
+        this.bgCanvas = document.getElementById('bgCanvas');
+        this.bgCtx = this.bgCanvas ? this.bgCanvas.getContext('2d') : this.ctx;
+        this.uiCanvas = document.getElementById('uiCanvas');
+        this.uiCtx = this.uiCanvas ? this.uiCanvas.getContext('2d') : this.ctx;
         this.width = this.canvas.width;
         this.height = this.canvas.height;
         
@@ -510,9 +514,13 @@ export class Game {
     }
 
     render() {
-        // Clear background
-        this.ctx.fillStyle = '#111';
-        this.ctx.fillRect(0, 0, this.width, this.height);
+        // Clear layered canvases
+        if (this.bgCtx) {
+            this.bgCtx.fillStyle = '#111';
+            this.bgCtx.fillRect(0, 0, this.width, this.height);
+        }
+        this.ctx.clearRect(0, 0, this.width, this.height);
+        if (this.uiCtx) this.uiCtx.clearRect(0, 0, this.width, this.height);
         
         if (this.gameState === 'playing' && this.player) {
             // Apply screen shake if active
