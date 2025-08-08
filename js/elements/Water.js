@@ -82,12 +82,10 @@ export class WaterGlobe {
                 // Create impact particle effect
                 this.createImpactEffect();
                 
-                // Remove enemy if dead
-                if (enemy.health <= 0) {
-                    enemies.splice(i, 1);
-                    this.player.game.score += enemy.scoreReward || 10;
-                    this.player.game.pickups.push(new XPPickup(enemy.x, enemy.y, enemy.xpReward));
-                }
+                // If enemy dies, do not remove or drop here; let Game.update handle
+                // death processing and loot/XP drops consistently
+                // (Avoids race conditions with boss loot drops)
+                // if (enemy.health <= 0) { /* handled centrally in Game.update */ }
             }
         }
     }
