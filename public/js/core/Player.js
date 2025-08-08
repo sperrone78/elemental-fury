@@ -1,10 +1,10 @@
-import { PLAYER_CONFIG, GAME_CONFIG } from '../utils/Constants.js';
+import { PLAYER_CONFIG, GAME_CONFIG, ELEMENT_CONFIG } from '../utils/Constants.js';
 import { MathUtils } from '../utils/MathUtils.js';
 import { FireballProjectile } from '../elements/Fire.js';
 import { TremorParticle } from '../entities/effects/TremorParticle.js';
 import { DebrisParticle } from '../entities/effects/DebrisParticle.js';
 import { LightningBolt, DelayedLightningChain, IceRing, EarthquakeWave, ShockwaveRing, StormClouds, ThunderBolt, LightningImpact, ElectricSpark } from '../entities/effects/LightningEffects.js';
-import { Tornado } from '../elements/Air.js';
+import { Tornado, WindBladeProjectile } from '../elements/Air.js';
 import { ElementalModifiers } from '../systems/ElementalModifiers.js';
 
 export class Player {
