@@ -54,6 +54,10 @@ export class Game {
                 () => new ExplosionParticle(0, 0),
                 (p, x, y) => { p.x = x; p.y = y; p.vx = (Math.random() - 0.5) * 4; p.vy = (Math.random() - 0.5) * 4; p.life = p.maxLife = 0.5; }
             ),
+            debris: new ObjectPool(
+                () => new DebrisParticle(0, 0),
+                (d, x, y) => { d.x = x; d.y = y; d.vx = (Math.random() - 0.5) * 8; d.vy = (Math.random() - 0.5) * 8 - 2; d.life = d.maxLife = 2; d.size = 2 + Math.random() * 3; d.rotation = Math.random() * Math.PI * 2; d.rotationSpeed = (Math.random() - 0.5) * 0.2; d.gravity = 0.15; }
+            ),
             tremor: new ObjectPool(
                 () => new TremorParticle(0, 0),
                 (p, x, y) => { p.x = x; p.y = y; p.vx = (Math.random() - 0.5) * 2; p.vy = (Math.random() - 0.5) * 2; p.life = p.maxLife = 0.8; p.rotation = Math.random() * Math.PI * 2; }

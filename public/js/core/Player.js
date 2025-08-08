@@ -746,7 +746,10 @@ export class Player {
             const debrisDistance = 30 + Math.random() * 60;
             const debrisX = this.x + Math.cos(angle) * debrisDistance;
             const debrisY = this.y + Math.sin(angle) * debrisDistance;
-            this.game.particles.push(new DebrisParticle(debrisX, debrisY));
+            {
+                const d = this.game.pools?.debris ? this.game.pools.debris.acquire(debrisX, debrisY) : new DebrisParticle(debrisX, debrisY);
+                this.game.particles.push(d);
+            }
         }
     }
     
