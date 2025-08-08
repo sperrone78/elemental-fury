@@ -506,8 +506,7 @@ export class Game {
     render() {
         // Clear layered canvases
         if (this.bgCtx) {
-            this.bgCtx.fillStyle = '#111';
-            this.bgCtx.fillRect(0, 0, this.width, this.height);
+            this.renderBackgroundEffects();
         }
         this.ctx.clearRect(0, 0, this.width, this.height);
         if (this.uiCtx) this.uiCtx.clearRect(0, 0, this.width, this.height);
@@ -547,6 +546,47 @@ export class Game {
         }
     }
     
+    renderBackgroundEffects() {
+        const ctx = this.bgCtx || this.ctx;
+        const w = this.width;
+        const h = this.height;
+        
+        // Base radial gradient background
+        const baseGradient = ctx.createRadialGradient(
+            w / 2, h / 2, Math.min(w, h) * 0.2,
+            w / 2, h / 2, Math.max(w, h) * 0.8
+        );
+        baseGradient.addColorStop(0, '#121213');
+        baseGradient.addColorStop(1, '#0a0a0b');
+        ctx.fillStyle = baseGradient;
+        ctx.fillRect(0, 0, w, h);
+        
+        // Subtle grid lines aligned to spatial grid size
+        const gridSize = 64;
+        ctx.beginPath();
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.04)';
+        ctx.lineWidth = 1;
+        for (let x = 0; x <= w; x += gridSize) {
+            ctx.moveTo(x + 0.5, 0);
+            ctx.lineTo(x + 0.5, h);
+        }
+        for (let y = 0; y <= h; y += gridSize) {
+            ctx.moveTo(0, y + 0.5);
+            ctx.lineTo(w, y + 0.5);
+        }
+        ctx.stroke();
+        
+        // Vignette overlay to draw eye to center
+        const vignette = ctx.createRadialGradient(
+            w / 2, h / 2, Math.min(w, h) * 0.55,
+            w / 2, h / 2, Math.max(w, h) * 0.9
+        );
+        vignette.addColorStop(0, 'rgba(0,0,0,0)');
+        vignette.addColorStop(1, 'rgba(0,0,0,0.45)');
+        ctx.fillStyle = vignette;
+        ctx.fillRect(0, 0, w, h);
+    }
+
     renderGameOverScreen() {
         // Update start widget text for game over
         const startPrompt = document.querySelector('.start-prompt');
