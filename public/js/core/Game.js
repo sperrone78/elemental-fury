@@ -79,6 +79,8 @@ export class Game {
         this.deltaTime = 0;
         this.targetFPS = GAME_CONFIG.TARGET_FPS;
         this.fixedTimeStep = GAME_CONFIG.FIXED_TIME_STEP;
+        this.accumulator = 0;
+        this.maxSubSteps = 5;
         
         // Screen shake for visual effects
         this.screenShake = 0;
@@ -277,18 +279,17 @@ export class Game {
     }
     
     gameLoop(currentTime = 0) {
-        // Calculate delta time in seconds
-        if (this.lastFrameTime === 0) {
-            this.lastFrameTime = currentTime;
-        }
-        
-        this.deltaTime = (currentTime - this.lastFrameTime) / 1000;
+        if (this.lastFrameTime === 0) this.lastFrameTime = currentTime;
+        const frameDelta = Math.min((currentTime - this.lastFrameTime) / 1000, 0.25);
         this.lastFrameTime = currentTime;
-        
-        // Cap delta time to prevent huge jumps (e.g., when tab loses focus)
-        this.deltaTime = Math.min(this.deltaTime, this.fixedTimeStep * 2);
-        
-        this.update();
+        this.accumulator += frameDelta;
+        let subSteps = 0;
+        while (this.accumulator >= this.fixedTimeStep && subSteps < this.maxSubSteps) {
+            this.deltaTime = this.fixedTimeStep;
+            this.update();
+            this.accumulator -= this.fixedTimeStep;
+            subSteps++;
+        }
         this.render();
         requestAnimationFrame((time) => this.gameLoop(time));
     }
