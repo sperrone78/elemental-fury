@@ -73,7 +73,7 @@ export class Player {
         this.fireballCooldown = 0;
         this.lastFireballTime = 0;
         // Wind Blades system
-        this.lastWindBladeTime = 0;
+        this.nextWindBladeAt = null;
         
         // Elemental Aura System variables
         this.auraTime = 0;
@@ -341,17 +341,18 @@ export class Player {
         // Compute cooldown: base 0.5s reduced by Lightning attack speed
         const baseCooldown = (ELEMENT_CONFIG && ELEMENT_CONFIG.AIR && ELEMENT_CONFIG.AIR.WIND_BLADE && ELEMENT_CONFIG.AIR.WIND_BLADE.COOLDOWN) || 0.5;
         const modifiers = this.elementalModifiers.getModifiers();
-        const cooldown = Math.max(0.05, baseCooldown * modifiers.attackSpeedMultiplier); // 0.9^lightningLevel per spec
+        const cooldown = Math.max(0.1, baseCooldown * modifiers.attackSpeedMultiplier); // clamp to avoid bursty catch-up
 
-        if (!Number.isFinite(this.lastWindBladeTime)) this.lastWindBladeTime = this.game.gameTime;
-        if (this.game.gameTime - this.lastWindBladeTime < cooldown) return;
+        // Schedule-style timing to avoid catch-up bursts
+        if (this.nextWindBladeAt == null) {
+            this.nextWindBladeAt = this.game.gameTime + cooldown;
+            return;
+        }
+        if (this.game.gameTime < this.nextWindBladeAt) return;
 
         const airLevel = this.upgradeCount.air || 0;
         const bladeCount = ELEMENT_CONFIG.AIR.WIND_BLADE.COUNT[Math.min(airLevel, 5)] || 0;
-        if (bladeCount <= 0) {
-            this.lastWindBladeTime = this.game.gameTime;
-            return;
-        }
+        if (bladeCount <= 0) { this.nextWindBladeAt = this.game.gameTime + cooldown; return; }
 
         // Use modified weapon stats for damage/range scaling (Fire/Air/Earth/Lightning)
         const baseStats = {
@@ -382,7 +383,7 @@ export class Player {
             this.game.projectiles.push(proj);
         }
 
-        this.lastWindBladeTime = this.game.gameTime;
+        this.nextWindBladeAt += cooldown;
     }
     
     render(ctx) {
