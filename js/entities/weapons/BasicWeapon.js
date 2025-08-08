@@ -64,34 +64,6 @@ export class BasicWeapon {
                     modifiedStats.damage, modifiedStats.range
                   );
             this.owner.game.projectiles.push(proj);
-            
-            if (this.owner.specialAbilities.windBlades) {
-                // Get Air mastery level to determine number of wind blades
-                const airLevel = this.owner.upgradeCount.air || 0;
-                const bladeCount = ELEMENT_CONFIG.AIR.WIND_BLADE.COUNT[Math.min(airLevel, 5)];
-                
-                // Fire wind blades at completely random angles around the character
-                for (let i = 0; i < bladeCount; i++) {
-                    const randomAngle = Math.random() * Math.PI * 2; // Full 360 degrees
-                    
-                    const proj = this.owner.game.pools?.windBladeProjectile
-                        ? this.owner.game.pools.windBladeProjectile.acquire(
-                            this.owner.x, this.owner.y,
-                            Math.cos(randomAngle), Math.sin(randomAngle),
-                            modifiedStats.damage * ELEMENT_CONFIG.AIR.WIND_BLADE.DAMAGE_MULTIPLIER,
-                            modifiedStats.range,
-                            this.owner.game
-                          )
-                        : new WindBladeProjectile(
-                            this.owner.x, this.owner.y,
-                            Math.cos(randomAngle), Math.sin(randomAngle),
-                            modifiedStats.damage * ELEMENT_CONFIG.AIR.WIND_BLADE.DAMAGE_MULTIPLIER,
-                            modifiedStats.range,
-                            this.owner.game
-                          );
-                    this.owner.game.projectiles.push(proj);
-                }
-            }
         }
     }
 }

@@ -129,6 +129,7 @@ export const ELEMENT_CONFIG = {
     AIR: {
         RANGE_BONUS_PER_LEVEL: 0.1,
         WIND_BLADE: {
+            COOLDOWN: 0.5,
             DAMAGE_MULTIPLIER: 0.8,
             SPEED: 7,
             SEEK_RADIUS: 120,

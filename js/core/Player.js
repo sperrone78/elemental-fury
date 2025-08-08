@@ -72,6 +72,8 @@ export class Player {
         // Fireball system
         this.fireballCooldown = 0;
         this.lastFireballTime = 0;
+        // Wind Blades system
+        this.lastWindBladeTime = 0;
         
         // Elemental Aura System variables
         this.auraTime = 0;
@@ -302,6 +304,10 @@ export class Player {
             this.updateLightningStrike();
         }
         
+        if (this.specialAbilities.windBlades) {
+            this.updateWindBlades();
+        }
+
         if (this.specialAbilities.tornadoVortex) {
             this.updateTornadoVortex();
         }
@@ -329,6 +335,53 @@ export class Player {
         
         // Update elemental aura system
         this.updateAura();
+    }
+
+    updateWindBlades() {
+        // Compute cooldown: base 0.5s reduced by Lightning attack speed
+        const baseCooldown = ELEMENT_CONFIG.AIR.WIND_BLADE.COOLDOWN;
+        const modifiers = this.elementalModifiers.getModifiers();
+        const cooldown = baseCooldown * modifiers.attackSpeedMultiplier; // 0.9^lightningLevel per spec
+
+        if (this.game.gameTime - this.lastWindBladeTime < cooldown) return;
+
+        const airLevel = this.upgradeCount.air || 0;
+        const bladeCount = ELEMENT_CONFIG.AIR.WIND_BLADE.COUNT[Math.min(airLevel, 5)] || 0;
+        if (bladeCount <= 0) {
+            this.lastWindBladeTime = this.game.gameTime;
+            return;
+        }
+
+        // Use modified weapon stats for damage/range scaling (Fire/Air/Earth/Lightning)
+        const baseStats = {
+            damage: this.weapons[0] ? this.weapons[0].baseDamage || 20 : 20,
+            range: 200,
+            cooldown: 0.5,
+            radius: 6
+        };
+        const modified = this.elementalModifiers.getModifiedWeaponStats(baseStats);
+
+        for (let i = 0; i < bladeCount; i++) {
+            const angle = Math.random() * Math.PI * 2;
+            const proj = this.game.pools?.windBladeProjectile
+                ? this.game.pools.windBladeProjectile.acquire(
+                    this.x, this.y,
+                    Math.cos(angle), Math.sin(angle),
+                    modified.damage * ELEMENT_CONFIG.AIR.WIND_BLADE.DAMAGE_MULTIPLIER,
+                    modified.range,
+                    this.game
+                  )
+                : new WindBladeProjectile(
+                    this.x, this.y,
+                    Math.cos(angle), Math.sin(angle),
+                    modified.damage * ELEMENT_CONFIG.AIR.WIND_BLADE.DAMAGE_MULTIPLIER,
+                    modified.range,
+                    this.game
+                  );
+            this.game.projectiles.push(proj);
+        }
+
+        this.lastWindBladeTime = this.game.gameTime;
     }
     
     render(ctx) {
