@@ -55,10 +55,11 @@ export class FireballProjectile extends Projectile {
         
         for (let i = 0; i < 8; i++) {
             const angle = (Math.PI * 2 * i) / 8;
-            game.particles.push(new ExplosionParticle(
+            const p = game.pools?.explosion ? game.pools.explosion.acquire(
                 this.x + Math.cos(angle) * 15,
                 this.y + Math.sin(angle) * 15
-            ));
+            ) : new ExplosionParticle(this.x + Math.cos(angle) * 15, this.y + Math.sin(angle) * 15);
+            game.particles.push(p);
         }
     }
     
@@ -89,10 +90,11 @@ export class FireballProjectile extends Projectile {
         // Create explosion particles around the inferno wave
         for (let i = 0; i < 6; i++) {
             const angle = (Math.PI * 2 * i) / 6;
-            game.particles.push(new ExplosionParticle(
+            const p = game.pools?.explosion ? game.pools.explosion.acquire(
                 centerX + Math.cos(angle) * 20,
                 centerY + Math.sin(angle) * 20
-            ));
+            ) : new ExplosionParticle(centerX + Math.cos(angle) * 20, centerY + Math.sin(angle) * 20);
+            game.particles.push(p);
         }
     }
 }

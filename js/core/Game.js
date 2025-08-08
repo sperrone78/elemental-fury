@@ -28,6 +28,7 @@ import {
     LightningImpact, 
     ElectricSpark 
 } from '../entities/effects/index.js';
+import { ObjectPool } from '../utils/ObjectPool.js';
 
 export class Game {
     constructor() {
@@ -46,6 +47,22 @@ export class Game {
         
         // Broad-phase acceleration structure for collisions
         this.enemyGrid = new SpatialGrid(64);
+
+        // Initialize object pools for common particles
+        this.pools = {
+            explosion: new ObjectPool(
+                () => new ExplosionParticle(0, 0),
+                (p, x, y) => { p.x = x; p.y = y; p.vx = (Math.random() - 0.5) * 4; p.vy = (Math.random() - 0.5) * 4; p.life = p.maxLife = 0.5; }
+            ),
+            tremor: new ObjectPool(
+                () => new TremorParticle(0, 0),
+                (p, x, y) => { p.x = x; p.y = y; p.vx = (Math.random() - 0.5) * 2; p.vy = (Math.random() - 0.5) * 2; p.life = p.maxLife = 0.8; p.rotation = Math.random() * Math.PI * 2; }
+            ),
+            spark: new ObjectPool(
+                () => new ElectricSpark(0, 0),
+                (p, x, y) => { p.x = x; p.y = y; p.vx = (Math.random() - 0.5) * 6; p.vy = (Math.random() - 0.5) * 6; p.life = p.maxLife = 0.5; }
+            )
+        };
         
         this.gameTime = 0;
         this.score = 0;
@@ -308,10 +325,18 @@ export class Game {
         });
         this.enemyProjectiles = this.enemyProjectiles.filter(p => !p.shouldRemove);
         
-        this.particles.forEach((particle) => {
-            particle.update(this.deltaTime);
-        });
-        this.particles = this.particles.filter(p => !p.shouldRemove);
+        {
+            const remainingParticles = [];
+            this.particles.forEach((particle) => {
+                particle.update(this.deltaTime);
+                if (particle.shouldRemove) {
+                    this.releaseParticle(particle);
+                } else {
+                    remainingParticles.push(particle);
+                }
+            });
+            this.particles = remainingParticles;
+        }
         
         this.dotEffects.forEach((dot) => {
             dot.update(this.gameTime, this.deltaTime);
@@ -404,6 +429,18 @@ export class Game {
             this.createXPPickup(enemy.x, enemy.y);
             this.score += ENEMY_CONFIG.BASIC.SCORE_REWARD;
         }
+    }
+
+    releaseParticle(particle) {
+        // Return pooled particle instances to their pools when possible
+        if (particle instanceof ExplosionParticle && this.pools?.explosion) {
+            this.pools.explosion.release(particle);
+        } else if (particle instanceof TremorParticle && this.pools?.tremor) {
+            this.pools.tremor.release(particle);
+        } else if (particle instanceof ElectricSpark && this.pools?.spark) {
+            this.pools.spark.release(particle);
+        }
+        // Other particle types are not pooled yet
     }
 
     render() {

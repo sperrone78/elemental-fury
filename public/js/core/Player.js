@@ -518,7 +518,10 @@ export class Player {
                     for (let i = 0; i < 3; i++) {
                         const offsetX = (Math.random() - 0.5) * 20;
                         const offsetY = (Math.random() - 0.5) * 20;
-                        this.game.particles.push(new TremorParticle(enemy.x + offsetX, enemy.y + offsetY));
+                        {
+                            const p = this.game.pools?.tremor ? this.game.pools.tremor.acquire(enemy.x + offsetX, enemy.y + offsetY) : new TremorParticle(enemy.x + offsetX, enemy.y + offsetY);
+                            this.game.particles.push(p);
+                        }
                     }
                 }
             });
@@ -534,7 +537,10 @@ export class Player {
                     const dist = Math.random() * tremorRange * 0.8;
                     const px = this.x + Math.cos(angle) * dist;
                     const py = this.y + Math.sin(angle) * dist;
-                    this.game.particles.push(new TremorParticle(px, py));
+                    {
+                        const p = this.game.pools?.tremor ? this.game.pools.tremor.acquire(px, py) : new TremorParticle(px, py);
+                        this.game.particles.push(p);
+                    }
                 }
             }
             
@@ -829,7 +835,10 @@ export class Player {
             const angle = (Math.PI * 2 * i) / 6;
             const sparkX = x + Math.cos(angle) * (strikeRadius * 0.7);
             const sparkY = y + Math.sin(angle) * (strikeRadius * 0.7);
-            this.game.particles.push(new ElectricSpark(sparkX, sparkY));
+            {
+                const p = this.game.pools?.spark ? this.game.pools.spark.acquire(sparkX, sparkY) : new ElectricSpark(sparkX, sparkY);
+                this.game.particles.push(p);
+            }
         }
     }
 }
