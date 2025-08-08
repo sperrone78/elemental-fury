@@ -2,6 +2,24 @@
 
 All notable changes to Elemental Fury are documented here.
 
+## [2.9.5] - 2025-08-08 - Multi-canvas Layers + Wind Blades Timing
+
+### 🎨 Changed - Rendering Layers
+- **UI to uiCtx**: On-canvas UI (`renderCanvasUI`) now renders on the dedicated `uiCtx` layer
+- **Background Effects on bgCtx**: Added subtle background on `bgCtx` with:
+  - Radial gradient base
+  - Faint 64px grid (aligned with `SpatialGrid`)
+  - Soft vignette to focus attention
+
+### ⚙️ Changed - Air: Wind Blades Behavior
+- **Decoupled from Basic Weapon**: Wind Blades now fire on their own timer, not tied to basic shots
+- **Per-Level Count**: Blades per tick = `ELEMENT_CONFIG.AIR.WIND_BLADE.COUNT[airLevel]` (e.g., L1=1, L2=2…)
+- **Cooldown Spec**: Base 0.5s; reduced by 10% per Lightning level (global attack speed)
+- **Stable Timing**: Switched to a scheduled timer to prevent rAF catch-up bursts; added minimum interval clamp
+
+### 🐛 Fixed
+- Import issues for `ELEMENT_CONFIG` and `WindBladeProjectile` in player code
+
 ## [2.9.4] - 2025-08-07 - Aura Blending, Palette Tuner, Loot Drop Fix
 
 ### 🎨 Changed - Elemental Aura & Colors

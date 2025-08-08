@@ -201,8 +201,11 @@ Elemental Fury is a top-down survival game where players master 5 elemental powe
 - **Smooth Animation**: Variable frame rate game loop with requestAnimationFrame
 - **Responsive Design**: Scales to different screen sizes
 - **Performance Optimization**: Frame time capping prevents lag spikes when tab loses focus
+- **Multi-canvas Layering**: Dedicated `bgCtx` (background), `gameCtx` (gameplay), `uiCtx` (UI) for cleaner separation and better performance
 
 ### Code Architecture
+### New Mechanics Notes
+- **Wind Blades Timing**: Wind Blades fire on their own 0.5s base cooldown (reduced by Lightning), with blade count based on Air level. Decoupled from the basic weapon to ensure consistent pacing.
 - **Class-based Design**: Modular entity system
 - **Component Pattern**: Separate systems for upgrades, waves, particles
 - **State Management**: Clean game state transitions

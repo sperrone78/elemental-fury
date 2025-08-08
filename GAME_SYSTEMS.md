@@ -158,6 +158,8 @@ radius: 3
 1. **Basic Projectile**: Standard attack
 2. **Fireball**: Explosive with area damage
 3. **Wind Blades**: Seeking projectiles (Air mastery)
+   - Independent timer: base 0.5s per tick, reduced by Lightning attack speed (10% per level)
+   - Per-tick blade count equals Air level (1–5), random directions around player
 
 ### Damage Tracking
 - All damage is tracked by type for statistics
@@ -223,8 +225,9 @@ Level 6: Earthquake Stomp Ultimate
 // Weapon Range Bonus
 Level 1-5: +10% weapon range per level
 
-// Wind Blades - Per-shot count scales with level
-Level 1-5: Fires 1 to 5 wind blades per shot (equal to Air level)
+// Wind Blades - Independent timer & per-tick count
+Level 1-5: Fires 1 to 5 wind blades per tick (equal to Air level)
+cooldown: 0.5s base, reduced 10% per Lightning level (global attack speed)
 behavior: Seeking, curved projectiles with gentle homing
 damage: 80% of base weapon damage each
 angles: Randomized angles around the player per shot
