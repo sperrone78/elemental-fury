@@ -91,11 +91,11 @@ export class Player {
     // Returns a blended color palette based on the two highest elemental levels
     getDominantElementColor() {
         const palette = {
-            fire: { core: '#ff6b6b' },
-            water: { core: '#4ecdc4' },
+            fire: { core: '#ff0000' },
+            water: { core: '#1f1ffc' },
             earth: { core: '#8b5a2b' },
             air: { core: '#95e1d3' },
-            lightning: { core: '#fce38a' }
+            lightning: { core: '#ffff00' }
         };
 
         // Helper functions kept local to this class for clarity
