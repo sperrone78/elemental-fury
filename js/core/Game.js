@@ -9,7 +9,7 @@ import { PlayerProfile } from '../systems/PlayerProfile.js';
 import { Enemy, VeteranEnemy, EliteEnemy } from '../entities/enemies/Enemy.js';
 import { BossEnemy, VeteranBoss, EliteBoss } from '../entities/enemies/BossEnemy.js';
 import { XPPickup, VeteranXPPickup, EliteXPPickup } from '../entities/pickups/XPPickup.js';
-import { EnemyProjectile, SpikeProjectile } from '../entities/weapons/index.js';
+import { EnemyProjectile, SpikeProjectile, Projectile } from '../entities/weapons/index.js';
 import { FireballProjectile, InfernoWave } from '../elements/Fire.js';
 import { WindBladeProjectile, Tornado, WindParticle } from '../elements/Air.js';
 import { WaterGlobe, WaterSplashParticle } from '../elements/Water.js';
@@ -61,6 +61,12 @@ export class Game {
             spark: new ObjectPool(
                 () => new ElectricSpark(0, 0),
                 (p, x, y) => { p.x = x; p.y = y; p.vx = (Math.random() - 0.5) * 6; p.vy = (Math.random() - 0.5) * 6; p.life = p.maxLife = 0.5; }
+            ),
+            projectile: new ObjectPool(
+                () => new Projectile(0, 0, 1, 0, 0, 0),
+                (p, x, y, dirX, dirY, damage, range) => {
+                    p.x = x; p.y = y; p.dirX = dirX; p.dirY = dirY; p.damage = damage; p.range = range; p.traveled = 0; p.radius = WEAPON_CONFIG.BASIC.RADIUS; p.speed = WEAPON_CONFIG.BASIC.PROJECTILE_SPEED;
+                }
             )
         };
         
@@ -326,7 +332,13 @@ export class Game {
         this.projectiles.forEach((projectile) => {
             projectile.update(this.deltaTime);
         });
-        this.projectiles = this.projectiles.filter(p => !p.shouldRemove);
+        this.projectiles = this.projectiles.filter(p => {
+            if (p.shouldRemove) {
+                // Projectiles currently not returned to pool (stateless), allowed to GC or future pool
+                return false;
+            }
+            return true;
+        });
         
         this.enemyProjectiles.forEach((projectile) => {
             projectile.update(this.deltaTime);

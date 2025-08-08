@@ -51,12 +51,19 @@ export class BasicWeapon {
             const dirY = dy / distance;
             const modifiedStats = this.getModifiedStats();
             
-            // Basic weapon fires projectile with modified stats
-            this.owner.game.projectiles.push(new Projectile(
-                this.owner.x, this.owner.y,
-                dirX, dirY,
-                modifiedStats.damage, modifiedStats.range
-            ));
+            // Basic weapon fires projectile (pooled if available)
+            const proj = this.owner.game.pools?.projectile
+                ? this.owner.game.pools.projectile.acquire(
+                    this.owner.x, this.owner.y,
+                    dirX, dirY,
+                    modifiedStats.damage, modifiedStats.range
+                  )
+                : new Projectile(
+                    this.owner.x, this.owner.y,
+                    dirX, dirY,
+                    modifiedStats.damage, modifiedStats.range
+                  );
+            this.owner.game.projectiles.push(proj);
             
             if (this.owner.specialAbilities.windBlades) {
                 // Get Air mastery level to determine number of wind blades

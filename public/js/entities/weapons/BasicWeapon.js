@@ -28,12 +28,19 @@ export class BasicWeapon {
             const dirX = dx / distance;
             const dirY = dy / distance;
             
-            // Basic weapon always fires regular projectiles now (fireball is separate)
-            this.owner.game.projectiles.push(new Projectile(
-                this.owner.x, this.owner.y,
-                dirX, dirY,
-                this.damage, this.range
-            ));
+            // Basic weapon always fires regular projectiles (pooled if available)
+            const proj = this.owner.game.pools?.projectile
+                ? this.owner.game.pools.projectile.acquire(
+                    this.owner.x, this.owner.y,
+                    dirX, dirY,
+                    this.damage, this.range
+                  )
+                : new Projectile(
+                    this.owner.x, this.owner.y,
+                    dirX, dirY,
+                    this.damage, this.range
+                  );
+            this.owner.game.projectiles.push(proj);
             
             if (this.owner.specialAbilities.windBlades) {
                 // Get Air mastery level to determine number of wind blades
