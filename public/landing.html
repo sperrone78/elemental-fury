@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Elemental Fury — Master the elements. Survive the fury.</title>
+  <meta name="description" content="Elemental Fury is a fast-paced survivor game with elemental mastery, powerful ultimates, and modern canvas UI." />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0b0f14;
+      --panel: #121821;
+      --muted: #8aa0b2;
+      --text: #e8f0f7;
+      --brand: linear-gradient(135deg,#ff6b6b,#f7b267,#ffd166,#06d6a0,#4ecdc4,#6c63ff);
+    }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji";
+      color: var(--text);
+      background: radial-gradient(1200px 800px at 10% 10%, #0f1520 0%, var(--bg) 60%),
+                  radial-gradient(1000px 1000px at 90% 20%, #111827 0%, rgba(11,15,20,0) 60%),
+                  radial-gradient(1000px 800px at 50% 120%, #10131a 0%, rgba(11,15,20,0) 60%);
+    }
+    a { color: inherit; text-decoration: none; }
+    .wrap { display: grid; grid-template-rows: auto 1fr auto; min-height: 100%; }
+    header { display:flex; align-items:center; justify-content:space-between; padding: 18px 24px; position: sticky; top: 0; backdrop-filter: blur(8px); background: linear-gradient( to bottom, rgba(11,15,20,0.85), rgba(11,15,20,0.4)); border-bottom: 1px solid rgba(255,255,255,0.06); }
+    .logo { font-weight: 800; letter-spacing: 0.5px; }
+    .logo span { background: var(--brand); -webkit-background-clip:text; background-clip: text; color: transparent; }
+    nav a { margin-left: 16px; color: var(--muted); font-weight: 600; }
+    .cta { display:inline-block; padding: 10px 16px; background: #1a2432; border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; }
+
+    .hero { display:grid; grid-template-columns: 1.1fr 0.9fr; gap: 36px; align-items: center; padding: 64px 24px 32px; max-width: 1100px; margin: 0 auto; }
+    .title { font-size: clamp(32px, 5vw, 56px); line-height: 1.04; margin: 0 0 12px; font-weight: 800; }
+    .title-gradient { background: var(--brand); -webkit-background-clip: text; background-clip: text; color: transparent; }
+    .subtitle { color: var(--muted); font-size: 18px; margin: 0 0 24px; }
+    .actions { display:flex; gap: 12px; flex-wrap: wrap; }
+    .btn { padding: 14px 18px; border-radius: 12px; font-weight: 700; letter-spacing: .2px; border: 1px solid rgba(255,255,255,0.12); }
+    .btn-primary { background: #0ea5e9; color: #03131e; border: none; box-shadow: 0 10px 30px rgba(14,165,233,.25); }
+    .btn-ghost { background: #141c27; color: var(--text); }
+
+    .panel { background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02)); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 18px; }
+    .grid { display:grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-top: 28px; }
+    .feature { padding: 14px; border-radius: 12px; background: #121923; border: 1px solid rgba(255,255,255,.06); }
+    .feature h3 { margin: 8px 0 6px; font-size: 16px; }
+    .feature p { margin: 0; color: var(--muted); font-size: 14px; line-height: 1.5; }
+
+    .preview { aspect-ratio: 16 / 10; border-radius: 14px; background: radial-gradient(400px 200px at 50% 30%, rgba(255,255,255,0.08), rgba(255,255,255,0)), url('js/assets/preview.jpg'); background-size: cover; border: 1px solid rgba(255,255,255,0.08); box-shadow: 0 20px 80px rgba(0,0,0,.4) inset; }
+
+    footer { padding: 28px 24px; color: #8aa0b2; border-top: 1px solid rgba(255,255,255,0.06); margin-top: 32px; }
+    .legal { font-size: 13px; }
+
+    @media (max-width: 900px) {
+      .hero { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="logo">Elemental <span>Fury</span></div>
+      <nav>
+        <a href="#features">Features</a>
+        <a href="#play">Play</a>
+        <a class="cta" href="https://elemental-fury.web.app" target="_blank" rel="noopener">Live Site ↗</a>
+      </nav>
+    </header>
+
+    <main>
+      <section class="hero">
+        <div>
+          <h1 class="title">Master the <span class="title-gradient">elements</span>. Survive the fury.</h1>
+          <p class="subtitle">A modern, canvas-driven survivor where every elemental level globally powers up your build. Choose wisely, unleash devastating ultimates, and chase the leaderboard.</p>
+          <div class="actions" id="play">
+            <a class="btn btn-primary" href="index.html">Play Now</a>
+            <a class="btn btn-ghost" href="README.md">Learn More</a>
+          </div>
+
+          <div class="grid" id="features">
+            <div class="feature">
+              <div>🔥</div>
+              <h3>Global Elemental Bonuses</h3>
+              <p>+10% Damage, Radius, Range, or Attack Speed per level across all compatible abilities.</p>
+            </div>
+            <div class="feature">
+              <div>🌪️</div>
+              <h3>Wind Blades at Level 1</h3>
+              <p>Air grants seeking Wind Blades from the moment you choose it. More levels = more blades.</p>
+            </div>
+            <div class="feature">
+              <div>⛈️</div>
+              <h3>Devastating Ultimates</h3>
+              <p>Reach Level 6 with rings to unlock Earthquake Stomp, Thunder Storm, Tornado Vortex, and more.</p>
+            </div>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="preview" aria-label="Gameplay preview"></div>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <div class="legal">© <span id="year"></span> Elemental Fury. All rights reserved.</div>
+    </footer>
+  </div>
+  <script>
+    document.getElementById('year').textContent = new Date().getFullYear();
+  </script>
+</body>
+</html>

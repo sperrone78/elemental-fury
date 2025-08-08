@@ -482,10 +482,10 @@ gameState: 'waiting' | 'playing' | 'gameOver' | 'shop'
 - **Stats**: Added to damage tracking across all UI sections
 
 ### ✅ Wind Blades Update
-- **NEW**: Progressive directional missile system
-- **Scaling**: 1-5 missiles at specific angles (45°, 315°, 180°, 90°, 270°)
-- **Visual**: Realistic rocket graphics with directional rendering
-- **Mechanics**: Each missile deals 70% weapon damage
+- **NEW**: Wind Blades per-shot scaling system
+- **Scaling**: Fires 1-5 wind blades per shot (equal to Air level)
+- **Visual**: Curved wind blades with airy trails and subtle seeking
+- **Mechanics**: Each blade deals 80% of base weapon damage
 - **Strategy**: Evolves from focused fire to full 360° coverage
 
 ### ✅ Chain Lightning Enhancement
