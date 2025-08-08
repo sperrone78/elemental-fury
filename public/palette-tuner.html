@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Elemental Palette Tuner</title>
+  <style>
+    :root {
+      --bg: #0f1115;
+      --panel: #151923;
+      --text: #e6e6e6;
+      --muted: #9aa4b2;
+      --accent: #7cafff;
+      --border: #23283a;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+    header {
+      padding: 18px 20px;
+      border-bottom: 1px solid var(--border);
+      background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(0,0,0,0));
+    }
+    h1 { font-size: 18px; margin: 0 0 4px; }
+    .subtitle { color: var(--muted); font-size: 13px; }
+
+    .container { max-width: 1100px; margin: 22px auto; padding: 0 16px; }
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+    @media (max-width: 900px) { .grid { grid-template-columns: 1fr; } }
+
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px;
+    }
+    .card h2 { font-size: 15px; margin: 0 0 10px; }
+    .row { display: flex; align-items: center; gap: 10px; margin: 8px 0; }
+    .row label { width: 120px; color: var(--muted); font-size: 13px; }
+    .swatch {
+      width: 28px; height: 28px; border-radius: 6px; border: 1px solid var(--border);
+    }
+    input[type="color"] {
+      width: 46px; height: 32px; padding: 0; border: 1px solid var(--border);
+      background: #0d0f14; border-radius: 6px; cursor: pointer;
+    }
+    input[type="range"] { width: 220px; }
+    select, input[type="number"], textarea, button {
+      background: #0f1420; color: var(--text); border: 1px solid var(--border);
+      border-radius: 8px; padding: 8px 10px; font-size: 13px;
+    }
+    select, input[type="number"] { height: 34px; }
+    .small { font-size: 12px; color: var(--muted); }
+    .btn {
+      background: #17315c; border-color: #28519b; color: #dbe8ff; cursor: pointer;
+    }
+    .btn:hover { filter: brightness(1.05); }
+
+    .palette-grid {
+      display: grid; grid-template-columns: repeat(2, minmax(260px, 1fr)); gap: 12px;
+    }
+    @media (max-width: 700px) { .palette-grid { grid-template-columns: 1fr; } }
+
+    .element-card { background: #0f1420; border: 1px solid var(--border); border-radius: 10px; padding: 10px; }
+    .element-card h3 { margin: 0 0 8px; font-size: 14px; color: var(--accent); }
+
+    .preview-area { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; }
+    .preview-box { background: #0d0f14; border: 1px solid var(--border); border-radius: 10px; padding: 10px; }
+    canvas { background: #0b0e13; border: 1px solid var(--border); border-radius: 10px; }
+
+    .blurb { width: 100%; min-height: 140px; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+    .actions { display: flex; gap: 10px; align-items: center; }
+  </style>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+</head>
+<body>
+  <header>
+    <h1>Elemental Palette Tuner</h1>
+    <div class="subtitle">Adjust per-element colors, preview aura and blended player color, and generate a copyable request blurb</div>
+  </header>
+
+  <div class="container">
+    <div class="grid">
+      <section class="card">
+        <h2>Element Palettes</h2>
+        <div class="palette-grid" id="paletteGrid"></div>
+        <div class="row" style="margin-top:10px">
+          <button class="btn" id="resetBtn">Reset to Defaults</button>
+          <span class="small">Defaults reflect current in-game values</span>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>Aura Settings</h2>
+        <div class="row">
+          <label for="auraAlpha">Aura Alpha</label>
+          <input type="range" id="auraAlpha" min="0" max="1" step="0.01" value="0.30" />
+          <span id="auraAlphaValue" class="small">0.30</span>
+        </div>
+        <div class="row">
+          <label for="innerRadius">Inner Radius</label>
+          <input type="range" id="innerRadius" min="10" max="60" step="1" value="20" />
+          <span id="innerRadiusValue" class="small">20</span>
+        </div>
+        <div class="row">
+          <label for="outerRadius">Outer Radius</label>
+          <input type="range" id="outerRadius" min="40" max="120" step="1" value="60" />
+          <span id="outerRadiusValue" class="small">60</span>
+        </div>
+      </section>
+    </div>
+
+    <section class="card" style="margin-top:16px">
+      <h2>Blending Preview (Top Two Elements)</h2>
+      <div class="row">
+        <label>Primary Element</label>
+        <select id="primaryEl"></select>
+        <input id="primaryLevel" type="number" min="0" max="10" value="7" />
+      </div>
+      <div class="row">
+        <label>Secondary Element</label>
+        <select id="secondaryEl"></select>
+        <input id="secondaryLevel" type="number" min="0" max="10" value="3" />
+      </div>
+
+      <div class="preview-area" style="margin-top:10px">
+        <div class="preview-box">
+          <div class="small" style="margin-bottom:6px">Player Core + Aura Preview</div>
+          <canvas id="playerPreview" width="220" height="160"></canvas>
+        </div>
+        <div class="preview-box">
+          <div class="small" style="margin-bottom:6px">Blended Color</div>
+          <div id="blendSwatch" class="swatch" style="width:60px; height:60px;"></div>
+          <div id="blendHex" class="small" style="margin-top:6px">#000000</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="card" style="margin-top:16px">
+      <h2>Copyable Blurb</h2>
+      <p class="small">Click copy and paste into chat to request the exact palette changes</p>
+      <textarea id="blurb" class="blurb"></textarea>
+      <div class="actions" style="margin-top:8px">
+        <button class="btn" id="copyBtn">Copy Blurb</button>
+        <span id="copied" class="small" style="opacity:0">Copied!</span>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    const elements = [
+      { key: 'fire', label: 'Fire 🔥' },
+      { key: 'water', label: 'Water 💧' },
+      { key: 'earth', label: 'Earth 🌍' },
+      { key: 'air', label: 'Air 🌪️' },
+      { key: 'lightning', label: 'Lightning ⚡' }
+    ];
+
+    const defaultPalette = {
+      fire: '#ff6b6b',
+      water: '#4ecdc4',
+      earth: '#8b5a2b',
+      air: '#95e1d3',
+      lightning: '#fce38a'
+    };
+
+    const state = {
+      palette: JSON.parse(localStorage.getItem('ef_palette')) || { ...defaultPalette },
+      auraAlpha: parseFloat(localStorage.getItem('ef_auraAlpha') || '0.30'),
+      innerRadius: parseInt(localStorage.getItem('ef_innerRadius') || '20', 10),
+      outerRadius: parseInt(localStorage.getItem('ef_outerRadius') || '60', 10),
+      primaryEl: localStorage.getItem('ef_primaryEl') || 'fire',
+      secondaryEl: localStorage.getItem('ef_secondaryEl') || 'lightning',
+      primaryLevel: parseInt(localStorage.getItem('ef_primaryLevel') || '7', 10),
+      secondaryLevel: parseInt(localStorage.getItem('ef_secondaryLevel') || '3', 10)
+    };
+
+    const $ = (id) => document.getElementById(id);
+
+    function hexToRgb(hex) {
+      const s = hex.replace('#', '');
+      const v = parseInt(s, 16);
+      return { r: (v >> 16) & 255, g: (v >> 8) & 255, b: v & 255 };
+    }
+    function rgbToHex(r, g, b) {
+      const toHex = (v) => v.toString(16).padStart(2, '0');
+      return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
+    }
+    function blend(hex1, hex2, w1, w2) {
+      const c1 = hexToRgb(hex1); const c2 = hexToRgb(hex2);
+      const r = Math.round(c1.r * w1 + c2.r * w2);
+      const g = Math.round(c1.g * w1 + c2.g * w2);
+      const b = Math.round(c1.b * w1 + c2.b * w2);
+      return rgbToHex(r, g, b);
+    }
+
+    function save() {
+      localStorage.setItem('ef_palette', JSON.stringify(state.palette));
+      localStorage.setItem('ef_auraAlpha', String(state.auraAlpha.toFixed(2)));
+      localStorage.setItem('ef_innerRadius', String(state.innerRadius));
+      localStorage.setItem('ef_outerRadius', String(state.outerRadius));
+      localStorage.setItem('ef_primaryEl', state.primaryEl);
+      localStorage.setItem('ef_secondaryEl', state.secondaryEl);
+      localStorage.setItem('ef_primaryLevel', String(state.primaryLevel));
+      localStorage.setItem('ef_secondaryLevel', String(state.secondaryLevel));
+    }
+
+    function buildPaletteGrid() {
+      const grid = $('paletteGrid');
+      grid.innerHTML = '';
+      elements.forEach(({ key, label }) => {
+        const wrap = document.createElement('div');
+        wrap.className = 'element-card';
+        wrap.innerHTML = `
+          <h3>${label}</h3>
+          <div class="row">
+            <label>Core Color</label>
+            <input type="color" id="color_${key}" value="${state.palette[key]}" />
+            <div id="sw_${key}" class="swatch" style="background:${state.palette[key]}"></div>
+            <input type="text" id="hex_${key}" value="${state.palette[key]}" style="width:110px" />
+          </div>
+        `;
+        grid.appendChild(wrap);
+
+        const colorInput = $(`color_${key}`);
+        const hexInput = $(`hex_${key}`);
+        const sw = $(`sw_${key}`);
+        colorInput.addEventListener('input', () => {
+          state.palette[key] = colorInput.value;
+          hexInput.value = colorInput.value;
+          sw.style.background = colorInput.value;
+          save();
+          renderAll();
+        });
+        hexInput.addEventListener('change', () => {
+          let v = hexInput.value.trim();
+          if (!/^#?[0-9a-fA-F]{6}$/.test(v)) { hexInput.value = state.palette[key]; return; }
+          if (v[0] !== '#') v = '#' + v;
+          state.palette[key] = v;
+          colorInput.value = v;
+          sw.style.background = v;
+          save();
+          renderAll();
+        });
+      });
+    }
+
+    function buildBlendSelectors() {
+      const primarySel = $('primaryEl');
+      const secondarySel = $('secondaryEl');
+      primarySel.innerHTML = '';
+      secondarySel.innerHTML = '';
+      elements.forEach(({ key, label }) => {
+        const o1 = document.createElement('option'); o1.value = key; o1.textContent = label; primarySel.appendChild(o1);
+        const o2 = document.createElement('option'); o2.value = key; o2.textContent = label; secondarySel.appendChild(o2);
+      });
+      primarySel.value = state.primaryEl;
+      secondarySel.value = state.secondaryEl;
+      $('primaryLevel').value = state.primaryLevel;
+      $('secondaryLevel').value = state.secondaryLevel;
+
+      primarySel.addEventListener('change', () => { state.primaryEl = primarySel.value; save(); renderAll(); });
+      secondarySel.addEventListener('change', () => { state.secondaryEl = secondarySel.value; save(); renderAll(); });
+      $('primaryLevel').addEventListener('input', () => { state.primaryLevel = clamp(parseInt($('primaryLevel').value||'0',10),0,10); save(); renderAll(); });
+      $('secondaryLevel').addEventListener('input', () => { state.secondaryLevel = clamp(parseInt($('secondaryLevel').value||'0',10),0,10); save(); renderAll(); });
+    }
+
+    function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
+
+    function blendedColor() {
+      const a = state.primaryEl, b = state.secondaryEl;
+      const la = clamp(state.primaryLevel, 0, 10);
+      const lb = clamp(state.secondaryLevel, 0, 10);
+      if (la === 0 && lb === 0) return '#4a7c59';
+      if (lb === 0) return state.palette[a];
+      if (la === 0) return state.palette[b];
+      const total = la + lb; const w1 = la / total; const w2 = lb / total;
+      return blend(state.palette[a], state.palette[b], w1, w2);
+    }
+
+    function renderPlayerPreview() {
+      const canvas = $('playerPreview');
+      const ctx = canvas.getContext('2d');
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      const core = blendedColor();
+      const { r, g, b } = hexToRgb(core);
+      const alpha = state.auraAlpha;
+      const inner = state.innerRadius; // gradient inner radius
+      const outer = state.outerRadius; // gradient outer radius
+
+      const cx = canvas.width / 2, cy = canvas.height / 2 + 10;
+
+      // Aura gradient
+      const grad = ctx.createRadialGradient(cx, cy, inner, cx, cy, outer);
+      grad.addColorStop(0, `rgba(${r}, ${g}, ${b}, ${alpha})`);
+      grad.addColorStop(0.55, `rgba(${r}, ${g}, ${b}, ${Math.max(alpha-0.2,0)})`);
+      grad.addColorStop(1, 'rgba(0,0,0,0)');
+      ctx.fillStyle = grad;
+      ctx.beginPath();
+      ctx.arc(cx, cy, outer, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Player core
+      ctx.fillStyle = core;
+      ctx.beginPath();
+      ctx.arc(cx, cy, 24, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Eyes highlight
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.arc(cx - 8, cy - 8, 3, 0, Math.PI * 2);
+      ctx.arc(cx + 8, cy - 8, 3, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    function buildAuraControls() {
+      const aa = $('auraAlpha');
+      const ir = $('innerRadius');
+      const or = $('outerRadius');
+      const aav = $('auraAlphaValue');
+      const irv = $('innerRadiusValue');
+      const orv = $('outerRadiusValue');
+
+      aa.value = state.auraAlpha.toFixed(2);
+      ir.value = state.innerRadius;
+      or.value = state.outerRadius;
+      aav.textContent = state.auraAlpha.toFixed(2);
+      irv.textContent = String(state.innerRadius);
+      orv.textContent = String(state.outerRadius);
+
+      aa.addEventListener('input', () => { state.auraAlpha = parseFloat(aa.value); aav.textContent = state.auraAlpha.toFixed(2); save(); renderAll(); });
+      ir.addEventListener('input', () => { state.innerRadius = parseInt(ir.value, 10); irv.textContent = String(state.innerRadius); save(); renderAll(); });
+      or.addEventListener('input', () => { state.outerRadius = parseInt(or.value, 10); orv.textContent = String(state.outerRadius); save(); renderAll(); });
+    }
+
+    function updateBlendWidgets() {
+      const hex = blendedColor();
+      $('blendSwatch').style.background = hex;
+      $('blendHex').textContent = hex;
+    }
+
+    function buildBlurb() {
+      const lines = [];
+      lines.push('Please update the Elemental Palette as follows:');
+      elements.forEach(({ key, label }) => {
+        lines.push(`- ${label}: ${state.palette[key]}`);
+      });
+      lines.push('');
+      lines.push('Aura preferences:');
+      lines.push(`- Aura alpha: ${state.auraAlpha.toFixed(2)}`);
+      lines.push(`- Aura inner radius (preview): ${state.innerRadius}`);
+      lines.push(`- Aura outer radius (preview): ${state.outerRadius}`);
+      lines.push('');
+      lines.push('Blending expectation (top-two example):');
+      lines.push(`- Primary: ${state.primaryEl} level ${state.primaryLevel}`);
+      lines.push(`- Secondary: ${state.secondaryEl} level ${state.secondaryLevel}`);
+      lines.push(`- Resulting blended core hex: ${blendedColor()}`);
+      lines.push('');
+      lines.push('Notes: Please ensure the in-game player core uses this blended color and the aura gradient uses the same hue with the alpha specified above.');
+      $('blurb').value = lines.join('\n');
+    }
+
+    function attachActions() {
+      $('resetBtn').addEventListener('click', () => {
+        state.palette = { ...defaultPalette };
+        state.auraAlpha = 0.30; state.innerRadius = 20; state.outerRadius = 60;
+        state.primaryEl = 'fire'; state.secondaryEl = 'lightning';
+        state.primaryLevel = 7; state.secondaryLevel = 3;
+        save();
+        buildPaletteGrid();
+        buildBlendSelectors();
+        buildAuraControls();
+        renderAll();
+      });
+      $('copyBtn').addEventListener('click', async () => {
+        try { await navigator.clipboard.writeText($('blurb').value); $('copied').style.opacity = '1'; setTimeout(()=> $('copied').style.opacity = '0', 1200); }
+        catch (e) { /* ignore */ }
+      });
+    }
+
+    function renderAll() {
+      updateBlendWidgets();
+      renderPlayerPreview();
+      buildBlurb();
+    }
+
+    // Init
+    buildPaletteGrid();
+    buildBlendSelectors();
+    buildAuraControls();
+    attachActions();
+    renderAll();
+  </script>
+</body>
+</html>
+
+
