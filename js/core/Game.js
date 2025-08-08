@@ -1,4 +1,4 @@
-import { GAME_CONFIG, PLAYER_CONFIG, ENEMY_CONFIG, DIAMOND_CONFIG } from '../utils/Constants.js';
+import { GAME_CONFIG, PLAYER_CONFIG, ENEMY_CONFIG, DIAMOND_CONFIG, WEAPON_CONFIG } from '../utils/Constants.js';
 import { MathUtils } from '../utils/MathUtils.js';
 import { SpatialGrid } from '../utils/SpatialGrid.js';
 import { Player } from './Player.js';
