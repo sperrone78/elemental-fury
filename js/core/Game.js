@@ -284,108 +284,47 @@ export class Game {
         this.enemies.forEach((enemy, index) => {
             enemy.update(this.player, this.deltaTime);
             if (enemy.health <= 0 && !enemy.shouldRemove) {
-                // Mark for removal immediately to prevent duplicate XP drops
-                enemy.shouldRemove = true;
-                // Track enemy kill by type
-                if (enemy.isBoss) {
-                    this.recordEnemyKill('boss');
-                    let xpCount = ENEMY_CONFIG.BOSS.BASIC.XP_DROP;
-                    let scoreReward = ENEMY_CONFIG.BOSS.BASIC.SCORE_REWARD;
-                    
-                    if (enemy.isElite) {
-                        xpCount = ENEMY_CONFIG.BOSS.ELITE.XP_DROP;
-                        scoreReward = ENEMY_CONFIG.BOSS.ELITE.SCORE_REWARD;
-                    } else if (enemy.isVeteran) {
-                        xpCount = ENEMY_CONFIG.BOSS.VETERAN.XP_DROP;
-                        scoreReward = ENEMY_CONFIG.BOSS.VETERAN.SCORE_REWARD;
-                    }
-                    
-                    // Create appropriate XP pickups based on boss type
-                    if (enemy.isElite) {
-                        // Elite bosses drop EliteXPPickup instances
-                        for (let i = 0; i < xpCount; i++) {
-                            this.pickups.push(new EliteXPPickup(
-                                enemy.x + (Math.random() - 0.5) * 40, 
-                                enemy.y + (Math.random() - 0.5) * 40
-                            ));
-                        }
-                    } else if (enemy.isVeteran) {
-                        // Veteran bosses drop VeteranXPPickup instances
-                        for (let i = 0; i < xpCount; i++) {
-                            this.pickups.push(new VeteranXPPickup(
-                                enemy.x + (Math.random() - 0.5) * 40, 
-                                enemy.y + (Math.random() - 0.5) * 40
-                            ));
-                        }
-                    } else {
-                        // Basic bosses drop basic XP pickups
-                        for (let i = 0; i < xpCount; i++) {
-                            this.createXPPickup(enemy.x + (Math.random() - 0.5) * 40, enemy.y + (Math.random() - 0.5) * 40);
-                        }
-                    }
-                    this.score += scoreReward;
-                } else if (enemy.isElite) {
-                    this.recordEnemyKill('elite');
-                    this.pickups.push(new EliteXPPickup(enemy.x, enemy.y));
-                    this.score += ENEMY_CONFIG.ELITE.SCORE_REWARD;
-                } else if (enemy.isVeteran) {
-                    this.recordEnemyKill('veteran');
-                    this.pickups.push(new VeteranXPPickup(enemy.x, enemy.y));
-                    this.score += ENEMY_CONFIG.VETERAN.SCORE_REWARD;
-                } else {
-                    this.recordEnemyKill('basic');
-                    this.createXPPickup(enemy.x, enemy.y);
-                    this.score += ENEMY_CONFIG.BASIC.SCORE_REWARD;
-                }
+                this.processEnemyDeath(enemy);
             }
         });
         
         // Remove dead enemies after processing all damage
         this.enemies = this.enemies.filter(enemy => !enemy.shouldRemove);
         
-        this.projectiles.forEach((projectile, index) => {
+        this.projectiles.forEach((projectile) => {
             projectile.update(this.deltaTime);
-            if (projectile.shouldRemove) {
-                this.projectiles.splice(index, 1);
-            }
         });
+        this.projectiles = this.projectiles.filter(p => !p.shouldRemove);
         
-        this.enemyProjectiles.forEach((projectile, index) => {
+        this.enemyProjectiles.forEach((projectile) => {
             projectile.update(this.deltaTime);
-            if (projectile.shouldRemove) {
-                this.enemyProjectiles.splice(index, 1);
-            }
         });
+        this.enemyProjectiles = this.enemyProjectiles.filter(p => !p.shouldRemove);
         
-        this.particles.forEach((particle, index) => {
+        this.particles.forEach((particle) => {
             particle.update(this.deltaTime);
-            if (particle.shouldRemove) {
-                this.particles.splice(index, 1);
-            }
         });
+        this.particles = this.particles.filter(p => !p.shouldRemove);
         
-        this.dotEffects.forEach((dot, index) => {
+        this.dotEffects.forEach((dot) => {
             dot.update(this.gameTime, this.deltaTime);
-            if (dot.shouldRemove) {
-                this.dotEffects.splice(index, 1);
-            }
         });
+        this.dotEffects = this.dotEffects.filter(d => !d.shouldRemove);
         
-        this.pickups.forEach((pickup, index) => {
+        this.pickups.forEach((pickup) => {
             if (pickup.update) pickup.update(this.deltaTime); // For animated pickups like EliteXPPickup
-            
             // Handle XP Vortex attraction
             if (pickup.type === 'xp') {
                 this.updateXPPickupVortex(pickup);
             }
-            
             if (this.checkXPPickupCollision(this.player, pickup)) {
                 if (pickup.type === 'xp') {
                     this.player.gainXP(pickup.value);
                 }
-                this.pickups.splice(index, 1);
+                pickup.shouldRemove = true;
             }
         });
+        this.pickups = this.pickups.filter(p => !p.shouldRemove);
         
         this.handleCollisions();
         
@@ -408,6 +347,58 @@ export class Game {
         this.updateCurrentSessionDisplay(); // Update current session stats during gameplay
     }
     
+    processEnemyDeath(enemy) {
+        // Mark for removal immediately to prevent duplicate processing
+        enemy.shouldRemove = true;
+        if (enemy.isBoss) {
+            this.recordEnemyKill('boss');
+            let xpCount = ENEMY_CONFIG.BOSS.BASIC.XP_DROP;
+            let scoreReward = ENEMY_CONFIG.BOSS.BASIC.SCORE_REWARD;
+            if (enemy.isElite) {
+                xpCount = ENEMY_CONFIG.BOSS.ELITE.XP_DROP;
+                scoreReward = ENEMY_CONFIG.BOSS.ELITE.SCORE_REWARD;
+            } else if (enemy.isVeteran) {
+                xpCount = ENEMY_CONFIG.BOSS.VETERAN.XP_DROP;
+                scoreReward = ENEMY_CONFIG.BOSS.VETERAN.SCORE_REWARD;
+            }
+            if (enemy.isElite) {
+                for (let i = 0; i < xpCount; i++) {
+                    this.pickups.push(new EliteXPPickup(
+                        enemy.x + (Math.random() - 0.5) * 40,
+                        enemy.y + (Math.random() - 0.5) * 40
+                    ));
+                }
+            } else if (enemy.isVeteran) {
+                for (let i = 0; i < xpCount; i++) {
+                    this.pickups.push(new VeteranXPPickup(
+                        enemy.x + (Math.random() - 0.5) * 40,
+                        enemy.y + (Math.random() - 0.5) * 40
+                    ));
+                }
+            } else {
+                for (let i = 0; i < xpCount; i++) {
+                    this.createXPPickup(
+                        enemy.x + (Math.random() - 0.5) * 40,
+                        enemy.y + (Math.random() - 0.5) * 40
+                    );
+                }
+            }
+            this.score += scoreReward;
+        } else if (enemy.isElite) {
+            this.recordEnemyKill('elite');
+            this.pickups.push(new EliteXPPickup(enemy.x, enemy.y));
+            this.score += ENEMY_CONFIG.ELITE.SCORE_REWARD;
+        } else if (enemy.isVeteran) {
+            this.recordEnemyKill('veteran');
+            this.pickups.push(new VeteranXPPickup(enemy.x, enemy.y));
+            this.score += ENEMY_CONFIG.VETERAN.SCORE_REWARD;
+        } else {
+            this.recordEnemyKill('basic');
+            this.createXPPickup(enemy.x, enemy.y);
+            this.score += ENEMY_CONFIG.BASIC.SCORE_REWARD;
+        }
+    }
+
     render() {
         // Clear background
         this.ctx.fillStyle = '#111';
