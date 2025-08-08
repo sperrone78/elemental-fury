@@ -339,10 +339,11 @@ export class Player {
 
     updateWindBlades() {
         // Compute cooldown: base 0.5s reduced by Lightning attack speed
-        const baseCooldown = ELEMENT_CONFIG.AIR.WIND_BLADE.COOLDOWN;
+        const baseCooldown = (ELEMENT_CONFIG && ELEMENT_CONFIG.AIR && ELEMENT_CONFIG.AIR.WIND_BLADE && ELEMENT_CONFIG.AIR.WIND_BLADE.COOLDOWN) || 0.5;
         const modifiers = this.elementalModifiers.getModifiers();
-        const cooldown = baseCooldown * modifiers.attackSpeedMultiplier; // 0.9^lightningLevel per spec
+        const cooldown = Math.max(0.05, baseCooldown * modifiers.attackSpeedMultiplier); // 0.9^lightningLevel per spec
 
+        if (!Number.isFinite(this.lastWindBladeTime)) this.lastWindBladeTime = this.game.gameTime;
         if (this.game.gameTime - this.lastWindBladeTime < cooldown) return;
 
         const airLevel = this.upgradeCount.air || 0;
