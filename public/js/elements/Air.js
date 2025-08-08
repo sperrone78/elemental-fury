@@ -234,7 +234,10 @@ export class Tornado {
                 enemy.takeDamage(this.damage);
                 this.game.recordDamage('tornadoVortex', this.damage);
                 // Create small wind particles on hit
-                this.game.particles.push(new WindParticle(enemy.x, enemy.y));
+                {
+                    const wp = this.game.pools?.windParticle ? this.game.pools.windParticle.acquire(enemy.x, enemy.y) : new WindParticle(enemy.x, enemy.y);
+                    this.game.particles.push(wp);
+                }
             }
         });
     }

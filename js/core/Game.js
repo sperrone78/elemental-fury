@@ -62,6 +62,14 @@ export class Game {
                 () => new ElectricSpark(0, 0),
                 (p, x, y) => { p.x = x; p.y = y; p.vx = (Math.random() - 0.5) * 6; p.vy = (Math.random() - 0.5) * 6; p.life = p.maxLife = 0.5; }
             ),
+            windParticle: new ObjectPool(
+                () => new WindParticle(0, 0),
+                (w, x, y) => { w.x = x; w.y = y; w.vx = (Math.random() - 0.5) * 6; w.vy = (Math.random() - 0.5) * 6; w.life = w.maxLife = 0.3; }
+            ),
+            dot: new ObjectPool(
+                () => new DOTEffect(null, 0, 0, 1),
+                (e, target, damage, duration, interval) => { e.target = target; e.damage = damage; e.duration = duration; e.interval = interval; e.lastTick = 0; e.startTime = 0; }
+            ),
             projectile: new ObjectPool(
                 () => new Projectile(0, 0, 1, 0, 0, 0),
                 (p, x, y, dirX, dirY, damage, range) => {
@@ -388,10 +396,14 @@ export class Game {
             this.particles = remainingParticles;
         }
         
-        this.dotEffects.forEach((dot) => {
-            dot.update(this.gameTime, this.deltaTime);
+        this.dotEffects = this.dotEffects.filter(d => {
+            d.update(this.gameTime, this.deltaTime);
+            if (d.shouldRemove) {
+                if (this.pools?.dot) this.pools.dot.release(d);
+                return false;
+            }
+            return true;
         });
-        this.dotEffects = this.dotEffects.filter(d => !d.shouldRemove);
         
         this.pickups.forEach((pickup) => {
             if (pickup.update) pickup.update(this.deltaTime); // For animated pickups like EliteXPPickup

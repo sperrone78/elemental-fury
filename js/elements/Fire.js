@@ -51,7 +51,10 @@ export class FireballProjectile extends Projectile {
                 const dotDamage = 5 + Math.max(0, (fireLevel - 1) * 1);
                 const dotDuration = 3 + Math.max(0, (fireLevel - 1) * 0.5);
                 
-                game.dotEffects.push(new DOTEffect(enemy, dotDamage, dotDuration, 1));
+                {
+                    const dot = game.pools?.dot ? game.pools.dot.acquire(enemy, dotDamage, dotDuration, 1) : new DOTEffect(enemy, dotDamage, dotDuration, 1);
+                    game.dotEffects.push(dot);
+                }
             }
         });
         
@@ -89,7 +92,10 @@ export class FireballProjectile extends Projectile {
                 const dotDamage = 3 + Math.max(0, (fireLevel - 1) * 0.5);
                 const dotDuration = 2 + Math.max(0, (fireLevel - 1) * 0.25);
                 
-                game.dotEffects.push(new DOTEffect(enemy, dotDamage, dotDuration, 1));
+                {
+                    const dot = game.pools?.dot ? game.pools.dot.acquire(enemy, dotDamage, dotDuration, 1) : new DOTEffect(enemy, dotDamage, dotDuration, 1);
+                    game.dotEffects.push(dot);
+                }
             }
         });
         
